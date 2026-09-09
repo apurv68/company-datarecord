@@ -1068,80 +1068,225 @@ def save_categorized_records(profile: Dict[str, Any], csv_path: str = EXPORT_CSV
     console.print(f"[green][OK] Saved categorized data to [bold]{csv_path}[/bold] and [bold]{json_path}[/bold][/green]")
 
 
-def clean_candidate_name(text: str) -> str:
-    """Clean raw search title into a concise company name."""
-    first = re.split(r"[-–—|:;,]", text)[0].strip()
-    first = re.sub(r"\s+(?:is an?|was an?|an?)\s+.*$", "", first, flags=re.IGNORECASE).strip()
-    return first
+COMMON_INDIAN_ACRONYMS = {
+    "tcs": ("Tata Consultancy Services", "Indian multinational technology company"),
+    "sbi": ("State Bank of India", "Indian public sector bank and financial services statutory body"),
+    "infy": ("Infosys", "Indian multinational technology company"),
+    "ril": ("Reliance Industries", "Indian multinational conglomerate"),
+    "lt": ("Larsen & Toubro", "Indian multinational conglomerate company"),
+    "l&t": ("Larsen & Toubro", "Indian multinational conglomerate company"),
+    "m&m": ("Mahindra & Mahindra", "Indian multinational automobile manufacturer"),
+    "lic": ("Life Insurance Corporation of India", "Indian central public sector undertaking"),
+    "bpcl": ("Bharat Petroleum", "Indian public sector undertaking"),
+    "hpcl": ("Hindustan Petroleum", "Indian public sector undertaking"),
+    "iocl": ("Indian Oil Corporation", "Indian public sector oil company"),
+    "ongc": ("Oil and Natural Gas Corporation", "Indian central public sector undertaking"),
+    "ntpc": ("NTPC Limited", "Indian central public sector undertaking"),
+    "bhel": ("Bharat Heavy Electricals Limited", "Indian public sector engineering and manufacturing company"),
+    "sail": ("Steel Authority of India Limited", "Indian central public sector undertaking"),
+    "pnb": ("Punjab National Bank", "Indian public sector bank"),
+    "bob": ("Bank of Baroda", "Indian public sector bank"),
+    "mrf": ("MRF Limited", "Indian tyre manufacturing company"),
+    "hcl": ("HCLTech", "Indian multinational technology company"),
+}
+
+REJECT_CANDIDATE_PATTERNS = [
+    r"\b(?:metro|railway|train|bus)\s+station\b",
+    r"\b(?:airport|airfield|village|town|city|district|subdivision|tehsil|taluk|constituency|municipality|commune|county|state of)\b",
+    r"\b(?:businessman|businesswoman|executive|industrialist|entrepreneur|philanthropist|politician|cricketer|actor|actress|singer|director|minister|governor)\b",
+    r"\b(?:founder of|inventor|author|king|ruler|emperor|billionaire|millionaire)\b",
+    r"\b(?:born\s+\d{4}|\(\d{4}[–—\-]\d{4}\)|\(\s*born\s+\d{4}\s*\))\b",
+    r"\b(?:film|movie|album|song|soundtrack|discography|novel|television series|episode|tv show)\b",
+    r"\b(?:history of|supply chain|timeline of|criticism of|economy of|list of|category:|companies based in|organizations based in|institutions based in|brand name potato|brand name)\b",
+    r"\b(?:disambiguation|transit line|highway|expressway|stadium|park|sanctuary|temple|mosque|church|bridge)\b",
+    r"\b(?:mascot|character|fictional character|symbol|logo|slogan)\b",
+    r"\b(?:branch|sub post office|office|building|tower|facility|complex)\b",
+    r"\b(?:horse|yacht|ship|military unit|naval|regiment|brigade)\b",
+    r"\b(?:pakistani|pakistan|bangladesh|nepalese|sri lankan)\b"
+]
+
+POSITIVE_COMPANY_PATTERNS = [
+    r"\b(?:company|corporation|conglomerate|manufacturer|multinational|enterprise|retailer|retail|supermarket)\b",
+    r"\b(?:chain|restaurant|foodstuff|business|bank|banking|financial services|fintech|airline|firm|brand)\b",
+    r"\b(?:software|technology company|tech company|it services|e-commerce|delivery service|quick-commerce|holding company)\b",
+    r"\b(?:telecommunications|telecom|automaker|automotive|pharmaceutical|pharma|dairy|cooperative society|cooperative)\b",
+    r"\b(?:fmcg|steelmaker|metallurgy|energy company|power producer|commercial bank|investment company|tyre|tire)\b",
+    r"\b(?:ltd|limited|pvt|inc|corp|group|industries|technologies|enterprises)\b"
+]
+
+INDIAN_COMPANY_TOKENS = [
+    "india", "indian", "mumbai", "delhi", "new delhi", "bengaluru", "bangalore",
+    "chennai", "hyderabad", "kolkata", "pune", "nagpur", "gurugram", "gurgaon",
+    "noida", "ahmedabad", "rajasthan", "gujarat", "maharashtra", "karnataka",
+    "tamil nadu", "bse", "nse", "pvt ltd", "private limited"
+]
+
+
+def normalize_candidate_key(name: str) -> str:
+    """Normalize company name to deduplicate legal variations."""
+    s = name.lower()
+    s = re.sub(r"\s*\([^)]*\)", "", s)
+    s = re.sub(r"\b(?:pvt|private|ltd|limited|inc|corp|corporation|group|industries|co)\b", "", s)
+    s = re.sub(r"[^\w\s]", "", s)
+    return " ".join(s.split())
+
+
+def score_candidate_relevance(name: str, query: str) -> int:
+    """Rank suggestions by closeness to user query."""
+    c_low = name.lower().strip()
+    q_low = query.lower().strip()
+    if c_low == q_low:
+        return 100
+    if c_low.startswith(q_low):
+        return 80
+    if q_low in c_low:
+        return 60
+    return 20
+
+
+def evaluate_company_entity(name: str, desc: str, query: str, allowed_tokens: list[str]) -> Optional[Dict[str, Any]]:
+    """Strictly validate whether a search hit is a real company and detect if it is Indian."""
+    name_clean = re.sub(r"\s*\([^)]*\)", "", name).strip()
+    n_lower = name_clean.lower()
+    d_lower = desc.lower().strip()
+    comb = f"{n_lower} {d_lower}"
+
+    if len(name_clean) < 2 or len(name_clean) > 60 or name_clean.isdigit():
+        return None
+
+    for pat in REJECT_CANDIDATE_PATTERNS:
+        if re.search(pat, comb):
+            return None
+
+    is_co = any(re.search(pat, comb) for pat in POSITIVE_COMPANY_PATTERNS)
+    if not is_co:
+        return None
+
+    is_indian = any(tok in comb for tok in INDIAN_COMPANY_TOKENS)
+
+    is_relevant = any(t in n_lower or t in d_lower for t in allowed_tokens) if allowed_tokens else True
+    if not is_relevant:
+        return None
+
+    return {
+        "name": name_clean,
+        "desc": desc.strip() or "Corporate Entity",
+        "is_indian": is_indian,
+        "score": score_candidate_relevance(name_clean, query),
+        "dedup_key": normalize_candidate_key(name_clean)
+    }
 
 
 def find_company_candidates(query: str) -> List[Dict[str, str]]:
-    """Discover potential matching/similar companies for ambiguous or general queries."""
+    """
+    Discover verified corporate candidates for queries, strictly excluding non-companies
+    (metro stations, categories, geographic locations) and prioritizing Indian companies.
+    """
     candidates = []
-    seen = set()
+    seen_keys = {}
+    headers = {"User-Agent": "CompanyIntelligence/2.0 (Windows; company-candidate-filter@company-datarecord.org)"}
 
-    # 1. Check DuckDuckGo Instant Answer Disambiguation / RelatedTopics
-    try:
-        resp = requests.get(
-            "https://api.duckduckgo.com/",
-            params={"q": query, "format": "json", "skip_disambig": 0},
-            timeout=5
-        )
-        if resp.status_code in (200, 202):
-            data = resp.json()
-            h = data.get("Heading")
-            if h and len(h) > 1:
-                clean_h = clean_candidate_name(h)
-                if clean_h.lower() not in seen:
-                    candidates.append({
-                        "name": clean_h,
-                        "desc": clean_text(data.get("Abstract") or data.get("AbstractText") or "Primary corporate entity")[:120]
-                    })
-                    seen.add(clean_h.lower())
-            for t in data.get("RelatedTopics", []):
-                if isinstance(t, dict) and "Text" in t:
-                    txt = t["Text"]
-                    c_name = clean_candidate_name(txt)
-                    if len(c_name) > 2 and c_name.lower() not in seen and len(c_name) < 50 and not c_name.isdigit():
-                        candidates.append({"name": c_name, "desc": clean_text(txt)[:120]})
-                        seen.add(c_name.lower())
-                    if len(candidates) >= 4:
-                        break
-    except Exception:
-        pass
+    clean_q = query.strip()
+    q_lower = clean_q.lower()
 
-    # 2. Check Wikipedia OpenSearch API
-    try:
-        w_resp = requests.get(
-            "https://en.wikipedia.org/w/api.php",
-            params={"action": "opensearch", "search": query, "limit": 4, "format": "json"},
-            headers={"User-Agent": "CompanyCandidateSearch/2.0"},
-            timeout=4
-        ).json()
-        titles = w_resp[1] if len(w_resp) > 1 else []
-        for t in titles:
-            clean_t = clean_candidate_name(t)
-            if len(clean_t) > 2 and clean_t.lower() not in seen and len(clean_t) < 50:
-                candidates.append({"name": clean_t, "desc": "Corporate encyclopedia record"})
-                seen.add(clean_t.lower())
-    except Exception:
-        pass
+    allowed_tokens = [t for t in re.findall(r"\w+", q_lower) if len(t) > 1]
 
-    # 3. Check Live Web Search
-    try:
-        with DDGS(timeout=5) as ddgs:
-            for r in ddgs.text(f"{query} company", max_results=5, backend="auto"):
-                title = r.get("title", "")
-                c_name = clean_candidate_name(title)
-                if len(c_name) > 2 and c_name.lower() not in seen and len(c_name) < 50 and not c_name.isdigit():
-                    candidates.append({"name": c_name, "desc": clean_text(r.get("body", ""))[:120]})
-                    seen.add(c_name.lower())
-                if len(candidates) >= 5:
-                    break
-    except Exception:
-        pass
+    # Pre-seed known Indian abbreviations
+    if q_lower in COMMON_INDIAN_ACRONYMS:
+        canonical_name, canonical_desc = COMMON_INDIAN_ACRONYMS[q_lower]
+        c_entry = {
+            "name": canonical_name,
+            "desc": canonical_desc,
+            "is_indian": True,
+            "score": 100,
+            "dedup_key": normalize_candidate_key(canonical_name)
+        }
+        candidates.append(c_entry)
+        seen_keys[c_entry["dedup_key"]] = 0
+        allowed_tokens.extend([t for t in re.findall(r"\w+", canonical_name.lower()) if len(t) > 2])
 
-    return candidates[:5]
+    search_terms = []
+    if q_lower in COMMON_INDIAN_ACRONYMS:
+        search_terms.append(COMMON_INDIAN_ACRONYMS[q_lower][0])
+    search_terms.extend([f"{clean_q} company India", f"{clean_q} company", clean_q])
+
+    # 1. Wikipedia Search API with description & pageprops
+    for sq in search_terms:
+        try:
+            r = requests.get(
+                "https://en.wikipedia.org/w/api.php",
+                params={
+                    "action": "query",
+                    "generator": "search",
+                    "gsrsearch": sq,
+                    "gsrlimit": 6,
+                    "prop": "description|pageprops",
+                    "format": "json"
+                },
+                headers=headers,
+                timeout=3.5
+            )
+            if r.status_code == 200:
+                pages = r.json().get("query", {}).get("pages", {})
+                for pid, p in pages.items():
+                    if "disambiguation" in p.get("pageprops", {}):
+                        continue
+                    cand = evaluate_company_entity(p.get("title", ""), p.get("description", ""), clean_q, allowed_tokens)
+                    if cand:
+                        key = cand["dedup_key"]
+                        if key not in seen_keys:
+                            seen_keys[key] = len(candidates)
+                            candidates.append(cand)
+                        else:
+                            idx = seen_keys[key]
+                            if cand["is_indian"] and not candidates[idx]["is_indian"]:
+                                candidates[idx]["is_indian"] = True
+        except Exception:
+            pass
+        if len([c for c in candidates if c["is_indian"]]) >= 4:
+            break
+
+    # 2. Wikidata Entities Search
+    for w_query in [clean_q, f"{clean_q} India"]:
+        try:
+            w_res = requests.get(
+                "https://www.wikidata.org/w/api.php",
+                params={
+                    "action": "wbsearchentities",
+                    "search": w_query,
+                    "language": "en",
+                    "format": "json",
+                    "limit": 8
+                },
+                headers=headers,
+                timeout=3.5
+            )
+            if w_res.status_code == 200:
+                for item in w_res.json().get("search", []):
+                    cand = evaluate_company_entity(item.get("label", ""), item.get("description", ""), clean_q, allowed_tokens)
+                    if cand:
+                        key = cand["dedup_key"]
+                        if key not in seen_keys:
+                            seen_keys[key] = len(candidates)
+                            candidates.append(cand)
+                        else:
+                            idx = seen_keys[key]
+                            if cand["is_indian"] and not candidates[idx]["is_indian"]:
+                                candidates[idx]["is_indian"] = True
+                                candidates[idx]["desc"] = cand["desc"]
+        except Exception:
+            pass
+
+    # Strictly focus on Indian companies if any Indian companies match
+    indian_cands = [c for c in candidates if c["is_indian"]]
+    final_list = indian_cands if indian_cands else candidates
+
+    # Rank by closeness to query
+    final_list.sort(key=lambda x: -x["score"])
+
+    return [{"name": c["name"], "desc": c["desc"]} for c in final_list[:6]]
+
+
 
 
 def is_valid_company_name(name: str) -> bool:
@@ -1245,20 +1390,14 @@ def main():
 
             selected_company = company_input
             if candidates:
-                # Add exact query as the last fallback option
-                candidates.append({
-                    "name": company_input,
-                    "desc": f"Search exact query as entered: '{company_input}'"
-                })
-
                 table = Table(
-                    title=f"[bold cyan]Matching / Similar Companies Found for '{company_input}'[/bold cyan]",
+                    title=f"[bold cyan]Verified Company Matches for '{company_input}' (Prioritizing Indian Companies)[/bold cyan]",
                     show_header=True,
                     header_style="bold magenta"
                 )
                 table.add_column("#", style="bold yellow", width=4)
-                table.add_column("Company Option", style="bold white", width=32)
-                table.add_column("Context / Description", style="dim white")
+                table.add_column("Company Name", style="bold white", width=34)
+                table.add_column("Corporate Details / Description", style="dim white")
 
                 for idx, cand in enumerate(candidates, 1):
                     table.add_row(str(idx), cand["name"], cand["desc"])
@@ -1266,7 +1405,7 @@ def main():
                 console.print()
                 console.print(table)
                 choice = console.input(
-                    f"[bold yellow]Select company number [1-{len(candidates)}] (or press Enter for [1], 'c' to cancel): [/bold yellow]"
+                    f"[bold yellow]Select company [1-{len(candidates)}] (press Enter for [1], 'c' to cancel): [/bold yellow]"
                 ).strip()
 
                 if choice.lower() in ("c", "cancel"):
@@ -1277,6 +1416,7 @@ def main():
                     selected_company = candidates[int(choice) - 1]["name"]
                 else:
                     selected_company = candidates[0]["name"]
+
 
             console.print(f"\n[cyan]Scanning multi-source web intelligence across all categories for '[bold]{selected_company}[/bold]'...[/cyan]")
             profile = fetch_full_company_profile(selected_company)
