@@ -317,6 +317,9 @@
     "Company Name": "Haldiram's",
     "Founding Year": "1937",
     "Founder Name(s)": "Ganga Bhishen Agarwal",
+    "CEO": "Krishan Kumar Chutani",
+    "CFO": "Manoj Pandey",
+    "CTO": "N/A",
     "Headquarter (City)": "Nagpur",
     "Office Address": "Nagpur, Maharashtra, India",
     "Business Type (Private Limited/Public Limited)": "Private Limited",
@@ -792,13 +795,16 @@
     "Company Name": "Tata Consultancy Services Ltd",
     "Founding Year": "1968",
     "Founder Name(s)": "J. R. D. Tata",
+    "CEO": "K. Krithivasan",
+    "CFO": "Samir Seksaria",
+    "CTO": "Harrick Vin",
     "Headquarter (City)": "Mumbai",
     "Office Address": "Mumbai, Maharashtra, India",
     "Business Type (Private Limited/Public Limited)": "Public Limited",
     "Is Listed Company": "Yes",
     "Stock Ticker": "NSE/BSE: TCS",
-    "Current Market Cap (Market Value/Mcap)": "₹ 7,99,018 Cr.",
-    "Share Price": "₹ 2,208",
+    "Current Market Cap (Market Value/Mcap)": "₹ 7,96,233 Cr.",
+    "Share Price": "₹ 2,201",
     "Source Links": [
       {
         "name": "Screener.in (BSE & NSE Corporate Financials)",
@@ -807,6 +813,28 @@
       {
         "name": "Wikipedia Corporate Encyclopedia",
         "url": "https://en.wikipedia.org/wiki/Tata_Consultancy_Services"
+      }
+    ]
+  },
+  {
+    "Company Name": "Tata Chemicals Ltd",
+    "Founding Year": "1939",
+    "Founder Name(s)": "N/A",
+    "Headquarter (City)": "Mumbai",
+    "Office Address": "Mumbai, Maharashtra, India",
+    "Business Type (Private Limited/Public Limited)": "Public Limited",
+    "Is Listed Company": "Yes",
+    "Stock Ticker": "NSE/BSE: TATACHEM",
+    "Current Market Cap (Market Value/Mcap)": "₹ 15,405 Cr.",
+    "Share Price": "₹ 605",
+    "Source Links": [
+      {
+        "name": "Screener.in (BSE & NSE Corporate Financials)",
+        "url": "https://www.screener.in/company/TATACHEM/consolidated/"
+      },
+      {
+        "name": "Wikipedia Corporate Encyclopedia",
+        "url": "https://en.wikipedia.org/wiki/Tata_Chemicals"
       }
     ]
   }

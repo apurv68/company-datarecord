@@ -986,10 +986,65 @@ def display_categorized_profile(profile: Dict[str, Any]):
     console.print()
 
 
+def clean_person_name(name: str) -> str:
+    """Clean person name, deduplicate repeated words/phrases and strip trailing roles."""
+    if not name or name == "N/A":
+        return "N/A"
+    name = re.sub(r"\s*\([^)]*\)", "", name)
+    name = re.sub(r"\b(Mr\.|Ms\.|Mrs\.|Dr\.|Meet)\s*", "", name, flags=re.I)
+    # Deduplicate repeating 2-word phrases e.g. "Samir Seksaria Samir Seksaria"
+    name = re.sub(r"\b([A-Za-z]+(?:\s+[A-Za-z]+)?)\s+\1\b", r"\1", name, flags=re.I)
+    words = name.strip().split()
+    if len(words) >= 3 and words[0].lower() == words[-1].lower():
+        words = words[1:]
+    cleaned_words = []
+    for w in words:
+        if not cleaned_words or w.lower() != cleaned_words[-1].lower():
+            cleaned_words.append(w)
+    cleaned = " ".join(cleaned_words).strip()
+    return cleaned if len(cleaned) >= 3 else "N/A"
+
+
+def search_executive_web(company: str, role: str) -> str:
+    """Search live web intelligence for company executive role (CFO, CTO, CEO)."""
+    comp_core = re.sub(r"\b(ltd|limited|pvt|private|corp|corporation|inc)\b", "", company, flags=re.I).strip()
+    role_full = "Chief Financial Officer" if role == "CFO" else ("Chief Technology Officer" if role == "CTO" else "Chief Executive Officer")
+    q = f'"{comp_core}" ({role} OR "{role_full}") India'
+    stop_words = [
+        "chief", "financial", "officer", "technology", "executive", "company", "india",
+        "limited", "services", "analysts", "investor", "relations", "operating",
+        "director", "president", "global", "group", "vice", "business", "profile", "board"
+    ]
+    try:
+        with DDGS(timeout=5) as ddgs:
+            for r in ddgs.text(q, max_results=5):
+                body = r.get("body", "")
+                title = r.get("title", "")
+                comb = f"{title} | {body}"
+
+                # Pattern 1: Name [is / as / - / ,] [current] Role
+                m1 = re.search(r"([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})\s*(?:,?\s*(?:is\s+(?:the\s+)?|as\s+)?(?:current\s+)?|,\s*|\s*[-–—]\s*)(?:" + role + r"|" + role_full + r")", comb)
+                if m1:
+                    cand = clean_person_name(m1.group(1))
+                    if not any(bad in cand.lower().split() for bad in stop_words):
+                        return cand
+
+                # Pattern 2: Role [: / is / appointed as / -] Name (strict delimiters to prevent next person matching)
+                m2 = re.search(r"(?:" + role + r"|" + role_full + r")\s*(?::\s*|\s+is\s+(?:the\s+)?|\s+appointed\s+as\s+|\s*[-–—]\s*|\s+)([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})", comb, re.I)
+                if m2:
+                    cand = clean_person_name(m2.group(1))
+                    if not any(bad in cand.lower().split() for bad in stop_words):
+                        return cand
+    except Exception:
+        pass
+    return "N/A"
+
+
+
 def fetch_table1_data(query: str) -> Tuple[Dict[str, Any], List[Dict[str, str]]]:
     """
     Fetch verified Table #1 data:
-    Company Name, Founding Year, Founder Name(s), Headquarter (City), Office Address,
+    Company Name, Founding Year, Founder Name(s), CEO, CFO, CTO, Headquarter (City), Office Address,
     Business Type (Private Limited/Public Limited), Is Listed Company, Stock Ticker,
     Current Market Cap (Market Value/Mcap), Share Price.
     Sources are collected separately to be displayed strictly below the table.
@@ -1006,6 +1061,9 @@ def fetch_table1_data(query: str) -> Tuple[Dict[str, Any], List[Dict[str, str]]]
         "Company Name": query,
         "Founding Year": "N/A",
         "Founder Name(s)": "N/A",
+        "CEO": "N/A",
+        "CFO": "N/A",
+        "CTO": "N/A",
         "Headquarter (City)": "N/A",
         "Office Address": "N/A",
         "Business Type (Private Limited/Public Limited)": "Private Limited",
@@ -1062,7 +1120,7 @@ def fetch_table1_data(query: str) -> Tuple[Dict[str, Any], List[Dict[str, str]]]
         except Exception:
             pass
 
-    # 2. Wikipedia Infobox for Identity, Founders, HQ & Type
+    # 2. Wikipedia Infobox for Identity, Founders, Leadership, HQ & Type
     wiki_slug = query.replace(" ", "_")
     try:
         w_url = f"https://en.wikipedia.org/api/rest_v1/page/html/{wiki_slug}"
@@ -1098,6 +1156,21 @@ def fetch_table1_data(query: str) -> Tuple[Dict[str, Any], List[Dict[str, str]]]
                             f_cleaned = re.sub(r"\s+", " ", f_cleaned).strip(", ")
                             data["Founder Name(s)"] = f_cleaned
 
+                        if "key people" in lbl or "leadership" in lbl:
+                            raw_txt = clean_text(td.get_text()).replace("\xa0", " ")
+                            matches = re.findall(r"([A-Z][a-zA-Z\.\s\-\']+?)\s*\(([^)]+)\)", raw_txt)
+                            for p_name, p_role in matches:
+                                role_l = p_role.lower()
+                                if any(k in role_l for k in ["ceo", "chief executive", "managing director", "md &", "& md"]):
+                                    if data["CEO"] == "N/A":
+                                        data["CEO"] = clean_person_name(p_name)
+                                elif any(k in role_l for k in ["cfo", "chief financial", "finance director"]):
+                                    if data["CFO"] == "N/A":
+                                        data["CFO"] = clean_person_name(p_name)
+                                elif any(k in role_l for k in ["cto", "chief technology", "technology officer"]):
+                                    if data["CTO"] == "N/A":
+                                        data["CTO"] = clean_person_name(p_name)
+
                         if "headquarter" in lbl or "location" in lbl:
                             parts = [p.strip() for p in val.split(",") if p.strip()]
                             if data["Headquarter (City)"] == "N/A" and parts:
@@ -1112,7 +1185,7 @@ def fetch_table1_data(query: str) -> Tuple[Dict[str, Any], List[Dict[str, str]]]
     except Exception:
         pass
 
-    # 3. Targeted Web Search for Registered Office Address if needed
+    # 3. Targeted Web Search for Office Address if needed
     if data["Office Address"] in ("N/A", "") or len(data["Office Address"]) < 15:
         try:
             with DDGS(timeout=5) as ddgs:
@@ -1130,13 +1203,20 @@ def fetch_table1_data(query: str) -> Tuple[Dict[str, Any], List[Dict[str, str]]]
         except Exception:
             pass
 
+    # 4. Fill missing executive roles via targeted web lookup
+    for role in ["CEO", "CFO", "CTO"]:
+        if data[role] == "N/A":
+            found_exec = search_executive_web(data["Company Name"], role)
+            if found_exec != "N/A":
+                data[role] = found_exec
+
     return data, sources
 
 
 def display_table1(data: Dict[str, Any], sources: List[Dict[str, str]]):
     """Render Table #1 with Rich formatting, followed by external source URLs strictly below."""
     table = Table(
-        title="[bold cyan]Table #1: Corporate Identity, Legal Standing & Market Metrics[/bold cyan]",
+        title="[bold cyan]Table #1: Corporate Identity, Leadership & Market Standing[/bold cyan]",
         show_header=True,
         header_style="bold magenta",
         show_lines=True
@@ -1148,6 +1228,9 @@ def display_table1(data: Dict[str, Any], sources: List[Dict[str, str]]):
         "Company Name",
         "Founding Year",
         "Founder Name(s)",
+        "CEO",
+        "CFO",
+        "CTO",
         "Headquarter (City)",
         "Office Address",
         "Business Type (Private Limited/Public Limited)",
@@ -1163,6 +1246,8 @@ def display_table1(data: Dict[str, Any], sources: List[Dict[str, str]]):
             v_str = f"[bold green]{v}[/bold green]"
         elif k in ("Current Market Cap (Market Value/Mcap)", "Share Price"):
             v_str = f"[bold cyan]{v}[/bold cyan]"
+        elif k in ("CEO", "CFO", "CTO"):
+            v_str = f"[bold white]{v}[/bold white]" if v != "N/A" else "[dim]N/A (Unlisted / Not Publicly Disclosed)[/dim]"
         elif k == "Is Listed Company":
             v_str = "[green]Yes[/green]" if "yes" in str(v).lower() else "[yellow]No[/yellow]"
         elif k == "Business Type (Private Limited/Public Limited)":
@@ -1193,6 +1278,9 @@ def save_table1_records(data: Dict[str, Any], sources: List[Dict[str, str]], csv
         "Company Name",
         "Founding Year",
         "Founder Name(s)",
+        "CEO",
+        "CFO",
+        "CTO",
         "Headquarter (City)",
         "Office Address",
         "Business Type (Private Limited/Public Limited)",
@@ -1227,6 +1315,7 @@ def save_table1_records(data: Dict[str, Any], sources: List[Dict[str, str]], csv
         writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(existing_rows)
+
 
 
     records = []
