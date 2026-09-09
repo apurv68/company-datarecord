@@ -793,28 +793,105 @@
   },
   {
     "Company Name": "Tata Consultancy Services Ltd",
-    "Founding Year": "1968",
-    "Founder Name(s)": "J. R. D. Tata",
-    "CEO": "K. Krithivasan",
-    "CFO": "Samir Seksaria",
-    "CTO": "Harrick Vin",
-    "Headquarter (City)": "Mumbai",
-    "Office Address": "Mumbai, Maharashtra, India",
-    "Business Type (Private Limited/Public Limited)": "Public Limited",
-    "Is Listed Company": "Yes",
-    "Stock Ticker": "NSE/BSE: TCS",
-    "Current Market Cap (Market Value/Mcap)": "₹ 7,96,233 Cr.",
-    "Share Price": "₹ 2,201",
-    "Source Links": [
-      {
-        "name": "Screener.in (BSE & NSE Corporate Financials)",
-        "url": "https://www.screener.in/company/TCS/consolidated/"
-      },
-      {
-        "name": "Wikipedia Corporate Encyclopedia",
-        "url": "https://en.wikipedia.org/wiki/Tata_Consultancy_Services"
-      }
-    ]
+    "table1": {
+      "Company Name": "Tata Consultancy Services Ltd",
+      "Founding Year": "1968",
+      "Founder Name(s)": "J. R. D. Tata",
+      "CEO": "K. Krithivasan",
+      "CFO": "Samir Seksaria",
+      "CTO": "N/A",
+      "Headquarter (City)": "Mumbai",
+      "Office Address": "Mumbai, Maharashtra, India",
+      "Business Type (Private Limited/Public Limited)": "Public Limited",
+      "Is Listed Company": "Yes",
+      "Stock Ticker": "NSE/BSE: TCS",
+      "Current Market Cap (Market Value/Mcap)": "₹ 7,94,984 Cr.",
+      "Share Price": "₹ 2,197",
+      "Source Links": [
+        {
+          "name": "Screener.in (BSE & NSE Corporate Financials)",
+          "url": "https://www.screener.in/company/TCS/consolidated/"
+        },
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Tata_Consultancy_Services"
+        }
+      ]
+    },
+    "table2": {
+      "periods": [
+        "Mar 2022",
+        "Mar 2023",
+        "Mar 2024",
+        "Mar 2025",
+        "Mar 2026",
+        "TTM"
+      ],
+      "rows": [
+        {
+          "Fiscal Period / Year": "Mar 2022",
+          "Market Cap": "$144.02 B",
+          "Net Revenue/Net Sales": "₹ 191,754 Cr.",
+          "Net Profit": "₹ 38,449 Cr.",
+          "EBITDA": "₹ 53,057 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2023",
+          "Market Cap": "$165.02 B",
+          "Net Revenue/Net Sales": "₹ 225,458 Cr.",
+          "Net Profit": "₹ 42,303 Cr.",
+          "EBITDA": "₹ 59,259 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2024",
+          "Market Cap": "$176.46 B",
+          "Net Revenue/Net Sales": "₹ 240,893 Cr.",
+          "Net Profit": "₹ 46,099 Cr.",
+          "EBITDA": "₹ 64,296 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2025",
+          "Market Cap": "$132.10 B",
+          "Net Revenue/Net Sales": "₹ 255,324 Cr.",
+          "Net Profit": "₹ 48,797 Cr.",
+          "EBITDA": "₹ 67,407 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2026",
+          "Market Cap": "$86.84 B",
+          "Net Revenue/Net Sales": "₹ 267,021 Cr.",
+          "Net Profit": "₹ 49,454 Cr.",
+          "EBITDA": "₹ 72,398 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "TTM",
+          "Market Cap": "₹ 7,94,695 Cr.",
+          "Net Revenue/Net Sales": "₹ 275,859 Cr.",
+          "Net Profit": "₹ 50,055 Cr.",
+          "EBITDA": "₹ 74,079 Cr.",
+          "Employee Headcount": "584,519"
+        }
+      ],
+      "Source Links": [
+        {
+          "name": "Screener.in (Audited Multi-Year P&L Financials)",
+          "url": "https://www.screener.in/company/TCS/consolidated/"
+        },
+        {
+          "name": "CompaniesMarketCap (Historical Market Valuation)",
+          "url": "https://companiesmarketcap.com/tata-consultancy-services/marketcap/"
+        },
+        {
+          "name": "Wikipedia Corporate Disclosures (Workforce Count)",
+          "url": "https://en.wikipedia.org/wiki/Tata_Consultancy_Services"
+        }
+      ]
+    }
   },
   {
     "Company Name": "Tata Chemicals Ltd",

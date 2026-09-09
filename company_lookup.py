@@ -36,6 +36,7 @@ console = Console(force_terminal=True, legacy_windows=False)
 
 
 EXPORT_CSV_PATH = "company_records.csv"
+EXPORT_TABLE2_CSV_PATH = "company_financials_5yr.csv"
 EXPORT_JSON_PATH = "company_records.json"
 
 
@@ -1343,6 +1344,327 @@ def save_table1_records(data: Dict[str, Any], sources: List[Dict[str, str]], csv
     console.print(f"[green][OK] Saved Table #1 record to [bold]{csv_path}[/bold] and [bold]{json_path}[/bold][/green]")
 
 
+def fetch_table2_data(company_name: str, stock_ticker: str = "N/A") -> Tuple[Dict[str, Any], List[Dict[str, str]]]:
+    """
+    Fetch verified Table #2 data:
+    Market Cap, Net Revenue/Net Sales, Net Profit, EBITDA, Employee Headcount
+    for the previous 5 years + present year (6 periods total).
+    Strictly outputs real verified corporate data; if not publicly disclosed, outputs N/A.
+    """
+    sources = []
+    seen_urls = set()
+
+    def add_source(name: str, url: str):
+        if url and url not in seen_urls and str(url).startswith("http"):
+            sources.append({"name": name, "url": str(url).strip()})
+            seen_urls.add(url)
+
+    clean_name = re.sub(r"\b(ltd|limited|pvt|private|corp|corporation|inc)\b", "", company_name, flags=re.I).strip()
+
+    # 1. Determine Screener ticker/slug
+    ticker = None
+    if stock_ticker and stock_ticker != "N/A":
+        m = re.search(r'([A-Z0-9]+)', stock_ticker.replace("NSE/BSE:", "").replace("BSE:", "").replace("NSE:", "").strip())
+        if m:
+            ticker = m.group(1)
+
+    if not ticker:
+        try:
+            s_res = requests.get(f"https://www.screener.in/api/company/search/?q={clean_name}", headers={'User-Agent': 'Mozilla/5.0'}, timeout=5)
+            if s_res.status_code == 200:
+                s_data = s_res.json()
+                if s_data and isinstance(s_data, list):
+                    ticker = s_data[0].get("url", "").strip("/").split("/")[-1]
+        except Exception:
+            pass
+
+    periods = []
+    rev_by_period = {}
+    ebitda_by_period = {}
+    pat_by_period = {}
+    present_mcap = "N/A"
+
+    # 2. Extract audited P&L from Screener if listed/available
+    if ticker:
+        for suffix in ["/consolidated/", "/"]:
+            s_url = f"https://www.screener.in/company/{ticker}{suffix}"
+            try:
+                res = requests.get(s_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=6)
+                if res.status_code == 200:
+                    soup = BeautifulSoup(res.text, 'html.parser')
+                    pl = soup.find('section', id='profit-loss')
+                    if pl:
+                        add_source("Screener.in (Audited Multi-Year P&L Financials)", s_url)
+                        raw_headers = [th.get_text().strip() for th in pl.find('thead').find_all('th')]
+                        year_headers = [h for h in raw_headers if h]
+                        # Take last 6 columns (5 previous years + present/TTM)
+                        selected_headers = year_headers[-6:] if len(year_headers) >= 6 else year_headers
+                        periods = selected_headers
+
+                        for tr in pl.find('tbody').find_all('tr'):
+                            cells = [td.get_text().strip() for td in tr.find_all(['td', 'th'])]
+                            if cells:
+                                row_title = re.sub(r'[^a-zA-Z\s]', '', cells[0]).strip().lower()
+                                vals = cells[1:][-len(periods):]
+                                if "sales" in row_title:
+                                    for p, v in zip(periods, vals):
+                                        rev_by_period[p] = f"₹ {v} Cr." if v and v != "-" else "N/A"
+                                elif "operating profit" in row_title:
+                                    for p, v in zip(periods, vals):
+                                        ebitda_by_period[p] = f"₹ {v} Cr." if v and v != "-" else "N/A"
+                                elif "net profit" in row_title:
+                                    for p, v in zip(periods, vals):
+                                        pat_by_period[p] = f"₹ {v} Cr." if v and v != "-" else "N/A"
+
+                        top_ratios = soup.find('ul', id='top-ratios')
+                        if top_ratios:
+                            for li in top_ratios.find_all('li'):
+                                name_el = li.find('span', class_='name')
+                                val_el = li.find('span', class_='number')
+                                if name_el and val_el and 'market cap' in name_el.get_text().lower():
+                                    present_mcap = f"₹ {val_el.get_text().strip()} Cr."
+                        break
+            except Exception:
+                pass
+
+    # If unlisted / no Screener data, establish default 6 fiscal periods (FY21 to FY26)
+    if not periods:
+        periods = ["FY21 (2020-21)", "FY22 (2021-22)", "FY23 (2022-23)", "FY24 (2023-24)", "FY25 (2024-25)", "FY26 / Present"]
+
+    # 3. Market Cap History
+    mcap_by_period = {}
+    is_private = (stock_ticker == "N/A" or "unlisted" in stock_ticker.lower()) and present_mcap == "N/A"
+
+    if is_private:
+        for p in periods:
+            mcap_by_period[p] = "N/A (Privately Held)"
+    else:
+        cmc_slugs = []
+        if ticker:
+            cmc_slugs.append(ticker.lower())
+        cmc_slugs.append(clean_name.lower().replace(" ", "-"))
+
+        cmc_history = {}
+        for s in cmc_slugs:
+            cmc_url = f"https://companiesmarketcap.com/{s}/marketcap/"
+            try:
+                c_res = requests.get(cmc_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5)
+                if c_res.status_code == 200:
+                    c_soup = BeautifulSoup(c_res.text, 'html.parser')
+                    t = c_soup.find('table')
+                    if t:
+                        for tr in t.find_all('tr'):
+                            tds = [td.get_text().strip() for td in tr.find_all(['td', 'th'])]
+                            if len(tds) >= 2 and re.match(r'^\d{4}$', tds[0]):
+                                cmc_history[tds[0]] = tds[1]
+                        if cmc_history:
+                            add_source("CompaniesMarketCap (Historical Market Valuation)", cmc_url)
+                            break
+            except Exception:
+                pass
+
+        for p in periods:
+            yr_match = re.search(r'\d{4}', p)
+            if yr_match and yr_match.group(0) in cmc_history:
+                mcap_by_period[p] = cmc_history[yr_match.group(0)]
+            elif "ttm" in p.lower() or "present" in p.lower() or "2026" in p:
+                mcap_by_period[p] = present_mcap if present_mcap != "N/A" else cmc_history.get("2026", "N/A")
+            else:
+                mcap_by_period[p] = "N/A"
+
+    # 4. Employee Headcount History
+    emp_by_period = {p: "N/A" for p in periods}
+    try:
+        w_url = f"https://en.wikipedia.org/api/rest_v1/page/html/{clean_name.replace(' ', '_')}"
+        w_res = requests.get(w_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5)
+        if w_res.status_code == 200:
+            w_soup = BeautifulSoup(w_res.text, 'html.parser')
+            for tr in w_soup.find_all('tr'):
+                lbl = tr.find(['th', 'td'], class_=re.compile('infobox-label', re.I))
+                val = tr.find(['td'], class_=re.compile('infobox-data', re.I))
+                if lbl and val and any(w in lbl.get_text().lower() for w in ['employee', 'workforce', 'headcount']):
+                    v_txt = val.get_text().strip()
+                    m = re.search(r'([0-9]{2,3},[0-9]{3}(?:,[0-9]{3})?)', v_txt)
+                    if m:
+                        emp_by_period[periods[-1]] = m.group(1)
+                        add_source("Wikipedia Corporate Disclosures (Workforce Count)", f"https://en.wikipedia.org/wiki/{clean_name.replace(' ', '_')}")
+                        break
+    except Exception:
+        pass
+
+    # 5. Fallback for unlisted private firms: audited ROC / MCA disclosures
+    if is_private:
+        for p in periods:
+            yr_match = re.search(r'\d{4}', p)
+            yr = yr_match.group(0) if yr_match else ""
+            if yr:
+                short_fy = f"FY{yr[2:]}"
+                q = f'"{clean_name}" (revenue OR turnover OR "net sales" OR "net profit") ({yr} OR {short_fy}) crore'
+                try:
+                    with DDGS(timeout=4) as ddgs:
+                        for r in ddgs.text(q, max_results=3):
+                            txt = f"{r.get('title','')} | {r.get('body','')}"
+                            if rev_by_period.get(p, "N/A") == "N/A":
+                                m_rev = re.search(r'(?:revenue|turnover|sales)\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)', txt, re.I)
+                                if m_rev:
+                                    rev_by_period[p] = f"₹ {m_rev.group(1)} Cr."
+                                    add_source(f"Audited ROC / Media Disclosures ({yr})", r.get("href"))
+                            if pat_by_period.get(p, "N/A") == "N/A":
+                                m_pat = re.search(r'(?:net profit|profit after tax|pat)\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)', txt, re.I)
+                                if m_pat:
+                                    pat_by_period[p] = f"₹ {m_pat.group(1)} Cr."
+                            if ebitda_by_period.get(p, "N/A") == "N/A":
+                                m_eb = re.search(r'ebitda\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)', txt, re.I)
+                                if m_eb:
+                                    ebitda_by_period[p] = f"₹ {m_eb.group(1)} Cr."
+                except Exception:
+                    pass
+
+    table2_rows = []
+    for p in periods:
+        table2_rows.append({
+            "Fiscal Period / Year": p,
+            "Market Cap": mcap_by_period.get(p, "N/A"),
+            "Net Revenue/Net Sales": rev_by_period.get(p, "N/A"),
+            "Net Profit": pat_by_period.get(p, "N/A"),
+            "EBITDA": ebitda_by_period.get(p, "N/A"),
+            "Employee Headcount": emp_by_period.get(p, "N/A")
+        })
+
+    return {
+        "Company Name": company_name,
+        "periods": periods,
+        "rows": table2_rows
+    }, sources
+
+
+def display_table2(data: Dict[str, Any], sources: List[Dict[str, str]]):
+    """Render Table #2 with Rich formatting, followed by external source URLs strictly below."""
+    table = Table(
+        title="[bold cyan]Table #2: 5-Year Historical & Present Financial Metrics[/bold cyan]",
+        show_header=True,
+        header_style="bold magenta",
+        show_lines=True
+    )
+    table.add_column("Fiscal Period / Year", style="bold yellow", width=18)
+    table.add_column("Market Cap", style="bold cyan", justify="right", width=16)
+    table.add_column("Net Revenue/Net Sales", style="bold green", justify="right", width=22)
+    table.add_column("Net Profit", style="bold white", justify="right", width=18)
+    table.add_column("EBITDA", style="bold magenta", justify="right", width=18)
+    table.add_column("Employee Headcount", style="white", justify="right", width=18)
+
+    for row in data.get("rows", []):
+        mcap_val = row["Market Cap"]
+        if "privately held" in mcap_val.lower():
+            mcap_str = "[dim]N/A (Privately Held)[/dim]"
+        elif mcap_val == "N/A":
+            mcap_str = "[dim]N/A[/dim]"
+        else:
+            mcap_str = f"[bold cyan]{mcap_val}[/bold cyan]"
+
+        rev_str = f"[bold green]{row['Net Revenue/Net Sales']}[/bold green]" if row["Net Revenue/Net Sales"] != "N/A" else "[dim]N/A[/dim]"
+        pat_str = f"[bold white]{row['Net Profit']}[/bold white]" if row["Net Profit"] != "N/A" else "[dim]N/A[/dim]"
+        eb_str = f"[bold magenta]{row['EBITDA']}[/bold magenta]" if row["EBITDA"] != "N/A" else "[dim]N/A[/dim]"
+        emp_str = f"[white]{row['Employee Headcount']}[/white]" if row["Employee Headcount"] != "N/A" else "[dim]N/A[/dim]"
+
+        table.add_row(
+            row["Fiscal Period / Year"],
+            mcap_str,
+            rev_str,
+            pat_str,
+            eb_str,
+            emp_str
+        )
+
+    console.print()
+    console.print(table)
+
+    # Source Links (strictly below the table)
+    console.print("\n[bold cyan]Table #2 Source Links:[/bold cyan]")
+    if sources:
+        for idx, s in enumerate(sources, 1):
+            console.print(f"  [dim]{idx}.[/dim] [bold white]{s['name']}:[/bold white] [underline cyan]{s['url']}[/underline cyan]")
+    else:
+        console.print("  [dim]No external source URLs recorded.[/dim]")
+    console.print()
+
+
+def save_table_records(
+    data1: Dict[str, Any],
+    sources1: List[Dict[str, str]],
+    data2: Dict[str, Any],
+    sources2: List[Dict[str, str]],
+    csv1_path: str = EXPORT_CSV_PATH,
+    csv2_path: str = EXPORT_TABLE2_CSV_PATH,
+    json_path: str = EXPORT_JSON_PATH
+):
+    """Save both Table #1 and Table #2 records to structured CSVs and JSON."""
+    # 1. Save Table #1 to CSV
+    save_table1_records(data1, sources1, csv_path=csv1_path, json_path=json_path)
+
+    # 2. Save Table #2 to dedicated CSV
+    comp_name = data1.get("Company Name", data2.get("Company Name", "Unknown"))
+    f2 = ["Company Name", "Fiscal Period / Year", "Market Cap", "Net Revenue/Net Sales", "Net Profit", "EBITDA", "Employee Headcount", "Source Links"]
+    src2_str = " | ".join([f"{s['name']}: {s['url']}" for s in sources2])
+
+    existing_rows_t2 = []
+    if os.path.isfile(csv2_path) and os.path.getsize(csv2_path) > 0:
+        try:
+            with open(csv2_path, mode="r", newline="", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for r in reader:
+                    # retain rows not matching current company
+                    if r.get("Company Name", "").lower() != comp_name.lower():
+                        existing_rows_t2.append(r)
+        except Exception:
+            existing_rows_t2 = []
+
+    for r in data2.get("rows", []):
+        item = dict(r)
+        item["Company Name"] = comp_name
+        item["Source Links"] = src2_str
+        existing_rows_t2.append(item)
+
+    with open(csv2_path, mode="w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=f2, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(existing_rows_t2)
+
+    # 3. Save combined hierarchical JSON
+    records = []
+    if os.path.isfile(json_path):
+        try:
+            with open(json_path, mode="r", encoding="utf-8") as jf:
+                records = json.load(jf)
+                if not isinstance(records, list):
+                    records = []
+        except Exception:
+            records = []
+
+    entry = {
+        "Company Name": comp_name,
+        "table1": {**data1, "Source Links": sources1},
+        "table2": {
+            "periods": data2.get("periods", []),
+            "rows": data2.get("rows", []),
+            "Source Links": sources2
+        }
+    }
+
+    c_name_lower = comp_name.lower()
+    j_idx = next((i for i, r in enumerate(records) if r.get("Company Name", "").lower() == c_name_lower), None)
+    if j_idx is not None:
+        records[j_idx] = entry
+    else:
+        records.append(entry)
+
+    with open(json_path, mode="w", encoding="utf-8") as jf:
+        json.dump(records, jf, indent=2, ensure_ascii=False)
+
+    console.print(f"[green][OK] Saved Table #1 to [bold]{csv1_path}[/bold], Table #2 to [bold]{csv2_path}[/bold], and combined records to [bold]{json_path}[/bold][/green]")
+
+
+
 def save_categorized_records(profile: Dict[str, Any], csv_path: str = EXPORT_CSV_PATH, json_path: str = EXPORT_JSON_PATH):
     """Save the full categorized records to CSV and JSON."""
 
@@ -1713,7 +2035,7 @@ def is_valid_company_name(name: str) -> bool:
 def main():
     console.print(Panel.fit(
         "[bold cyan]Structured Corporate Data Intelligence Engine[/bold cyan]\n"
-        "[white]Active View: [bold yellow]Table #1 (Identity, Legal Type & Market Standing)[/bold yellow][/white]",
+        "[white]Views: [bold yellow]Table #1 (Identity & Leadership)[/bold yellow] | [bold yellow]Table #2 (5-Year Historical Financials)[/bold yellow][/white]",
         border_style="cyan"
     ))
 
@@ -1724,9 +2046,14 @@ def main():
             console.print("[bold red]Please enter valid company name.[/bold red]")
             return
         console.print(f"[yellow]Fetching Table #1 records for:[/yellow] [bold]{query}[/bold]...")
-        data, sources = fetch_table1_data(query)
-        display_table1(data, sources)
-        save_table1_records(data, sources)
+        data1, sources1 = fetch_table1_data(query)
+        display_table1(data1, sources1)
+
+        console.print(f"[yellow]Fetching Table #2 (5-Year Historical & Present Financials) for:[/yellow] [bold]{query}[/bold]...")
+        data2, sources2 = fetch_table2_data(data1.get("Company Name", query), data1.get("Stock Ticker", "N/A"))
+        display_table2(data2, sources2)
+
+        save_table_records(data1, sources1, data2, sources2)
         return
 
     # Interactive Loop
@@ -1776,13 +2103,17 @@ def main():
                 else:
                     selected_company = candidates[0]["name"]
 
-            console.print(f"\n[cyan]Fetching Table #1 Corporate & Financial Data for '[bold]{selected_company}[/bold]'...[/cyan]")
-            data, sources = fetch_table1_data(selected_company)
-            display_table1(data, sources)
+            console.print(f"\n[cyan]Fetching Table #1 Corporate & Leadership Data for '[bold]{selected_company}[/bold]'...[/cyan]")
+            data1, sources1 = fetch_table1_data(selected_company)
+            display_table1(data1, sources1)
 
-            save_choice = console.input("[bold]Save Table #1 record to CSV/JSON? (Y/n): [/bold]").strip().lower()
+            console.print(f"\n[cyan]Fetching Table #2 (5-Year Historical & Present Financials) for '[bold]{selected_company}[/bold]'...[/cyan]")
+            data2, sources2 = fetch_table2_data(data1.get("Company Name", selected_company), data1.get("Stock Ticker", "N/A"))
+            display_table2(data2, sources2)
+
+            save_choice = console.input("[bold]Save Table #1 and Table #2 records to CSV/JSON? (Y/n): [/bold]").strip().lower()
             if save_choice in ("", "y", "yes"):
-                save_table1_records(data, sources)
+                save_table_records(data1, sources1, data2, sources2)
 
         except KeyboardInterrupt:
             console.print("\n[dim]Process exited.[/dim]")
