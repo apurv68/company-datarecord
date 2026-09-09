@@ -16,7 +16,7 @@ import json
 import csv
 import re
 import time
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Tuple
 
 # Ensure UTF-8 output on Windows consoles
 if hasattr(sys.stdout, "reconfigure"):
@@ -25,6 +25,7 @@ if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
 
 import requests
+from bs4 import BeautifulSoup
 from ddgs import DDGS
 from rich.console import Console
 from rich.panel import Panel
@@ -32,6 +33,7 @@ from rich.table import Table
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 console = Console(force_terminal=True, legacy_windows=False)
+
 
 EXPORT_CSV_PATH = "company_records.csv"
 EXPORT_JSON_PATH = "company_records.json"
@@ -984,8 +986,277 @@ def display_categorized_profile(profile: Dict[str, Any]):
     console.print()
 
 
+def fetch_table1_data(query: str) -> Tuple[Dict[str, Any], List[Dict[str, str]]]:
+    """
+    Fetch verified Table #1 data:
+    Company Name, Founding Year, Founder Name(s), Headquarter (City), Office Address,
+    Business Type (Private Limited/Public Limited), Is Listed Company, Stock Ticker,
+    Current Market Cap (Market Value/Mcap), Share Price.
+    Sources are collected separately to be displayed strictly below the table.
+    """
+    sources = []
+    seen_urls = set()
+
+    def add_source(name: str, url: str):
+        if url and url not in seen_urls and str(url).startswith("http"):
+            sources.append({"name": name, "url": str(url).strip()})
+            seen_urls.add(url)
+
+    data = {
+        "Company Name": query,
+        "Founding Year": "N/A",
+        "Founder Name(s)": "N/A",
+        "Headquarter (City)": "N/A",
+        "Office Address": "N/A",
+        "Business Type (Private Limited/Public Limited)": "Private Limited",
+        "Is Listed Company": "No",
+        "Stock Ticker": "N/A (Unlisted)",
+        "Current Market Cap (Market Value/Mcap)": "N/A (Privately Held)",
+        "Share Price": "N/A (Privately Held)"
+    }
+
+    # 1. Live Market Data via Screener.in (Real-time BSE/NSE financial ratios)
+    screener_match = None
+    try:
+        s_url = f"https://www.screener.in/api/company/search/?q={query}"
+        s_res = requests.get(s_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=4).json()
+        if s_res and isinstance(s_res, list):
+            q_clean = query.lower().replace("limited", "").replace("ltd", "").strip()
+            for cand in s_res[:3]:
+                c_name = cand.get("name", "").lower()
+                if any(t in c_name for t in q_clean.split() if len(t) > 2):
+                    screener_match = cand
+                    break
+    except Exception:
+        pass
+
+    if screener_match:
+        try:
+            c_url = f"https://www.screener.in{screener_match['url']}"
+            r = requests.get(c_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=4)
+            if r.status_code == 200:
+                soup = BeautifulSoup(r.text, "html.parser")
+                ratios = {}
+                for li in soup.find_all("li"):
+                    nm = li.find("span", class_="name")
+                    vl = li.find("span", class_="nowrap") or li.find("span", class_="number")
+                    if nm and vl:
+                        ratios[nm.text.strip()] = re.sub(r"\s+", " ", vl.text.strip())
+
+                if "Market Cap" in ratios:
+                    data["Current Market Cap (Market Value/Mcap)"] = ratios["Market Cap"]
+                if "Current Price" in ratios:
+                    clean_p = ratios["Current Price"].replace("₹", "").strip()
+                    data["Share Price"] = f"₹ {clean_p}"
+
+                data["Is Listed Company"] = "Yes"
+                data["Business Type (Private Limited/Public Limited)"] = "Public Limited"
+                data["Company Name"] = screener_match.get("name", query)
+
+                m = re.search(r"/company/([^/]+)/", screener_match["url"])
+                if m:
+                    ticker = m.group(1).upper()
+                    data["Stock Ticker"] = f"NSE/BSE: {ticker}"
+
+                add_source("Screener.in (BSE & NSE Corporate Financials)", c_url)
+        except Exception:
+            pass
+
+    # 2. Wikipedia Infobox for Identity, Founders, HQ & Type
+    wiki_slug = query.replace(" ", "_")
+    try:
+        w_url = f"https://en.wikipedia.org/api/rest_v1/page/html/{wiki_slug}"
+        w_res = requests.get(w_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=4)
+        if w_res.status_code == 200:
+            soup = BeautifulSoup(w_res.text, "html.parser")
+            infobox = soup.find("table", class_=re.compile(r"infobox", re.I))
+            if infobox:
+                add_source("Wikipedia Corporate Encyclopedia", f"https://en.wikipedia.org/wiki/{wiki_slug}")
+                for tr in infobox.find_all("tr"):
+                    th = tr.find(["th", "td"], class_=re.compile(r"infobox-label", re.I)) or tr.find("th")
+                    td = tr.find(["td"], class_=re.compile(r"infobox-data", re.I)) or tr.find("td")
+                    if th and td and th != td:
+                        lbl = clean_text(th.get_text()).lower()
+                        val = clean_text(td.get_text())
+
+                        if "type" in lbl and data["Business Type (Private Limited/Public Limited)"] == "Private Limited":
+                            if "public" in val.lower():
+                                data["Business Type (Private Limited/Public Limited)"] = "Public Limited"
+                                data["Is Listed Company"] = "Yes"
+                            elif "private" in val.lower():
+                                data["Business Type (Private Limited/Public Limited)"] = "Private Limited"
+
+                        if any(k in lbl for k in ["founded", "established", "inception"]) and data["Founding Year"] == "N/A":
+                            y_m = re.search(r"\b(18\d{2}|19\d{2}|20\d{2})\b", val)
+                            if y_m:
+                                data["Founding Year"] = y_m.group(1)
+                            else:
+                                data["Founding Year"] = val[:20]
+
+                        if "founder" in lbl and data["Founder Name(s)"] == "N/A":
+                            f_cleaned = re.sub(r"\[\d+\]", "", td.get_text(separator=", "))
+                            f_cleaned = re.sub(r"\s+", " ", f_cleaned).strip(", ")
+                            data["Founder Name(s)"] = f_cleaned
+
+                        if "headquarter" in lbl or "location" in lbl:
+                            parts = [p.strip() for p in val.split(",") if p.strip()]
+                            if data["Headquarter (City)"] == "N/A" and parts:
+                                data["Headquarter (City)"] = parts[0]
+                            if data["Office Address"] == "N/A" and len(val) > 10:
+                                data["Office Address"] = val
+
+                        if "traded as" in lbl and data["Stock Ticker"] in ("N/A (Unlisted)", "N/A"):
+                            data["Stock Ticker"] = val
+                            data["Is Listed Company"] = "Yes"
+                            data["Business Type (Private Limited/Public Limited)"] = "Public Limited"
+    except Exception:
+        pass
+
+    # 3. Targeted Web Search for Registered Office Address if needed
+    if data["Office Address"] in ("N/A", "") or len(data["Office Address"]) < 15:
+        try:
+            with DDGS(timeout=5) as ddgs:
+                res = list(ddgs.text(f'"{query}" "registered office" address India', max_results=3))
+                for r in res:
+                    body = r.get("body", "")
+                    if re.search(r"\b\d{6}\b", body) or any(k in body.lower() for k in ["road", "street", "marg", "floor", "plot", "building"]):
+                        m = re.search(r"(?:Registered (?:Office|address)(?: is)?:?\s*)([^.]+?\d{6})", body, re.IGNORECASE)
+                        if m:
+                            data["Office Address"] = clean_text(m.group(1))
+                        else:
+                            data["Office Address"] = clean_text(body[:140])
+                        add_source("Corporate Ministry / Registry Records", r.get("href"))
+                        break
+        except Exception:
+            pass
+
+    return data, sources
+
+
+def display_table1(data: Dict[str, Any], sources: List[Dict[str, str]]):
+    """Render Table #1 with Rich formatting, followed by external source URLs strictly below."""
+    table = Table(
+        title="[bold cyan]Table #1: Corporate Identity, Legal Standing & Market Metrics[/bold cyan]",
+        show_header=True,
+        header_style="bold magenta",
+        show_lines=True
+    )
+    table.add_column("Column / Metric", style="bold yellow", width=36)
+    table.add_column("Corporate Value", style="bold white")
+
+    order = [
+        "Company Name",
+        "Founding Year",
+        "Founder Name(s)",
+        "Headquarter (City)",
+        "Office Address",
+        "Business Type (Private Limited/Public Limited)",
+        "Is Listed Company",
+        "Stock Ticker",
+        "Current Market Cap (Market Value/Mcap)",
+        "Share Price"
+    ]
+
+    for k in order:
+        v = data.get(k, "N/A")
+        if k == "Company Name":
+            v_str = f"[bold green]{v}[/bold green]"
+        elif k in ("Current Market Cap (Market Value/Mcap)", "Share Price"):
+            v_str = f"[bold cyan]{v}[/bold cyan]"
+        elif k == "Is Listed Company":
+            v_str = "[green]Yes[/green]" if "yes" in str(v).lower() else "[yellow]No[/yellow]"
+        elif k == "Business Type (Private Limited/Public Limited)":
+            v_str = f"[bold blue]{v}[/bold blue]"
+        else:
+            v_str = str(v)
+        table.add_row(k, v_str)
+
+    console.print()
+    console.print(table)
+
+    # Source Links (strictly below the table, as requested)
+    console.print("\n[bold cyan]Source Links:[/bold cyan]")
+    if sources:
+        for idx, s in enumerate(sources, 1):
+            console.print(f"  [dim]{idx}.[/dim] [bold white]{s['name']}:[/bold white] [underline cyan]{s['url']}[/underline cyan]")
+    else:
+        console.print("  [dim]No external source URLs recorded.[/dim]")
+    console.print()
+
+
+def save_table1_records(data: Dict[str, Any], sources: List[Dict[str, str]], csv_path: str = EXPORT_CSV_PATH, json_path: str = EXPORT_JSON_PATH):
+    """Save Table #1 record to CSV and JSON with source URLs."""
+    row = dict(data)
+    row["Source Links"] = " | ".join([f"{s['name']}: {s['url']}" for s in sources])
+
+    fieldnames = [
+        "Company Name",
+        "Founding Year",
+        "Founder Name(s)",
+        "Headquarter (City)",
+        "Office Address",
+        "Business Type (Private Limited/Public Limited)",
+        "Is Listed Company",
+        "Stock Ticker",
+        "Current Market Cap (Market Value/Mcap)",
+        "Share Price",
+        "Source Links"
+    ]
+
+    existing_rows = []
+    if os.path.isfile(csv_path) and os.path.getsize(csv_path) > 0:
+        try:
+            with open(csv_path, mode="r", newline="", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for r in reader:
+                    # Keep only Table #1 fieldnames or empty string
+                    filtered_r = {k: r.get(k, "") for k in fieldnames}
+                    if any(filtered_r.values()):
+                        existing_rows.append(filtered_r)
+        except Exception:
+            existing_rows = []
+
+    c_name_lower = row.get("Company Name", "").lower()
+    idx = next((i for i, r in enumerate(existing_rows) if r.get("Company Name", "").lower() == c_name_lower), None)
+    if idx is not None:
+        existing_rows[idx] = row
+    else:
+        existing_rows.append(row)
+
+    with open(csv_path, mode="w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(existing_rows)
+
+
+    records = []
+    if os.path.isfile(json_path):
+        try:
+            with open(json_path, mode="r", encoding="utf-8") as jf:
+                records = json.load(jf)
+                if not isinstance(records, list):
+                    records = []
+        except Exception:
+            records = []
+
+    json_entry = dict(data)
+    json_entry["Source Links"] = sources
+
+    j_idx = next((i for i, r in enumerate(records) if r.get("Company Name", "").lower() == c_name_lower), None)
+    if j_idx is not None:
+        records[j_idx] = json_entry
+    else:
+        records.append(json_entry)
+
+    with open(json_path, mode="w", encoding="utf-8") as jf:
+        json.dump(records, jf, indent=2, ensure_ascii=False)
+
+    console.print(f"[green][OK] Saved Table #1 record to [bold]{csv_path}[/bold] and [bold]{json_path}[/bold][/green]")
+
+
 def save_categorized_records(profile: Dict[str, Any], csv_path: str = EXPORT_CSV_PATH, json_path: str = EXPORT_JSON_PATH):
     """Save the full categorized records to CSV and JSON."""
+
     cats = profile.get("Categories", {})
 
     # Flatten for CSV
@@ -1352,9 +1623,8 @@ def is_valid_company_name(name: str) -> bool:
 
 def main():
     console.print(Panel.fit(
-        "[bold cyan]Multi-Source Categorized Corporate Intelligence Engine[/bold cyan]\n"
-        "[white]Categories: [bold]Land & Property Deals[/bold] | [bold]YoY Revenue[/bold] | "
-        "[bold]Employee Roles[/bold] | [bold]Job Openings[/bold] | [bold]Legal Info[/bold][/white]",
+        "[bold cyan]Structured Corporate Data Intelligence Engine[/bold cyan]\n"
+        "[white]Active View: [bold yellow]Table #1 (Identity, Legal Type & Market Standing)[/bold yellow][/white]",
         border_style="cyan"
     ))
 
@@ -1364,10 +1634,10 @@ def main():
         if not is_valid_company_name(query):
             console.print("[bold red]Please enter valid company name.[/bold red]")
             return
-        console.print(f"[yellow]Collecting full multi-source intelligence for:[/yellow] [bold]{query}[/bold]...")
-        profile = fetch_full_company_profile(query)
-        display_categorized_profile(profile)
-        save_categorized_records(profile)
+        console.print(f"[yellow]Fetching Table #1 records for:[/yellow] [bold]{query}[/bold]...")
+        data, sources = fetch_table1_data(query)
+        display_table1(data, sources)
+        save_table1_records(data, sources)
         return
 
     # Interactive Loop
@@ -1417,18 +1687,18 @@ def main():
                 else:
                     selected_company = candidates[0]["name"]
 
+            console.print(f"\n[cyan]Fetching Table #1 Corporate & Financial Data for '[bold]{selected_company}[/bold]'...[/cyan]")
+            data, sources = fetch_table1_data(selected_company)
+            display_table1(data, sources)
 
-            console.print(f"\n[cyan]Scanning multi-source web intelligence across all categories for '[bold]{selected_company}[/bold]'...[/cyan]")
-            profile = fetch_full_company_profile(selected_company)
-            display_categorized_profile(profile)
-
-            save_choice = console.input("[bold]Save this categorized record to CSV/JSON? (Y/n): [/bold]").strip().lower()
+            save_choice = console.input("[bold]Save Table #1 record to CSV/JSON? (Y/n): [/bold]").strip().lower()
             if save_choice in ("", "y", "yes"):
-                save_categorized_records(profile)
+                save_table1_records(data, sources)
 
         except KeyboardInterrupt:
             console.print("\n[dim]Process exited.[/dim]")
             break
+
 
 
 if __name__ == "__main__":
