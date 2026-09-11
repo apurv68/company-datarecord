@@ -315,24 +315,211 @@
   },
   {
     "Company Name": "Haldiram's",
-    "Founding Year": "1937",
-    "Founder Name(s)": "Ganga Bhishen Agarwal",
-    "CEO": "Krishan Kumar Chutani",
-    "CFO": "Manoj Pandey",
-    "CTO": "N/A",
-    "Headquarter (City)": "Nagpur",
-    "Office Address": "Nagpur, Maharashtra, India",
-    "Business Type (Private Limited/Public Limited)": "Private Limited",
-    "Is Listed Company": "No",
-    "Stock Ticker": "N/A (Unlisted)",
-    "Current Market Cap (Market Value/Mcap)": "N/A (Privately Held)",
-    "Share Price": "N/A (Privately Held)",
-    "Source Links": [
-      {
-        "name": "Wikipedia Corporate Encyclopedia",
-        "url": "https://en.wikipedia.org/wiki/Haldiram's"
-      }
-    ]
+    "table1": {
+      "Company Name": "Haldiram's",
+      "Founding Year": "1937",
+      "Founder Name(s)": "Ganga Bhishen Agarwal",
+      "CEO": "Krishan Kumar Chutani",
+      "CFO": "N/A (Unlisted / Not Publicly Disclosed)",
+      "CTO": "N/A (Unlisted / Not Publicly Disclosed)",
+      "Headquarter (City)": "Nagpur",
+      "Office Address": "Nagpur, Maharashtra, India",
+      "Business Type (Private Limited/Public Limited)": "Private Limited",
+      "Is Listed Company": "No",
+      "Stock Ticker": "N/A (Unlisted)",
+      "Current Market Cap (Market Value/Mcap)": "N/A (Privately Held)",
+      "Share Price": "N/A (Privately Held)",
+      "Source Links": [
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Haldiram's"
+        }
+      ]
+    },
+    "table2": {
+      "periods": [
+        "FY21 (2020-21)",
+        "FY22 (2021-22)",
+        "FY23 (2022-23)",
+        "FY24 (2023-24)",
+        "FY25 (2024-25)",
+        "FY26 / Present"
+      ],
+      "rows": [
+        {
+          "Fiscal Period / Year": "FY21 (2020-21)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY22 (2021-22)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "₹ 9,215 Cr.",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY23 (2022-23)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "₹ 3,622 Cr.",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY24 (2023-24)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "₹ 9,215 Cr.",
+          "Net Profit": "₹ 597 Cr.",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY25 (2024-25)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "₹ 6,976 Cr.",
+          "Net Profit": "₹ 597 Cr.",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY26 / Present",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        }
+      ],
+      "Source Links": [
+        {
+          "name": "Audited ROC / Media Disclosures (2021)",
+          "url": "https://digitalgriot.com/haldiram-net-worth/"
+        },
+        {
+          "name": "Audited ROC / Media Disclosures (2022)",
+          "url": "https://inshorts.com/en/news/how-much-money-has-haldirams-made-in-the-last-5-years-1694078564071"
+        },
+        {
+          "name": "Audited ROC / Media Disclosures (2024)",
+          "url": "https://www.livemint.com/companies/news/temasek-haldiram-acquisitions-expansion-india-snack-market-competition-11755577980043.html"
+        }
+      ]
+    },
+    "table3_latest_news": {
+      "categories": {
+        "Corporate M&A & Investments": [
+          "L Catterton Receives CCI Approval for Haldiram Snacks Food ...",
+          "The Competition Commission of India (CCI) has approved Alpha Wave Ventures II LP and Alpha Wave IHC CI, LP's...",
+          "CCI gives nod to Temasek's minority acquisition of Haldiram ...",
+          "Haldiram sells stake to IHC and Alpha Wave Global"
+        ]
+      },
+      "Source Links": [
+        {
+          "name": "Corporate News",
+          "url": "https://retail.economictimes.indiatimes.com/news/food-entertainment/food-services/l-catterton-gets-cci-clearance-to-acquire-stake-in-haldiram-snacks-food/127899517"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://economictimes.indiatimes.com/industry/cons-products/fmcg/cci-approves-acquisition-of-certain-issued-and-paid-up-equity-share-capital-of-haldiram/articleshow/122049580.cms"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.business-standard.com/companies/news/cci-approves-temasek-minority-acquisition-haldiram-snacks-jongsong-125052001464_1.html"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://legal.economictimes.indiatimes.com/news/regulators/l-catterton-receives-cci-approval-for-haldiram-snacks-food-acquisition/127892410"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://cfo.economictimes.indiatimes.com/news/strategy-operations/haldiram-sells-stake-to-ihc-and-alpha-wave-global/119840109"
+        }
+      ]
+    },
+    "table4_business_activities": {
+      "activities": {
+        "Manufacturing": {
+          "active": true,
+          "details": "Active — Operates high-capacity automated food processing, packaging, and commercial confectionery facilities"
+        },
+        "Online Sales / E-Commerce": {
+          "active": true,
+          "details": "Active — Direct-to-Consumer (D2C) webstore + omnichannel distribution via Blinkit, Zepto, Swiggy Instamart, BigBasket, and Amazon"
+        },
+        "Own Retail Stores": {
+          "active": true,
+          "details": "Active — Network of 100+ branded quick-service restaurants, retail sweet parlors, and highway travel plazas across India"
+        },
+        "Franchise Model": {
+          "active": true,
+          "details": "Active — Operates authorized franchise restaurant outlets, brand kiosks, and multi-tier wholesale FMCG distributor partnerships"
+        },
+        "Import / Export": {
+          "active": true,
+          "details": "Active — Exports packaged ethnic snacks, sweets, and ready-to-eat meals to 160+ countries (USA, UK, UAE, Canada, Australia, Singapore)"
+        },
+        "Product Type": "Physical Consumer Packaged Goods (CPG) + Food Service",
+        "Product Categories": [
+          "Namkeen & Savory Snacks",
+          "Traditional Indian Sweets (Mithai)",
+          "Ready-To-Eat & Frozen Meals",
+          "Confectionery & Bakery",
+          "Packaged Beverages & Syrups"
+        ],
+        "Business Model": "B2C (Consumer Packaged Goods & Quick-Service Food Retail)",
+        "Industry / Sector": "Food Processing, Fast-Moving Consumer Goods (FMCG), Restaurant Hospitality",
+        "Core Business Profile": "Premier Indian consumer goods and confectionery enterprise operating large-scale manufacturing alongside a national chain of quick-service restaurants and sweet parlors.",
+        "Revenue Streams": "Packaged Goods Wholesale/Retail Sales + Restaurant Food & Beverage Services + International Export Shipments + Online D2C Sales"
+      },
+      "Source Links": [
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Haldiram"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.scribd.com/document/878754370/Haldiram-s-Business-Plan"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://haldiramsfranchiseindia.com/franchise-models/"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://therollingplate.com/haldiram-franchise-in-india-investment-franchise-model-returns/"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.haldiram.com/"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.haldirams.com/"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://haldirams.com/collection/products"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.haldiram.com/international-buyers"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://en.nbd.ltd/trader/info/NBDDIY324604003"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://en.nbd.ltd/trader/info/26IN0392032449"
+        }
+      ]
+    }
   },
   {
     "Search Query": "Razorpay",
@@ -799,14 +986,14 @@
       "Founder Name(s)": "J. R. D. Tata",
       "CEO": "K. Krithivasan",
       "CFO": "Samir Seksaria",
-      "CTO": "N/A",
+      "CTO": "Harrick Vin",
       "Headquarter (City)": "Mumbai",
       "Office Address": "Mumbai, Maharashtra, India",
       "Business Type (Private Limited/Public Limited)": "Public Limited",
       "Is Listed Company": "Yes",
       "Stock Ticker": "NSE/BSE: TCS",
-      "Current Market Cap (Market Value/Mcap)": "₹ 7,94,984 Cr.",
-      "Share Price": "₹ 2,197",
+      "Current Market Cap (Market Value/Mcap)": "₹ 7,95,075 Cr.",
+      "Share Price": "₹ 2,198",
       "Source Links": [
         {
           "name": "Screener.in (BSE & NSE Corporate Financials)",
@@ -862,7 +1049,7 @@
         },
         {
           "Fiscal Period / Year": "Mar 2026",
-          "Market Cap": "$86.84 B",
+          "Market Cap": "$83.97 B",
           "Net Revenue/Net Sales": "₹ 267,021 Cr.",
           "Net Profit": "₹ 49,454 Cr.",
           "EBITDA": "₹ 72,398 Cr.",
@@ -870,7 +1057,7 @@
         },
         {
           "Fiscal Period / Year": "TTM",
-          "Market Cap": "₹ 7,94,695 Cr.",
+          "Market Cap": "₹ 7,95,274 Cr.",
           "Net Revenue/Net Sales": "₹ 275,859 Cr.",
           "Net Profit": "₹ 50,055 Cr.",
           "EBITDA": "₹ 74,079 Cr.",
@@ -891,28 +1078,1650 @@
           "url": "https://en.wikipedia.org/wiki/Tata_Consultancy_Services"
         }
       ]
+    },
+    "table3_latest_news": {
+      "categories": {
+        "New Products / Launches": [
+          "PRESS RELEASE SAN JOSE",
+          "MUMBAI, June 07, 2024: Tata Consultancy Services (TCS), a global leader in IT services, consulting, and..."
+        ],
+        "Strategic Partnerships": [
+          "This partnership marks a pivotal moment in India’s vision to become a global leader in AI and build an..."
+        ],
+        "Other Notable Developments": [
+          "TCS Atlas Hiring 2026 - Tata Consultancy Services",
+          "Tata Consultancy Services reported its consolidated financial results Ind AS and IFRS, for the quarter ending..."
+        ]
+      },
+      "Source Links": [
+        {
+          "name": "Corporate News",
+          "url": "https://www.tcs.com/careers/india/tcs-atlas-hiring"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.tcs.com/who-we-are/newsroom/press-release/tcs-launches-rapid-outcome-ai-platform-powered-nvidia"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.tcs.com/who-we-are/newsroom/press-release/tcs-launches-wisdomnext-an-industry-first-genai-aggregation-platform"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.tcs.com/who-we-are/newsroom/press-release/tcs-financial-results-q1-fy-2025"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.tata.com/newsroom/business/tata-openai-partnership"
+        }
+      ]
+    },
+    "table4_business_activities": {
+      "activities": {
+        "Manufacturing": {
+          "active": false,
+          "details": "Not detected — Service and intellectual delivery model"
+        },
+        "Online Sales / E-Commerce": {
+          "active": false,
+          "details": "Not detected — Direct contract and offline sales model"
+        },
+        "Own Retail Stores": {
+          "active": false,
+          "details": "Not detected — Centralized regional corporate offices"
+        },
+        "Franchise Model": {
+          "active": false,
+          "details": "Not detected — Directly managed corporate operations"
+        },
+        "Import / Export": {
+          "active": false,
+          "details": "Domestic focus — Primary commercial operations in India"
+        },
+        "Product Type": "Commercial & Professional Services",
+        "Product Categories": [
+          "Commercial Operations",
+          "Product & Service Delivery"
+        ],
+        "Business Model": "B2B (Business to Business)",
+        "Industry / Sector": "N/A",
+        "Core Business Profile": "Operating corporate enterprise engaged in commercial operations within the N/A sector.",
+        "Revenue Streams": "Commercial Product Sales + Service Delivery Agreements"
+      },
+      "Source Links": []
     }
   },
   {
     "Company Name": "Tata Chemicals Ltd",
-    "Founding Year": "1939",
-    "Founder Name(s)": "N/A",
-    "Headquarter (City)": "Mumbai",
-    "Office Address": "Mumbai, Maharashtra, India",
-    "Business Type (Private Limited/Public Limited)": "Public Limited",
-    "Is Listed Company": "Yes",
-    "Stock Ticker": "NSE/BSE: TATACHEM",
-    "Current Market Cap (Market Value/Mcap)": "₹ 15,405 Cr.",
-    "Share Price": "₹ 605",
-    "Source Links": [
-      {
-        "name": "Screener.in (BSE & NSE Corporate Financials)",
-        "url": "https://www.screener.in/company/TATACHEM/consolidated/"
+    "table1": {
+      "Company Name": "Tata Chemicals Ltd",
+      "Founding Year": "1939",
+      "Founder Name(s)": "N/A",
+      "CEO": "Ramakrishnan Mukundan",
+      "CFO": "Nandakumar Tirumalai",
+      "CTO": "N/A",
+      "Headquarter (City)": "Mumbai",
+      "Office Address": "Mumbai, Maharashtra, India",
+      "Business Type (Private Limited/Public Limited)": "Public Limited",
+      "Is Listed Company": "Yes",
+      "Stock Ticker": "NSE/BSE: TATACHEM",
+      "Current Market Cap (Market Value/Mcap)": "₹ 15,594 Cr.",
+      "Share Price": "₹ 612",
+      "Source Links": [
+        {
+          "name": "Screener.in (BSE & NSE Corporate Financials)",
+          "url": "https://www.screener.in/company/TATACHEM/consolidated/"
+        },
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Tata_Chemicals"
+        }
+      ]
+    },
+    "table2": {
+      "periods": [
+        "Mar 2022",
+        "Mar 2023",
+        "Mar 2024",
+        "Mar 2025",
+        "Mar 2026",
+        "TTM"
+      ],
+      "rows": [
+        {
+          "Fiscal Period / Year": "Mar 2022",
+          "Market Cap": "$2.88 B",
+          "Net Revenue/Net Sales": "₹ 12,622 Cr.",
+          "Net Profit": "₹ 1,405 Cr.",
+          "EBITDA": "₹ 2,319 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2023",
+          "Market Cap": "$3.38 B",
+          "Net Revenue/Net Sales": "₹ 16,789 Cr.",
+          "Net Profit": "₹ 2,434 Cr.",
+          "EBITDA": "₹ 3,820 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2024",
+          "Market Cap": "$3.12 B",
+          "Net Revenue/Net Sales": "₹ 15,421 Cr.",
+          "Net Profit": "N/A",
+          "EBITDA": "₹ 2,847 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2025",
+          "Market Cap": "$2.16 B",
+          "Net Revenue/Net Sales": "₹ 14,887 Cr.",
+          "Net Profit": "₹ 387 Cr.",
+          "EBITDA": "₹ 1,953 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2026",
+          "Market Cap": "$1.62 B",
+          "Net Revenue/Net Sales": "₹ 14,584 Cr.",
+          "Net Profit": "₹ 1,715 Cr.",
+          "EBITDA": "₹ 1,805 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "TTM",
+          "Market Cap": "₹ 15,594 Cr.",
+          "Net Revenue/Net Sales": "₹ 15,120 Cr.",
+          "Net Profit": "₹ 1,971 Cr.",
+          "EBITDA": "₹ 1,694 Cr.",
+          "Employee Headcount": "N/A"
+        }
+      ],
+      "Source Links": [
+        {
+          "name": "Screener.in (Audited Multi-Year P&L Financials)",
+          "url": "https://www.screener.in/company/TATACHEM/consolidated/"
+        },
+        {
+          "name": "CompaniesMarketCap (Historical Market Valuation)",
+          "url": "https://companiesmarketcap.com/tata-chemicals/marketcap/"
+        }
+      ]
+    },
+    "table3_latest_news": {
+      "categories": {
+        "Executive Changes": [
+          "R Mukundan, Managing Director & CEO, Tata Chemicals Ltd ..."
+        ],
+        "Corporate M&A & Investments": [
+          "Clarification on Cost of Acquisition and Capital Gains Tax Treatment for Tata Chemicals",
+          "1 Tata Chemicals - British Salt Merger",
+          "Tata Chemicals 2026 Company Profile: Stock Performance & Earnings",
+          "Tata Chemicals: Merger of Tata Chemicals & Tata Global Beverages to help Tatas focus on consumer vertical"
+        ],
+        "New Branches / Offices / Expansion": [
+          "CCU Plant - Tata Chemicals Europe (TCE) - Case Studies",
+          "Tata Chemicals board approves ₹910 crore expansion plans — Here's what you need to know",
+          "Tata Chemicals approves ₹910 Crore expansion plans",
+          "Tata Chemicals approves Rs 910-cr investment for plant expansions in Gujarat, Tamil Nadu",
+          "Tata Chemicals Europe to invest Rs. 655 crore on expansion of sodium bicarbonate capacity"
+        ],
+        "Strategic Partnerships": [
+          "Brenntag Essentials appointed exclusive distributor for Tata Chemicals North America's soda ash in Malaysia,..."
+        ],
+        "Other Notable Developments": [
+          "Closure of Tata Chemicals Ltd. - Facebook",
+          "Tata Chemicals Limited - Facebook",
+          "Stay updated with the latest press releases, news, and media coverage from Tata Chemicals"
+        ]
       },
-      {
-        "name": "Wikipedia Corporate Encyclopedia",
-        "url": "https://en.wikipedia.org/wiki/Tata_Chemicals"
-      }
-    ]
+      "Source Links": [
+        {
+          "name": "Corporate News",
+          "url": "https://www.facebook.com/FollowCII/posts/r-mukundan-managing-director-ceo-tata-chemicals-ltd-assumes-office-as-president-/1376210591204624/"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.facebook.com/JohnMuhiaMethu/posts/closure-of-tata-chemicals-ltd/1688340239962202/"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://carboncapture.pentair.com/en/case-studies/tata-chemicals.html"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.techsciresearch.com/news/19519-brenntag-essentials-named-exclusive-distributor-of-tata-chemicals-soda-ash-targets-southeast-asian-expansion.html"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.facebook.com/61588615537185/posts/new-faces-new-perspectives-one-shared-journeywere-delighted-to-welcome-our-gets-/122117839317287184/"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.livemint.com/market/stock-market-news/tata-chemicals-board-approves-rs-910-crore-expansion-plans-heres-what-you-need-to-know-11763743810435.html"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.indiainfoline.com/news/companies/tata-chemicals-approves-910-crore-expansion-plans"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.projectstoday.com/News/Tata-Chemicals-approves-Rs-910-cr-investment-for-plant-expansions-in-Gujarat-Tamil-Nadu"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.indianchemicalnews.com/chemical/tata-chemicals-europe-to-invest-rs-655-crore-on-expansion-of-sodium-bicarbonate-capacity-24065"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.tatachemicals.com/News-room/Articles/next-gen-technologies-for-future-readiness"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.caclubindia.com/experts/clarification-on-cost-of-acquisition-and-capital-gains-tax-treatment-for-tata-chemicals-2948269.asp"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.scribd.com/doc/95672846/1-Tata-Chemicals-British-Salt-Merger"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://pitchbook.com/profiles/company/11784-88"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.tatachemicals.com/media/newsroom/press-releases"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://economictimes.indiatimes.com/news/company/corporate-trends/merger-of-tata-chemicals-tata-global-beverages-to-help-tatas-focus-on-consumer-vertical/articleshow/69351204.cms"
+        }
+      ]
+    },
+    "table4_business_activities": {
+      "activities": {
+        "Manufacturing": {
+          "active": true,
+          "details": "Active — Operates domestic production and processing facilities"
+        },
+        "Online Sales / E-Commerce": {
+          "active": false,
+          "details": "Not detected — Direct contract and offline sales model"
+        },
+        "Own Retail Stores": {
+          "active": false,
+          "details": "Not detected — Centralized regional corporate offices"
+        },
+        "Franchise Model": {
+          "active": false,
+          "details": "Not detected — Directly managed corporate operations"
+        },
+        "Import / Export": {
+          "active": true,
+          "details": "Active — International trade and global commercial presence"
+        },
+        "Product Type": "Physical Products + Services",
+        "Product Categories": [
+          "Commercial Operations",
+          "Product & Service Delivery"
+        ],
+        "Business Model": "B2B (Business to Business)",
+        "Industry / Sector": "N/A",
+        "Core Business Profile": "Operating corporate enterprise engaged in commercial operations within the N/A sector.",
+        "Revenue Streams": "Commercial Product Sales + Service Delivery Agreements"
+      },
+      "Source Links": [
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://en.wikipedia.org/wiki/Tata_Chemicals"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.tata.com/business/tata-chemicals"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://growthsharematrix.com/blogs/how-it-works/tatachemicals"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.scribd.com/document/395796104/Tata-Chemicals-Final"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.facebook.com/groups/598847514154909/posts/1547065249333126/"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.marketscreener.com/news/kenya-s-president-orders-tata-chemicals-to-end-operations-in-the-country-ce7858d3de81f520"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.eximpedia.app/companies/tata-chemical/08362214"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.facebook.com/Billionaires.Africa/posts/president-william-ruto-has-told-tata-chemicals-to-leave-kenya-saying-the-indian-/1404842001742318/"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.facebook.com/JohnMuhiaMethu/posts/closure-of-tata-chemicals-ltd/1688340239962202/"
+        }
+      ]
+    }
+  },
+  {
+    "Company Name": "TCS",
+    "table1": {
+      "Company Name": "TCS",
+      "Founding Year": "N/A",
+      "Founder Name(s)": "N/A",
+      "CEO": "N/A",
+      "CFO": "N/A",
+      "CTO": "N/A",
+      "Headquarter (City)": "N/A",
+      "Office Address": "Appointed on · 1 November 2024 · Correspondence address · Tcs House, Raveline Street, Mumbai, Maharashtra 400001",
+      "Business Type (Private Limited/Public Limited)": "Private Limited",
+      "Is Listed Company": "No",
+      "Stock Ticker": "N/A (Unlisted)",
+      "Current Market Cap (Market Value/Mcap)": "N/A (Privately Held)",
+      "Share Price": "N/A (Privately Held)",
+      "Source Links": [
+        {
+          "name": "Corporate Ministry / Registry Records",
+          "url": "https://find-and-update.company-information.service.gov.uk/company/FC025271/officers"
+        }
+      ]
+    },
+    "table2": {
+      "periods": [
+        "FY21 (2020-21)",
+        "FY22 (2021-22)",
+        "FY23 (2022-23)",
+        "FY24 (2023-24)",
+        "FY25 (2024-25)",
+        "FY26 / Present"
+      ],
+      "rows": [
+        {
+          "Fiscal Period / Year": "FY21 (2020-21)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY22 (2021-22)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY23 (2022-23)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY24 (2023-24)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY25 (2024-25)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY26 / Present",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        }
+      ],
+      "Source Links": []
+    }
+  },
+  {
+    "Company Name": "Amul",
+    "table1": {
+      "Company Name": "Amul",
+      "Founding Year": "1946",
+      "Founder Name(s)": "Tribhuvandas Patel",
+      "CEO": "Tarun Bhatia",
+      "CFO": "N/A (Unlisted / Not Publicly Disclosed)",
+      "CTO": "N/A (Unlisted / Not Publicly Disclosed)",
+      "Headquarter (City)": "Anand",
+      "Office Address": "Anand, Gujarat, India",
+      "Business Type (Private Limited/Public Limited)": "Private Limited",
+      "Is Listed Company": "No",
+      "Stock Ticker": "N/A (Unlisted)",
+      "Current Market Cap (Market Value/Mcap)": "N/A (Privately Held)",
+      "Share Price": "N/A (Privately Held)",
+      "Source Links": [
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Amul"
+        }
+      ]
+    },
+    "table2": {
+      "periods": [
+        "FY21 (2020-21)",
+        "FY22 (2021-22)",
+        "FY23 (2022-23)",
+        "FY24 (2023-24)",
+        "FY25 (2024-25)",
+        "FY26 / Present"
+      ],
+      "rows": [
+        {
+          "Fiscal Period / Year": "FY21 (2020-21)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY22 (2021-22)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY23 (2022-23)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY24 (2023-24)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "₹ 61,000 Cr.",
+          "Net Profit": "₹ 2,750 Cr.",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY25 (2024-25)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY26 / Present",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        }
+      ],
+      "Source Links": [
+        {
+          "name": "Audited ROC / Media Disclosures (2023)",
+          "url": "https://www.scribd.com/document/885330856/Amul-Financial-Reports-Section3"
+        }
+      ]
+    },
+    "table3_latest_news": {
+      "categories": {
+        "2026 Developments & Strategic Milestones": [
+          "[STRATEGIC DEVELOPMENT] Recently Amul was emerged as India's most chosen beverages brand and entered into OOH FMCG top five list. The ranking is as per the 14th edition of the Brand Footprint India 2026 report which was released by Worldpanel by Numerator on 13th August 2026. (Year: 2026)"
+        ],
+        "2025 Developments & Strategic Milestones": [
+          "[STRATEGIC DEVELOPMENT] In 2025, Amul was ranked third most valued brand in India in the YouGov India Value Rankings 2025. (Year: 2025)",
+          "[EXPANSION SIGNAL] In 2025, Amul's Sabar Dairy Plant at IMT Rohtak in Haryana state was expanded making it India's largest processing plant for curd, buttermilk, and yoghurt catering for the Haryana, Delhi-NCR, and northern India region. (Year: 2025)",
+          "[STRATEGIC DEVELOPMENT] In 2025, every day it processes 150 mt (metric ton) curd, 10 mt yoghurt, 10 mt sweets, and 3 mt of buttermilk. (Year: 2025)",
+          "[STRATEGIC DEVELOPMENT] In 2025, Haryana was India's third largest producer of milk (122.2 lakh tonnes per year) with highest per capita milk availability in India (1,105 grams per day). (Year: 2025)",
+          "[STRATEGIC ALLIANCE SIGNAL] In June 2025, the cooperative launched Amul milk in Spain through a partnership with a Spanish dairy cooperative. (Year: 2025)",
+          "[STRATEGIC DEVELOPMENT] The ranking is as per the 14th edition of the Brand Footprint India 2026 report which was released by Worldpanel by Numerator on 13th August 2026. The report tracked consumer choices made during 2025. (Year: 2025)"
+        ],
+        "2024 Developments & Strategic Milestones": [
+          "[STRATEGIC ALLIANCE SIGNAL] In May 2024, it signed an agreement to market Amul-branded fresh milk in the United States in collaboration with the Michigan Milk Producers Association, using locally produced milk and Amul formulations. (Year: 2024)",
+          "[STRATEGIC DEVELOPMENT] In July 2024, Amul featured Maya Neelakantan, a ten-year-old guitar prodigy who auditioned for America's Got Talent season 19 in June 2024. (Year: 2024)"
+        ]
+      },
+      "Source Links": [
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Amul"
+        }
+      ]
+    },
+    "table4_business_activities": {
+      "activities": {
+        "Manufacturing": {
+          "active": true,
+          "details": "Active — Operates high-capacity automated food processing, packaging, and commercial confectionery facilities"
+        },
+        "Online Sales / E-Commerce": {
+          "active": true,
+          "details": "Active — Direct-to-Consumer (D2C) webstore + omnichannel distribution via Blinkit, Zepto, Swiggy Instamart, BigBasket, and Amazon"
+        },
+        "Own Retail Stores": {
+          "active": true,
+          "details": "Active — Network of 100+ branded quick-service restaurants, retail sweet parlors, and highway travel plazas across India"
+        },
+        "Franchise Model": {
+          "active": true,
+          "details": "Active — Operates authorized franchise restaurant outlets, brand kiosks, and multi-tier wholesale FMCG distributor partnerships"
+        },
+        "Import / Export": {
+          "active": true,
+          "details": "Active — Exports packaged ethnic snacks, sweets, and ready-to-eat meals to 160+ countries (USA, UK, UAE, Canada, Australia, Singapore)"
+        },
+        "Product Type": "Physical Consumer Packaged Goods (CPG) + Food Service",
+        "Product Categories": [
+          "Namkeen & Savory Snacks",
+          "Traditional Indian Sweets (Mithai)",
+          "Ready-To-Eat & Frozen Meals",
+          "Confectionery & Bakery",
+          "Packaged Beverages & Syrups"
+        ],
+        "Business Model": "B2C (Consumer Packaged Goods & Quick-Service Food Retail)",
+        "Industry / Sector": "Food Processing, Fast-Moving Consumer Goods (FMCG), Restaurant Hospitality",
+        "Core Business Profile": "Premier Indian consumer goods and confectionery enterprise operating large-scale manufacturing alongside a national chain of quick-service restaurants and sweet parlors.",
+        "Revenue Streams": "Packaged Goods Wholesale/Retail Sales + Restaurant Food & Beverage Services + International Export Shipments + Online D2C Sales"
+      },
+      "Source Links": [
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Amul"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.amul.com/m/amul-franchise-business-opportunity"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.franchiseeindia.org/retail-store/amul/"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.thebusinessachiever.com/how-amuls-commission-based-franchise-model-is-reshaping-retail-profits/"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://shopping.amuldairy.com/"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.storehippo.com/en/page/amul"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.zepto.com/brand/Amul/b27a7a24-66c5-495d-9fc0-ee6459536bb9"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.volza.com/p/amul-milk/export/export-from-india/"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.volza.com/p/amul/export/export-from-india/"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.eximpedia.app/products/amul-milk-import-export-data"
+        }
+      ]
+    }
+  },
+  {
+    "Company Name": "Interglobe Aviation Ltd (IndiGo)",
+    "table1": {
+      "Company Name": "Interglobe Aviation Ltd (IndiGo)",
+      "Founding Year": "2005",
+      "Founder Name(s)": "Rahul Bhatia Rakesh Gangwal",
+      "CEO": "Willie Walsh",
+      "CFO": "N/A",
+      "CTO": "N/A",
+      "Headquarter (City)": "Gurgaon",
+      "Office Address": "Gurgaon, Haryana, India",
+      "Business Type (Private Limited/Public Limited)": "Public Limited",
+      "Is Listed Company": "Yes",
+      "Stock Ticker": "NSE/BSE: INDIGO",
+      "Current Market Cap (Market Value/Mcap)": "₹ 1,89,024 Cr.",
+      "Share Price": "₹ 4,889",
+      "Source Links": [
+        {
+          "name": "Screener.in (BSE & NSE Corporate Financials)",
+          "url": "https://www.screener.in/company/INDIGO/consolidated/"
+        },
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/IndiGo"
+        }
+      ]
+    },
+    "table2": {
+      "periods": [
+        "Mar 2022",
+        "Mar 2023",
+        "Mar 2024",
+        "Mar 2025",
+        "Mar 2026",
+        "TTM"
+      ],
+      "rows": [
+        {
+          "Fiscal Period / Year": "Mar 2022",
+          "Market Cap": "N/A",
+          "Net Revenue/Net Sales": "₹ 25,931 Cr.",
+          "Net Profit": "₹ 6,162 Cr.",
+          "EBITDA": "₹ 575 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2023",
+          "Market Cap": "N/A",
+          "Net Revenue/Net Sales": "₹ 54,446 Cr.",
+          "Net Profit": "N/A",
+          "EBITDA": "₹ 6,531 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2024",
+          "Market Cap": "N/A",
+          "Net Revenue/Net Sales": "₹ 68,904 Cr.",
+          "Net Profit": "₹ 8,172 Cr.",
+          "EBITDA": "₹ 16,356 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2025",
+          "Market Cap": "N/A",
+          "Net Revenue/Net Sales": "₹ 80,803 Cr.",
+          "Net Profit": "₹ 7,258 Cr.",
+          "EBITDA": "₹ 18,102 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2026",
+          "Market Cap": "₹ 1,89,084 Cr.",
+          "Net Revenue/Net Sales": "₹ 84,962 Cr.",
+          "Net Profit": "₹ 2,394 Cr.",
+          "EBITDA": "₹ 12,037 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "TTM",
+          "Market Cap": "₹ 1,89,084 Cr.",
+          "Net Revenue/Net Sales": "₹ 89,050 Cr.",
+          "Net Profit": "₹ 4,808 Cr.",
+          "EBITDA": "₹ 10,024 Cr.",
+          "Employee Headcount": "N/A"
+        }
+      ],
+      "Source Links": [
+        {
+          "name": "Screener.in (Audited Multi-Year P&L Financials)",
+          "url": "https://www.screener.in/company/INDIGO/consolidated/"
+        }
+      ]
+    },
+    "table3_latest_news": {
+      "categories": {
+        "2026 Developments & Strategic Milestones": [
+          "[LEADERSHIP SIGNAL] In the aftermath of the operational disruptions, CEO Pieter Elbers resigned on 10 March 2026, with managing director Rahul Bhatia assuming management of the airline as the interim CEO. (Year: 2026)",
+          "[LEADERSHIP SIGNAL] On 31 March 2026, IndiGo named Irish aviation executive Willie Walsh as its next chief executive officer. (Year: 2026)",
+          "[LEADERSHIP SIGNAL] On 3 August 2026, Walsh assumed office as CEO, succeeding Bhatia, who continued as the airline's managing director. (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] In August 2026, a report indicated that IndiGo was in a preliminary discussion with Embraer for a possible purchase of a large number of E-Jet E2 aircraft as a replacement for its existing ATR 72-600 fleet. (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] As of July 2026, IndiGo operates a fleet of 425 aircraft. (Year: 2026)"
+        ],
+        "2025 Developments & Strategic Milestones": [
+          "[MARKET & OPERATIONAL SIGNAL] IndiGo is an Indian low-cost  airline headquartered in Gurgaon, Haryana. It is the largest airline in India by passengers carried, with a 64.2% domestic market share as of August 2025. (Year: 2025)",
+          "[MARKET & OPERATIONAL SIGNAL] It is the largest airline in India by passengers carried, with a 64.2% domestic market share as of August 2025. It is one of the largest in the world in terms of passengers carried, with 31.9 million passengers carried in the fourth quarter of 2025. (Year: 2025)",
+          "[EXPANSION SIGNAL] As of November 2025, IndiGo operates over 2,700 daily flights to 137 destinations – 94 domestic and 43 international. (Year: 2025)",
+          "[STRATEGIC DEVELOPMENT] In December 2025, IndiGo experienced a major scheduling crisis, which led to the cancellation of thousands of flights. (Year: 2025)",
+          "[FINANCIAL & M&A SIGNAL] Also, in March 2025, the Income Tax Department imposed a penalty of Rs. 9.44 billion (US$98 million) on InterGlobe Aviation, IndiGo's parent company, for the assessment year 2021–22. (Year: 2025)",
+          "[EXPANSION SIGNAL] As of November 2025, IndiGo operates more than 2,700 daily flights to 137 destinations, 94 in India and 43 abroad. (Year: 2025)",
+          "[PRODUCT & FLEET SIGNAL] It also operates two Boeing 777s on wet-lease from Turkish Airlines. It wet leased six Boeing 787 aircraft from Norse Atlantic, with its inaugural flight on 1 March 2025. (Year: 2025)",
+          "[STRATEGIC DEVELOPMENT] In 2025, IndiGo introduced \"All I Want Is Touchdown\" as its boarding anthem. (Year: 2025)"
+        ],
+        "2024 Developments & Strategic Milestones": [
+          "[PRODUCT & FLEET SIGNAL] In April 2024, it placed an order for 30 A350-900 aircraft, with an additional option for 70 aircraft in a deal valued at $5 billion. (Year: 2024)",
+          "[PRODUCT & FLEET SIGNAL] On 14 November 2024, the airline introduced business class in select flights. (Year: 2024)",
+          "[STRATEGIC DEVELOPMENT] In 2024, the A320neo accounted for 45% of all flights, but its dominance was overtaken by the A321neo near the end of 2025. (Year: 2024)",
+          "[PRODUCT & FLEET SIGNAL] In 2024, it launched IndiGoStretch, with business class seats, in limited flights. (Year: 2024)"
+        ],
+        "2023 Developments & Strategic Milestones": [
+          "[PRODUCT & FLEET SIGNAL] In January 2023, the airline became the first Indian airline to have a fleet of more than 300 aircraft. (Year: 2023)",
+          "[PRODUCT & FLEET SIGNAL] In February 2023, the airline inducted its first wide-body aircraft, a wet-leased Boeing 777-300ER, to its fleet. (Year: 2023)",
+          "[PRODUCT & FLEET SIGNAL] In June 2023, the airline placed an order for 500 Airbus A320neo family aircraft, the largest aircraft order in commercial aviation history. (Year: 2023)",
+          "[MARKET & OPERATIONAL SIGNAL] As of November 2023, IndiGo had a 61.8% domestic market share. (Year: 2023)",
+          "[STRATEGIC DEVELOPMENT] In December 2023, IndiGo became the first Indian airline to have carried over 100 million passengers in a calendar year. (Year: 2023)",
+          "[FINANCIAL & M&A SIGNAL] In July 2023, Indian aviation watchdog DGCA imposed a Rs. 3 million (US$31,000) fine on IndiGo for certain systemic deficiencies concerning documentation pertaining to operations, training, and engineering procedures. (Year: 2023)"
+        ]
+      },
+      "Source Links": [
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/IndiGo"
+        }
+      ]
+    },
+    "table4_business_activities": {
+      "activities": {
+        "Manufacturing": {
+          "active": false,
+          "details": "Not applicable — Operates commercial aircraft fleet, line maintenance facilities, and airport ground handling infrastructure"
+        },
+        "Online Sales / E-Commerce": {
+          "active": true,
+          "details": "Active — Direct web booking portal (goindigo.in), mobile app, web check-in, and global travel aggregator integrations"
+        },
+        "Own Retail Stores": {
+          "active": true,
+          "details": "Active — Airport terminal ticketing reservation counters, customer service kiosks, and city booking offices"
+        },
+        "Franchise Model": {
+          "active": false,
+          "details": "Not applicable — Centralized corporate flight operations, cabin crew management, and airline fleet control"
+        },
+        "Import / Export": {
+          "active": true,
+          "details": "Active — Operates scheduled international passenger flights to 30+ global destinations and dedicated IndiGo CarGo freight logistics"
+        },
+        "Product Type": "Commercial Air Passenger Transport + Air Cargo Logistics",
+        "Product Categories": [
+          "Domestic Scheduled Flights",
+          "International Scheduled Flights",
+          "IndiGo CarGo Air Freight",
+          "In-Flight Services & Ancillary (6E Eats, Seat Selection)",
+          "Frequent Flyer Program (BluChip)"
+        ],
+        "Business Model": "B2C + B2B (Commercial Aviation & Air Freight Logistics)",
+        "Industry / Sector": "Aviation, Airlines, Passenger & Cargo Transportation",
+        "Core Business Profile": "Premier commercial airline and aviation transport enterprise operating scheduled domestic and international passenger flights alongside dedicated air cargo operations.",
+        "Revenue Streams": "Passenger Flight Ticket Sales + Ancillary Passenger Services (Baggage, Meal, Seat) + Air Cargo Freight Logistics"
+      },
+      "Source Links": [
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/IndiGo"
+        }
+      ]
+    }
+  },
+  {
+    "Company Name": "Indigo Paints Ltd",
+    "table1": {
+      "Company Name": "Indigo Paints Ltd",
+      "Founding Year": "2000",
+      "Founder Name(s)": "Hemant Jalan",
+      "CEO": "Hemant Jalan",
+      "CFO": "Chetan Humane",
+      "CTO": "N/A",
+      "Headquarter (City)": "Pune",
+      "Office Address": "Pune, Maharashtra, India",
+      "Business Type (Private Limited/Public Limited)": "Public Limited",
+      "Is Listed Company": "Yes",
+      "Stock Ticker": "NSE/BSE: INDIGOPNTS",
+      "Current Market Cap (Market Value/Mcap)": "₹ 5,159 Cr.",
+      "Share Price": "₹ 1,078",
+      "Source Links": [
+        {
+          "name": "Screener.in (BSE & NSE Corporate Financials)",
+          "url": "https://www.screener.in/company/INDIGOPNTS/"
+        },
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Indigo_Paints"
+        }
+      ]
+    },
+    "table2": {
+      "periods": [
+        "Mar 2023",
+        "Mar 2024",
+        "Mar 2025",
+        "Mar 2026",
+        "TTM"
+      ],
+      "rows": [
+        {
+          "Fiscal Period / Year": "Mar 2023",
+          "Market Cap": "N/A",
+          "Net Revenue/Net Sales": "₹ 1,073 Cr.",
+          "Net Profit": "₹ 132 Cr.",
+          "EBITDA": "₹ 182 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2024",
+          "Market Cap": "N/A",
+          "Net Revenue/Net Sales": "₹ 1,306 Cr.",
+          "Net Profit": "₹ 149 Cr.",
+          "EBITDA": "₹ 238 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2025",
+          "Market Cap": "N/A",
+          "Net Revenue/Net Sales": "₹ 1,341 Cr.",
+          "Net Profit": "₹ 142 Cr.",
+          "EBITDA": "₹ 233 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2026",
+          "Market Cap": "₹ 5,159 Cr.",
+          "Net Revenue/Net Sales": "₹ 1,405 Cr.",
+          "Net Profit": "₹ 148 Cr.",
+          "EBITDA": "₹ 255 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "TTM",
+          "Market Cap": "₹ 5,159 Cr.",
+          "Net Revenue/Net Sales": "₹ 1,466 Cr.",
+          "Net Profit": "₹ 163 Cr.",
+          "EBITDA": "₹ 272 Cr.",
+          "Employee Headcount": "N/A"
+        }
+      ],
+      "Source Links": [
+        {
+          "name": "Screener.in (Audited Multi-Year P&L Financials)",
+          "url": "https://www.screener.in/company/INDIGOPNTS/consolidated/"
+        }
+      ]
+    },
+    "table3_latest_news": {
+      "categories": {
+        "Other Notable Developments": [
+          "Indigo Paints eyes stronger cash flow as major capex cycle nears end",
+          "Defective Paint Supply: Baramulla Consumer Commission Holds Indigo Paints Liable",
+          "Indigo Paints targets 25% annual growth as it puts market share ahead of margins",
+          "Court orders Indigo Paints to pay Rs 4.35 lakh for supplying defective paints",
+          "Indigo Paints Q1 Results: Profit Zooms 61% As Margins Expand; Revenue Up 20%",
+          "Indigo Paints files FY26 annual report, sets Sep 12 AGM",
+          "Indigo Paints Q1 profit jumps 60% to ₹41.7 crore, revenue rises 19.7%",
+          "Paint stocks: Asian Paints, Indigo Paints, Berger, Shalimar gain up to 5%",
+          "Indigo Paints dismisses Birla Opus threat, says profitability has remained unaffected",
+          "Indigo Paints Projects 25% Revenue Growth by FY27 as Apple Chemie Orders Exceed 30%"
+        ]
+      },
+      "Source Links": [
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi-wFBVV95cUxPaWRSZXlOQVRRTUQ4eW9DYjN4SzBiU0Ytd1FNZm51WjFGRUJKQkRfT1pWOFRwOFhGUnJfMmZRM2JJWExUNXQ5enAxTUJQbC1Rdm91ajBYa0gzeFI0WVhBRldtSXZJZWpDN0xzeVJwMGtpMk5tdzk2RTBRdGZCM19CeFQyMFhDd2hOREpubWtlNzlpVV9vMExJc0h5WDJ1aXhWb2dFN2k3aGRtRHFnVExLVDBXeS1KWGtyZ2EtRWU4cDNoZWxUQ1lWeHR3a2l2STFZZmVmbmRhd1MzMFloMXY5QVdabWl2X0wyS1c0ektlOGpMbWpnYXRhSmNBb9IBgAJBVV95cUxPR3NiV19VeDRxcGNKX2Vib0ZaWE01UkktZjZCTk44c1RtRWtXbzVOQkpJdnR0OHNLOVA5OFZ4dktIcEljOE5xSElxdnE1bnFpb21tREwxUnp5UTlVMjRkTV9NTzlSbTgzTzIyZ1QtNTFoNXFZVEFpc0pHRzZFZE15TGp0b1JlZU4weUYxdHBjdXo2LU5kNEVaRXlGQ2x0UTk0dVZfU1JCTFBBakRFODRaSmlBQU9zLU02eWwwZS0tU0ZhYlp1Nl92ZWJDbWlBcUVCdjBFaVRxakNUcTdBMXN4RVBKQ3BZdUVxOEdyd0xRNmlGdDNzV1IzcGpoM2hvMzV3?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMitwFBVV95cUxNeHYtWXE1RnJnaFl6cm9rLTZPNTctS2dRMFB3MUhWa0dzYndWdkhTakJPRkRVZzZyeTVjYWczRlhlWmVnR0pkbXotNFZna21FVVdqV0p0NHZxb0hWTWFnakdvb1QxQWJ5SFlGOVQ5YjJMaFRDUWJBLWJ4OTVKOWtiMUtyd0UtSFVSRF8yYWxfYjVlTFFoT0w1Z0NIY3FaQnM0WE1CWG9aRkJMajhyNHlUNUVIdnNnenPSAbwBQVVfeXFMTUtpMTBJLXRMUDZmbDVoallOY0NDLVljZ1BMUDhDWGtZR2tqSFEtR0xudjQ2Z1dPUFZ5WGRUUFhHRThMWDNvRGIxeW5OaTBQSVpyNS11X1IxQnY3bTd1SnpJQVFLNzNfUXVzZy1NNTNtdkk2VVBaaE12T0RJLVdhdXZiYWJ4aTNBUTZOSnJHSmVqc0l1TXE5QU4zUkUyWVg2YzNSMzMtOXpQRFdzQ2pNcmp0YWRuQUk3am83cWU?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxOblNKSUZubjVEUnZBZDhBM1VobXp4dklmRzBBVW9qaWJ1RkhESnlaay0wWmFrekNHdmtseElsalVHanpXMnNRWXVjQlIwbkg5bk5iY1VLcDZKd2VLY2NxeFFmT2dBdnlXdU1oQmVwaXVuOXo5b2NFdXNGNnhPbmVyUEFCbXY3Q0IybFdGTTExODJqaG9aVFBGVEJmZkZ1aExsOHZnNVZmN213ekpFMzJIby1Ea1N0TUxBTHlKVHlTZFQwV1FrczZaY1RVaFN1ZktGT0tVekdINDc0Qlgyc1AtRdIB5gFBVV95cUxQY1hCN2p2ay1XNEtXbDlHSURZWFJ1RE05b1dyWlRIOFhadkhrbGdQRkEwQVZHQ2ZpMmprUGloR0dHR3Q0VFk1MzZ3SHJXZUd4N2NJMGQwQmxMSnZ5RV8xczlMN2JxTjNJS3hqMlpaWTMwTEhEOUp5SEp6WFpDT3c2c0FaOFZWTi04QUJQdkxhUm1TOGdaVFUxQWhiczRhWEtHQjR2U2FxZUVZUDd6bDVHTjBKTm9ZSkRsdXM4SDFCdDF6SFZiYWlQN05DQTh3Xzk5c0ZKaF9Pd1lCbnNvdGdiN3RNN21WZw?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxPWjZ5UG5TekxCV1oxdXUyNFVBb1pPeVRiaWpXMEl5cFM0Yno0NjVGcUJuck1PdlhGTWZ3YmxUSWg5YkV6Ulg3OF92Y01GWG5ibEpfSjJhTDljd1ZXVlIyYmdGTTczQ1VnWnJNZVVpaXo4dlZ4T1BsVVM3NWhsYTdNTGxsWTk1TnFReGludG03VnZyNGlaRUJKSVUwV1BURGZ4ZkZ4RjdfM254M0VXNlZ3U3NCTFhON2tPNTVtdndFZGhsT3BNa3p1Zk54a3B6ZmN1ekUwbU5TVElWbzEtem5tTTFDNlPSAeoBQVVfeXFMTzM4ekZPUkpqWlRkQ3drTzdwMEZCQ2Nkam55VjN1VC1RQmhNeEwxek5uWFdEb1VZVVhUYmMtdkNkTVk3UEwyWER2eUlzQ1pqbVdoTFZlOHZOYTE2Y0ZDU3E1cEUzUnV5Zm9PanNjMU9YN0phYVNGV05aVkdnY0FjNHN3TFVUZU1pV2VZQ09QcXVfNTd6OTVaR01xeEpNaEtDYTVUSGxvWU8wbDZUWVUyd3U0U21qcDI0UlI2WjBkN1BPeVd5THJYUjRtWE5peXItc29XTjNmdlIxMkxtV1F2MlVaWlhQbUJhT3RR?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxNZnEzWVpvOVRMVTRaYUxjM1VEUTdRVDY2OUdFVWRFMVNYXzRjY29GNGRZSGd3RXpEZmo3SHN6N0Y5V2F1UmNJeUw5YWdWQzY3c3pFZDQ0RzVhc3ItdFpnWkJqMHpFNmpuUEdHcnBBaC1hN0dfLTVpWHFNdHZKWVVkUmFaVnlVenh5bmN1UDBnS09nbDNkczVYaVl5dU5VSE4t0gGoAUFVX3lxTE54QmVZVm1jV2RuaHFrb0gxS3RWWW9zVFlMcmVBY0ZZcHhFOXJkclZPellSeWlSTXVodXNBVmh2RHJreEhwQS1pbTRXUmxPRE42UHpKWkJyLXJXdFE4SWlNX0dFWTBEVjBOeUlPUTJrVW04ajRJbUN2NWdaaVBDNS12QTlkR0VfcXBRdFlLX1RGelhmakJEQ2xkTkZWM0tIZHdBZmVfRWZCeQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMivwFBVV95cUxPZmt0MFhiZFhxN2dZSnpIUTM4bks1RnNadGR4Nzdib21BRHBLUkJxNUVJQUVEYTVVdGt2UGVjMVY5V0ZoaXFhNFVPaVNTQlUzX2RFNVFyWXBYRzdzeDBMbHNzRGVyeFp0WlpHNUd1WHU0Tm0yT0JCa0JDdG5rZW9sQ1A3RzFtWE1wczZ1ZjMxNUlxU3VvTHZKa2g3MUliMFNsSVRadUJjRUFEMy13XzBHcXdKQXNTdFRXNDVraEJEYw?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiswFBVV95cUxQaVZQT1dPY3RpM2FqY0dnVWE3elZkeVZZbmFoOFR3dWJEVm15OEtKUEVBa2pkWENVSlJ5UU5Dc2ZMZ0dTNWJYZTF0Vy15WVJoaXJUMFdpb0RRR3kzc3F5ek5IMVZUNnVpMGYtLXFOWEk2MGJ5SWNRUTV4NlFxV3M2QUFxRkg3V3Z5VzVEeXFBMzhqWEtfbTFaTGY4eXVJb19GR1Y3ZUNOZXJDbmlzLWhsQ1gyb9IBwAFBVV95cUxQMXVTSjczQXRJVlR5VlpKdWlKX3ZmRHVtVFBFOVkwUEVZTk1yNUZtMkdBV2NjQ0JPRVRIRk9lbURqZFpyLVNfN2JiVTZsNnBfWEttWnN2UGhQS29ZZzYxX3U3X3lFcTRRZHZhcmRKdjR6Q1FHR0h0NzJTZFdkdlpkMExHUVNqNXprblBvMDBhLVFGNkNSbEszV21WXzZ1eHJISUZpZWZQeWVTVWJnbUZEQWI2MVJwaEZPMkRhSlZxMzE?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxOSHhuU21rVkpZYXFMMGtlNkpDel95N3U2bklMUm1YRGRfV3ZDV1R5dHVUUnUzaWdlU2VtZE1QN0ZZY2dEcFo4d3I3YVI3MnJJU3FqTW9kdlV0emlhUzJJVTMyWlNCTmFzOUtvaWs0UWJOd3kzWlhMYTRUOFR1NXlxc3FtZzR0SmRLS1JIOE9tc3BURlZjcllXMU5DeC1RVnNTQlAtNWxiTHRwbmlTeEVpVU9sUXRtQ1RjNjNVcGtJT0R2YlN5NmdYMW15cVUxOWFU0gHWAUFVX3lxTE1SQklSWE9OMkR1UnU2eGR5c1BQSEJFUFJpY1JwNEViZnNYdUpxQm1BZ29ZdEtnYjRseERCdENfREJKSTlBYjRfRnIzaGxvT0R4a2lpVU5xUFQ5Rk1nVTM5VnpDa3pmYlNMeGllT1hnN0ZIT2lDZ3NaejcyaVhTOG9XYlBkUmxBX1J1Q19FQ0FYRzNjekVqdzNuVFJQZE5YLWF2b2NjTVhpT0FXeldoZUVCbS14TjA2U2k4b2phbXVVNWlqYXVCV2JtWk9ZQ2M0V3B3RlI2WHc?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxQX2prT2Fyamh2VVlQVzNJLVNyakxudnBSQ1VFdFk5MXBJaDVLcllvWUtfZTVuUjBLSC1nQ1RMQjNQdVpaZG9WNk54dFhEZDREQ1ZKdzJtakdVMzFuNGRBdFpXcVowc3ZmdklsY2ROaUktdUxIbFpULTdwYmFpY3JwMnhXTTRMVUhTeklVVkUxcGk3d1RzQUVBWDdDdXI2UFZ2Q21uRjJBVWVBVDE5WThzQkRXYVE1a2ltRlAzRXRvd2pSTkdrakF3Wmw4WlpLd2pHMmIzWtIB4gFBVV95cUxOeDFRNlhoT0RtZTNMS1M2V0ljN0RBcmkxdjI0T0Q2bUVnMko2V05qSnFtY0JwenV4VXpXSDlTMmxjcjlaQl9TOTYwV0xNR3lid01aLVV0SEQ2ZzhfWGxBeXVoWmdidVptY2dwMTljR0FmUHFDaFJsQWRPckUxbmFDVmgwdVg1ZzZIaTFGWW1aUkhnZ1pOa3NoZHhFQkZuN1lwWGhacEF5YTB4OWNzdE9ncFI1QVROdVlUWVJRb0tvY0pSaEZaWjY2elpILUlNc2E1RWtkYlV4RjZOTG9LaGR4YTBn?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMivAFBVV95cUxQN0pTNUl0RXRmRlQ0Z3laN3ZVWndrWU1adXlVOHZKSWpmVlFtODl3QU5NUDM3WkxranZGX29xWVMxajRQclR2ZHpobUgzOVRWTklLUnYwT1U2MEI2TFkwZG5vTFhFVmtnRW13dHAzek5DY2locHJ1SXppYkhrQ3k1ajVfM1paVEY2WXhWYU1WSWlXcUNQcnZzd3ZNNUlsaGlyX1lWWXdpZEJNR1FPbXBnOXpqRHRFT1FXTzNvQw?oc=5"
+        }
+      ]
+    },
+    "table4_business_activities": {
+      "activities": {
+        "Manufacturing": {
+          "active": false,
+          "details": "Not detected — Service and intellectual delivery model"
+        },
+        "Online Sales / E-Commerce": {
+          "active": false,
+          "details": "Not detected — Direct contract and offline sales model"
+        },
+        "Own Retail Stores": {
+          "active": false,
+          "details": "Not detected — Centralized regional corporate offices"
+        },
+        "Franchise Model": {
+          "active": false,
+          "details": "Not detected — Directly managed corporate operations"
+        },
+        "Import / Export": {
+          "active": false,
+          "details": "Domestic focus — Primary commercial operations in India"
+        },
+        "Product Type": "Commercial & Professional Services",
+        "Product Categories": [
+          "Commercial Operations",
+          "Product & Service Delivery"
+        ],
+        "Business Model": "B2B (Business to Business)",
+        "Industry / Sector": "N/A",
+        "Core Business Profile": "Operating corporate enterprise engaged in commercial operations within the N/A sector.",
+        "Revenue Streams": "Commercial Product Sales + Service Delivery Agreements"
+      },
+      "Source Links": []
+    }
+  },
+  {
+    "Company Name": "Parle-G",
+    "table1": {
+      "Company Name": "Parle-G",
+      "Founding Year": "N/A",
+      "Founder Name(s)": "N/A",
+      "CEO": "George Kovoor",
+      "CFO": "N/A (Unlisted / Not Publicly Disclosed)",
+      "CTO": "N/A (Unlisted / Not Publicly Disclosed)",
+      "Headquarter (City)": "N/A",
+      "Office Address": "Khandekar Marg, Vile Parle East Mumbai - 400057",
+      "Business Type (Private Limited/Public Limited)": "Private Limited",
+      "Is Listed Company": "No",
+      "Stock Ticker": "N/A (Unlisted)",
+      "Current Market Cap (Market Value/Mcap)": "N/A (Privately Held)",
+      "Share Price": "N/A (Privately Held)",
+      "Source Links": [
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Parle-G"
+        },
+        {
+          "name": "Corporate Ministry / Registry Records",
+          "url": "https://www.parleproducts.com/mgt"
+        }
+      ]
+    },
+    "table2": {
+      "periods": [
+        "FY21 (2020-21)",
+        "FY22 (2021-22)",
+        "FY23 (2022-23)",
+        "FY24 (2023-24)",
+        "FY25 (2024-25)",
+        "FY26 / Present"
+      ],
+      "rows": [
+        {
+          "Fiscal Period / Year": "FY21 (2020-21)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY22 (2021-22)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY23 (2022-23)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY24 (2023-24)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY25 (2024-25)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY26 / Present",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        }
+      ],
+      "Source Links": []
+    },
+    "table3_latest_news": {
+      "categories": {
+        "New Products / Launches": [
+          "Parle-G DarkA rich, chocolatey twist on the classic biscuit, Parle-G Dark brings a \"Dark Cocoa\" flavor tothe...",
+          "It's official! Dark Parle-G is for real and will be available ... - BMI",
+          "Parle-G Dark. It's for real! Parle-G officially launches new variant ..."
+        ],
+        "Other Notable Developments": [
+          "Parle-G : Latest News Headlines, Videos and Photo Galleries on Parle-G ...",
+          "Parle-G's New Post On Mental Health Strengthens Our Love For A Childhood Favourite 30 Jul 2021 Parle continues..."
+        ]
+      },
+      "Source Links": [
+        {
+          "name": "Corporate News",
+          "url": "https://www.scribd.com/document/914523909/Cpo"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://bestmediainfo.com/2024/03/it-s-official-dark-parleg-is-for-real-and-will-be-available-across-india-in-next-23-months"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.storyboard18.com/brand-marketing/parle-g-dark-its-for-real-parle-g-officially-launches-new-variant-parle-g-dark-26007.htm"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.business-standard.com/topic/parle-g"
+        },
+        {
+          "name": "Corporate News",
+          "url": "https://www.parleproducts.com/news"
+        }
+      ]
+    },
+    "table4_business_activities": {
+      "activities": {
+        "Manufacturing": {
+          "active": true,
+          "details": "Active — Operates high-capacity automated food processing, packaging, and commercial confectionery facilities"
+        },
+        "Online Sales / E-Commerce": {
+          "active": true,
+          "details": "Active — Direct-to-Consumer (D2C) webstore + omnichannel distribution via Blinkit, Zepto, Swiggy Instamart, BigBasket, and Amazon"
+        },
+        "Own Retail Stores": {
+          "active": true,
+          "details": "Active — Network of 100+ branded quick-service restaurants, retail sweet parlors, and highway travel plazas across India"
+        },
+        "Franchise Model": {
+          "active": true,
+          "details": "Active — Operates authorized franchise restaurant outlets, brand kiosks, and multi-tier wholesale FMCG distributor partnerships"
+        },
+        "Import / Export": {
+          "active": true,
+          "details": "Active — Exports packaged ethnic snacks, sweets, and ready-to-eat meals to 160+ countries (USA, UK, UAE, Canada, Australia, Singapore)"
+        },
+        "Product Type": "Physical Consumer Packaged Goods (CPG) + Food Service",
+        "Product Categories": [
+          "Namkeen & Savory Snacks",
+          "Traditional Indian Sweets (Mithai)",
+          "Ready-To-Eat & Frozen Meals",
+          "Confectionery & Bakery",
+          "Packaged Beverages & Syrups"
+        ],
+        "Business Model": "B2C (Consumer Packaged Goods & Quick-Service Food Retail)",
+        "Industry / Sector": "Food Processing, Fast-Moving Consumer Goods (FMCG), Restaurant Hospitality",
+        "Core Business Profile": "Premier Indian consumer goods and confectionery enterprise operating large-scale manufacturing alongside a national chain of quick-service restaurants and sweet parlors.",
+        "Revenue Streams": "Packaged Goods Wholesale/Retail Sales + Restaurant Food & Beverage Services + International Export Shipments + Online D2C Sales"
+      },
+      "Source Links": [
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Parle-G"
+        }
+      ]
+    }
+  },
+  {
+    "Company Name": "Tata Motors Ltd",
+    "table1": {
+      "Company Name": "Tata Motors Ltd",
+      "Founding Year": "1945",
+      "Founder Name(s)": "JRD Tata",
+      "CEO": "N/A",
+      "CFO": "N/A",
+      "CTO": "N/A",
+      "Headquarter (City)": "Mumbai",
+      "Office Address": "Mumbai, Maharashtra, India",
+      "Business Type (Private Limited/Public Limited)": "Public Limited",
+      "Is Listed Company": "Yes",
+      "Stock Ticker": "NSE/BSE: TMCV",
+      "Current Market Cap (Market Value/Mcap)": "₹ 1,59,815 Cr.",
+      "Share Price": "₹ 434",
+      "Source Links": [
+        {
+          "name": "Screener.in (BSE & NSE Corporate Financials)",
+          "url": "https://www.screener.in/company/TMCV/consolidated/"
+        },
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Tata_Motors"
+        }
+      ]
+    },
+    "table2": {
+      "periods": [
+        "Mar 2025\n            \n            \n              10m",
+        "Mar 2026",
+        "TTM"
+      ],
+      "rows": [
+        {
+          "Fiscal Period / Year": "Mar 2025\n            \n            \n              10m",
+          "Market Cap": "$16.63 B",
+          "Net Revenue/Net Sales": "₹ 58,217 Cr.",
+          "Net Profit": "₹ 3,195 Cr.",
+          "EBITDA": "₹ 6,172 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2026",
+          "Market Cap": "$16.63 B",
+          "Net Revenue/Net Sales": "₹ 83,855 Cr.",
+          "Net Profit": "₹ 3,030 Cr.",
+          "EBITDA": "₹ 7,617 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "TTM",
+          "Market Cap": "₹ 1,59,815 Cr.",
+          "Net Revenue/Net Sales": "₹ 87,197 Cr.",
+          "Net Profit": "₹ 4,187 Cr.",
+          "EBITDA": "₹ 11,218 Cr.",
+          "Employee Headcount": "20,635"
+        }
+      ],
+      "Source Links": [
+        {
+          "name": "Screener.in (Audited Multi-Year P&L Financials)",
+          "url": "https://www.screener.in/company/TMCV/consolidated/"
+        },
+        {
+          "name": "CompaniesMarketCap (Historical Market Valuation)",
+          "url": "https://companiesmarketcap.com/tata-motors/marketcap/"
+        },
+        {
+          "name": "Wikipedia Corporate Disclosures (Workforce Count)",
+          "url": "https://en.wikipedia.org/wiki/Tata_Motors"
+        }
+      ]
+    },
+    "table3_latest_news": {
+      "categories": {
+        "2026 Developments & Strategic Milestones": [
+          "[PRODUCT & FLEET SIGNAL] Tata Cars Sales Breakup August 2026: EV Vs ICE Breakdown (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] Tata Safari EV Launch 2026 - 500km Range, Dual-Motor AWD and 3 Screens (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] Tata Punch EV Prices Hiked by up to Rs. 20,000 (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] Tata Cars Discounts September 2026: Benefits Up To Rs. 1.25 Lakh on Curvv, Rs. 75,000 on Nexon (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] Tata Safari EV 2026 Could Get 500 Km Range and AWD – Launch Soon (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] Benefits up to Rs 75,000 on Tata Nexon in September 2026 (Year: 2026)",
+          "[MARKET & OPERATIONAL SIGNAL] Tata Motors Q4 FY26: Record Sales Performance with Official SIAM Production Data (Year: 2026)",
+          "[LEADERSHIP SIGNAL] Expect demand for electric CV to remain strong: Tata Motors MD & CEO (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] Tata Motors gives PV business a new identity with TATA.CARS (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] Tata Motors MD Shailesh Chandra In The Running To Become Next Tata Chairman (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] Tata Motors Passenger Vehicles rebrands as TATA.CARS to attract younger buyers (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] Tata Motors Passenger Vehicles unveils TATA.CARS brand identity (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] PETRONAS Lubricants India, Tata Motors Launch Used-Oil Recycling Pilot (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] Tata Motors To Bring 6 New Models In India In 2026-27 (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] Petronas Lubricants, Tata Motors collaborate for pilot used lubricant recycling model (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] PETRONAS Lubricants India and Tata Motors launch used oil recycling pilot (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] Tata Motors To Introduce 10 New Nameplates By FY31, Including 4 EVs And 6 ICE Cars (Year: 2026)"
+        ],
+        "2025 Developments & Strategic Milestones": [
+          "[FINANCIAL & M&A SIGNAL] In October 2025, the demerger came into effect and the demerged entity TML Commercial Vehicles was subsequently renamed Tata Motors, while the original Tata Motors was renamed Tata Motors Passenger Vehicles. (Year: 2025)",
+          "[FINANCIAL & M&A SIGNAL] The demerger went into effect on 1 October 2025. (Year: 2025)"
+        ],
+        "2024 Developments & Strategic Milestones": [
+          "[FINANCIAL & M&A SIGNAL] The company was incorporated in 2024 as TML Commercial Vehicles, after Tata Motors announced the demerger of its commercial vehicles business. (Year: 2024)",
+          "[FINANCIAL & M&A SIGNAL] In March 2024, the original Tata Motors announced that it would split into two separate listed entities through a demerger. (Year: 2024)",
+          "[STRATEGIC DEVELOPMENT] Consequently, the commercial vehicles business was transferred to its wholly owned subsidiary called TML Commercial Vehicles Limited, which was incorporated on 23 June 2024. (Year: 2024)"
+        ]
+      },
+      "Source Links": [
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Tata_Motors"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE9uc25iZzcxaEFZckpHZWNhckxqOU5QcVgyZ3prcWJvb1RQb2tpN2hHR3YwZmJOWTZzYjQtbXU3Mmx2QXNxNVp3c19kUnMyOEJfYzZ1YjNQNXpLRU5LV3pPQzA4ZThsMndkeVNqWE1HVVI1UQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiigFBVV95cUxOSEFZUllDMmxOdXY4OXVackdOU05zRGVNRjRWZm9zeTltajNxTDFvQlo2LVNNRzNPZ3c2TnVoNGU5T2xxQ2l3UDFzUzByUGJOU19XRlZyeGMwUnpQMVhVMWlKZnFOVlVickU4V0NnMDF2anFxY3MwSS11VXBDblN3RFRMRmdpQnI2M1E?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMif0FVX3lxTE5ROTN0WUlZYW5ad2hrNGFJc1R6aU5Zem5jZEpZakJPWG5PVGI0U1dPRmxYUEJSU0t5TDRuR3Ywd0JhRXM4OUs5OGRlLVFydkJwRHhBWTd0Nm1OQTFPODNFUm02M2p6emtJRnNqNl9sY2g5MldUMFhvcXhlTUpGTkk?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMif0FVX3lxTE96c1p4eF9LVTVCU1lXekxVV0ZjUmVNUFgyUEJoWWt5b1Ntd3NLeF8tMFJ5a2FZWFVqdlM3NkxGcXZWcW52aGhSRlFiT0lIZWl2dXFhY1g5cWo2cWtuQ2duQzYyVHlZQlVHcjNWRHpIMVBxVWE0VEJreUJNZjZmeEE?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMie0FVX3lxTE1QbWxtVFRnUGxmTVktMXlFRHh3elNKenBrSkJkd1RPcXlMc2JTczlUczVJYkFRTmlUc0pTWlRERjJraFZrYTJqY2ZxSUtFOWJncExKVURNbnZIcFk1eWlxMW1NZnY1MnBhYmhza3ctV25tcEpPck5IdnFLOA?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiowFBVV95cUxOTnVDMDlYQjY0RHh5MGpRNTR0QnBMNmNQS2lmM251bjV3WVpUYl9sRUdUWHBHbktKSldoa2xxeVpUcmowYUFWa3pSSjRoT1hEUXhFT3IzMFppVjYwQnlET3hNZmVrXzY2cGt0RmhsWGRoQWdIQzlxV041THlCYzZfWHNhdFdmbU83bGpFbGNKdTlDRmlSeHhmQUYyNWl5M2ZEeFcw0gGoAUFVX3lxTE1ad2Q5dGJvUnA1eThSZ2NlYWRjeEQ3TnNYNHdaOVdUSUdtUzVCV2JTUFNJYnhZS1lXTlVMNW54VHFLM0U3Um5tSHBMOW5XaVhzREZWX085eU1mc2ZzMzd6Z25nTW5oSnNabk8wYVBWTWZ1dXd1R01lRU9SZ2ZaUU50SmdLOVI0QmJjWUFXX29RMi1sRDBvQ3lBS2tLbnRLaG84WGpZdXRwZQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxOc1Q5eWtnUDhPb1NfZjBNX2JKODBfNVNETGRyMXBNZjVvYkxhMXhFM1JLbi1xRXl5Nm9TRWEyd25kZTZmNzZpZlc0TG9EWVdNSkUtRUNJdDZMNE0xaFZDNTU3eE9rNFg3V3l4VHloUVpxVFQySmhoaDJBN3k1YkNKV3BJOG5GU3hzUTZaVy10Wi1Ub0prWFRXVDhUZWk4RGVfM1JGSHo3VWpVSGNtdk9nZzZWTEo5TkR2QktKWHRoa0hfYzVUMkpBbmtn?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMizAFBVV95cUxOdHJISjIyX2UxSC15LURCeEVtUDRlak5FejlmQmNKUHpXNW5TS3VxNjBLYjVZNjVuWjZVWC1vNVhMNVhaaGphdUhqZ3UyZ1VfWFpHRWRjWWh0RTVLMnR6c1BPMlhCX0dRUXFvVW44YnQ3RDIxOFRHVkc3MGp3ckR2WlQwajMzSE5xU3JOdWJiUWNyT1BRcmlOWUxBRktiSkh5SWJlSDY5OEJBcUE3MGtHS0pBVFBoZlhlSUxTOHo2QlZOWEQwVWJvdm1mam3SAdMBQVVfeXFMT3htYjZHNlY5ZUV6S093WTN1TndZaVpuRUdCcVBWRE9tWHJ5MmJ0SldUTG9PYTlQMVU0ei1HcU5uYXdIbnl0VWlSTXlGNkRYS21STjdQQTRxTS1IV25KLWZtel9EZG1QOW9RalN4cUZNMy00NkUzdVgwT1VjV0RrRWF0LVd2b3JuUFMzdlphUEZCSnZNRTk0Q2o0eWhuSWFFZEt3Z24ydHpCbEhZdjA1SEM3NTY3YXhaaHhZc082NVlLcmFfck5GcU5wZ3ZHQlpjUFVROA?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxOSDdZcVhUaUQ5YlpDamxNTWZIVWxpSkZDRThXYjBZWDZtSGdWODE4TVdERkJpMmRNSVFhbk5mRTVoUmJtc3NjY1RLa2IwOEo1QUlveTlaYm1VVkNlTUI5WFd1b2lhNkFOY3lybWRMT3ZRN0N2c2dvTmpMMHNfMTZEbDlKVUVPcVo0QWtqR3o5R2cwR0RoYkJ0bThPcmZIYnV6X3Ewdk1GaGRQemRWTG5UUUZB0gG_AUFVX3lxTE1QT1NpYW83RS1pVEJmN1J0bGFGT1FyMjhMcXRHMzVIVGhCaTVmY1dlN0o0VnFyczNGR2VsTkM4RDh6cXNFV1BTWjA4NlF1Nm4zeFI1M2I5QVRERUtTTFNrUE9KU29CeWRlcGdSYldPTENHT00yekpzNTVkMkpCUm8wcU9ReHViQk92TnlHU1NlbjBzdkowc0JTM2pHdWM1a3RYaTBaMlZKWDZoQXZ4MEVjQ0N0N3oxZFhDVDhNVVkw?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMihgFBVV95cUxNVHRmRnJZVUVwenZnSDVKMzhzdmJ6akJrWS1ZRHZTYVlqTTcwZ0I1TDlyRHVPTkxsOGppYXUxektiR2dqM0xJMlJOUExHVzRsYmF1WjFjUHpCR0JURU5UTl9RbTIxRDI3LTEyS0J2SGlaTlhRYUZkTDlPQlZaN25rWnFBbGNqQQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxOQXNLZERlbGhldVZJaHFTTTdyWVlzV3FTQnBjSGtraU1VOE9aU2tKRjZtbmR3MjdSd0EzdE5tYnE2UTlsTS1ZTHM3cDFKVl9lT2c1bVBUVXVPQVFuQVoyeXFha1JETGdZX2pGcjRSaVdNbnpIVVZ4NC1NZlBHdnByM1dTajV1aVdmOU9TRmxCOWNPdkUwLVJCWGpaR3MtTkhEUEpQTng2b25BaHp4MkhjUXJfY0lnOXIxNjREemNsOTdVZlhaTEVFTlBxSkZrNDJP0gHTAUFVX3lxTE50VnkxT0l6V0hBLUxCMkFaWGxzcDRsU1htbHBrZHlxaEZiMWc5cGRRZDU0VlFpRXVtWkdWVDlNbDMyT3ZfUzRDdTZ6bE5pR2NtZjlxVWlXeks4QUhsQU9OeU9PZEI5M1NQWk1LbWRYaXRMcnZveEdGUDBEdEU0R1ZqampUUlktWS1sTUhyMngzNlBYYkRyYUpYbm04eFBJemU3SFdxcjhWTklXeVlxNjJYT2o2S3NGVGdORVRKLVFXTTc1ZVZUTndXRzRHa05ONVloNVU?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMipgFBVV95cUxQRzdCdzlLWGlQRXZya0NuTUFzU0Y4UXp6cWlTTFZkdjItMHluMnlrM192NWM3SE4tSmtMOU1CWGZ2bXFrN3JXUmhpZnhJa3VDVVZ0WFBjcGE0ejdwNDRPVjdsSEhEN2N0eG8xV3J0WFNnbmVzeFJkTUMyeGJHTFBwYlBBZks5aU5FVGVKRWRYMWxuR0NZOEhYZGFzT1JOTm5RWk4zTTJB0gGzAUFVX3lxTE1pQU40X2MxVXU5c3RfdEIyY2Q1bk1hUWhHVFB4MVhLcWhmbGlXZWY2SFFGYzNMdE9tOVV3RC1CcWpuMGxxXzBCSk9KYl9oSklIS3lZZWlrQVd3a091LVJhMGF2aFVkbnlkZDk4eC10Yng2OTNmdmtxY2dNd2tiSVRxQXB2ekZJS1hKMUFvNzRFdjJPb0l3eHlGYjFwNUVVT3lzbWo1TGlFMVRjRm1CcWtDRUYw?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxOc3hnQjEyeXl6d2ZBd2h1NXNpMWlmNXc3a3MtNmV5cEQ1VjdSbE5qVDhYSVdSV3hGa2c5cEtIRDRkdjJ0MHI1Q2dzNzk0ZGlqSGdpNjg2ejIxMUIwU2piNEpCS3ZwR0RCSHBvTjdfazY0VnJLejVVSlJwUXhaOE9TME85WHg?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxOX2RaNzNfdzhCM2hOOEdhbVNHekNwTTVBWGhIV2dSYy1ydWNSaHhGQ3kxel9nTjg2SmxNX2xmb1NZNG1VODZ6TXYyTm5GUGdCTHVjc1hJLUFzSzV1U3Rod0pGcHZSSU1LaFY2RVpYWW5rQ2oyZURHYTJicFh1b0RZbkFTSdIBgwFBVV95cUxOX2RaNzNfdzhCM2hOOEdhbVNHekNwTTVBWGhIV2dSYy1ydWNSaHhGQ3kxel9nTjg2SmxNX2xmb1NZNG1VODZ6TXYyTm5GUGdCTHVjc1hJLUFzSzV1U3Rod0pGcHZSSU1LaFY2RVpYWW5rQ2oyZURHYTJicFh1b0RZbkFTSQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi6wFBVV95cUxPVXNIQThFdW00SFRjRUZlUnZaUzdBZ0d2Ry1sZE90VG5nMzl2NnBHUDJEUjE0U0UzS1dadV84dmtESXFJRGREVG4za1MzZ2tYWUZaeGhxNHdObHp3YjdNQ3JrTzRwYzExMlhiX1VZRmZKb21WMEJva0tyRERySjFTemlaUXRHeUVWbUlPaHA2UF9lWkFaQXctWVpUX2lCNW9MYVNReXVTeWx6N2pvMHY5azM0RE5LLW1pa2xJSTlrWm9uUTc5Rkw2b2dvbkN5SFEzdXJkZ0hjYXJRRkw0TWVrbUxDTElnUnN6N2k40gHwAUFVX3lxTFB2NlZtNDdnaGN1V0c0OGcxRTktQmRuWHphb0t6b05FZjRRSThldmotaU5FRDh5dkJka0ZOQ2ZyV0gyQVJXbUtrMHBXLTk3VFp0QnJVaHZTRl9ieTh3X2ZDdWtJSkpWU2tJWUJBQXNDSlJOTkhGd2ptQ0Yyc0xvZmpsVHdzWnUwblRadzBMcjJhSEVaNV9tSjdlNE5UX1ZmVFBBbnVmVnFQTkRIY0M0V2VxUHAxenFSSTY5ZnlWQVppTFZxZlBxZkRCaXZEREs4Z2dNZ09vY19WZUtFTnRTRFRpdjFmelQ0QXlTZnJjNzgxUQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMieEFVX3lxTE0xMFFIRDRHVERvQ3YycW9UTk1KUFVCVTZvcDZLT09FbUNfRUQzdVRlR1V4QS03UmUxTFkyOXZYeVJkTDh5NVFaQjZIbmdBcGhHOWhrQkVPRTd3bW10Nm9mWnRSYmwyRy1FeVZtX3VOb2ZpM3lnMmo3dg?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiywFBVV95cUxQMUhTSzN5cEtzaVhpTnpBamdsODc4WHYzTTlURWlPUGRsVW9JZE1QbFlmaGZkRlhKWGdfUUNIY2lNRHExeUI3QXVPZzFGRzVIMG41VDhLQXVWVVpiUXBxN09kRGhfRmNXVFVrWlJmc01KSjdCWVVMU0l4cjFLYkEzT2tRSlVKaFV4dzEzOWRIZW5Lc0IyUFRySXBmaFhQZXg3QkRJSFJiLUpLSnduS0p4T0ZVMk9GeTh0TGlzQXUwbjA5YUFjLWFzRkhqTdIB0wFBVV95cUxPTUdlZVUzUmtWLWtoRzZpRU5hR0RSRlZwSXVVYVgzNTlqUzh2Yy1mYjAzR2t5SndXQUZqSXpSM1VaNXRIeWV3T1B0dTFRZTgxR2dKSFJfbTJlbjFYakIwaFo0S2ZLTWtleENZOThnejhxQmpDZ0tVMW1MZDhiTHhGVmFISmkzdEF0TWdWb29IY3RvbVFvNEJLTVNOR1dIZjhFSVJTZkQ0TGRaNVJ5dnNjZXhkR1MtTFhDNlM4eUs3M2VuZ1EzdmlvWkF0MUZmN0FMZFpv?oc=5"
+        }
+      ]
+    },
+    "table4_business_activities": {
+      "activities": {
+        "Core Business Profile": "Major multinational automotive manufacturing conglomerate producing commercial vehicles, passenger cars, and electric vehicles.",
+        "Brands & Trademarks": [
+          "Tata",
+          "Jaguar",
+          "Land Rover (JLR)",
+          "Tata Daewoo",
+          "Tata Ace",
+          "Nexon",
+          "Harrier",
+          "Punch",
+          "Safari",
+          "Tata Hispano",
+          "Tata Hitachi Construction Machinery"
+        ],
+        "Key Products & Offerings": [
+          "Passenger SUVs & Cars (Nexon, Punch, Harrier, Safari, Altroz)",
+          "Passenger Electric Vehicles (Nexon EV, Tiago EV, Curvv EV)",
+          "Luxury Vehicles & SUVs (Range Rover, Defender, Jaguar F-PACE)",
+          "Commercial Trucks & Haulage Vehicles (Tata Prima, Signa, Ultra)",
+          "Small Commercial Vehicles (Tata Ace 'Chhota Hathi')",
+          "Buses, Vans & Fleet Mobility Solutions",
+          "Buses",
+          "Vans",
+          "Trucks",
+          "Automotive parts",
+          "Fleet management",
+          "Vehicle servicing"
+        ],
+        "Product Categories": [
+          "Commercial Vehicles (Trucks, Buses & Vans)",
+          "Passenger Automobiles (SUVs & Sedans)",
+          "Electric Vehicles (EVs & Clean Mobility)",
+          "Luxury Performance Automobiles",
+          "Fleet Management & Aftermarket Spares"
+        ],
+        "Product Type": "Physical Automotive Vehicles, Components & Mobility Solutions",
+        "Manufacturing": {
+          "active": true,
+          "details": "Active — Operates advanced automotive assembly and powertrain manufacturing plants across India, UK, and overseas"
+        },
+        "Online Sales / E-Commerce": {
+          "active": true,
+          "details": "Active — Digital vehicle booking portals, mobile telematics apps (iRA), and spare parts distribution"
+        },
+        "Own Retail Stores": {
+          "active": true,
+          "details": "Active — Extensive nationwide network of authorized dealerships, commercial vehicle service centers, and showrooms"
+        },
+        "Franchise Model": {
+          "active": true,
+          "details": "Active — Authorized dealership, service franchise, and spare parts distribution networks"
+        },
+        "Import / Export": {
+          "active": true,
+          "details": "Active — Exports vehicles across Europe, South America, Africa, Middle East, and Asia"
+        },
+        "Revenue Streams": "Commercial & Passenger Vehicle Sales + Spare Parts & Service Revenue + Vehicle Financing & Telematics",
+        "Business Model": "B2C + B2B (Automotive Manufacturing & Dealership Distribution)",
+        "Industry / Sector": "Automotive"
+      },
+      "Source Links": [
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Tata_Motors"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.bccresearch.com/company-index/profile/tata-motors-ltd/products"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.tatamotors.com/home-new/"
+        }
+      ]
+    }
+  },
+  {
+    "Company Name": "Jio Financial Services Ltd",
+    "table1": {
+      "Company Name": "Jio Financial Services Ltd",
+      "Founding Year": "1999",
+      "Founder Name(s)": "Mukesh Ambani",
+      "CEO": "N/A",
+      "CFO": "N/A",
+      "CTO": "Ganesh Ar",
+      "Headquarter (City)": "Mumbai",
+      "Office Address": "Mumbai, Maharashtra",
+      "Business Type (Private Limited/Public Limited)": "Public Limited",
+      "Is Listed Company": "Yes",
+      "Stock Ticker": "NSE/BSE: JIOFIN",
+      "Current Market Cap (Market Value/Mcap)": "₹ 1,49,891 Cr.",
+      "Share Price": "₹ 227",
+      "Source Links": [
+        {
+          "name": "Screener.in (BSE & NSE Corporate Financials)",
+          "url": "https://www.screener.in/company/JIOFIN/consolidated/"
+        },
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Jio_Financial_Services"
+        }
+      ]
+    },
+    "table2": {
+      "periods": [
+        "Mar 2023",
+        "Mar 2024",
+        "Mar 2025",
+        "Mar 2026",
+        "TTM"
+      ],
+      "rows": [
+        {
+          "Fiscal Period / Year": "Mar 2023",
+          "Market Cap": "$17.99 B",
+          "Net Revenue/Net Sales": "₹ 45 Cr.",
+          "Net Profit": "₹ 31 Cr.",
+          "EBITDA": "₹ 39 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2024",
+          "Market Cap": "$22.68 B",
+          "Net Revenue/Net Sales": "₹ 1,855 Cr.",
+          "Net Profit": "₹ 1,605 Cr.",
+          "EBITDA": "₹ 1,559 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2025",
+          "Market Cap": "$21.00 B",
+          "Net Revenue/Net Sales": "₹ 2,043 Cr.",
+          "Net Profit": "₹ 1,613 Cr.",
+          "EBITDA": "₹ 1,549 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2026",
+          "Market Cap": "$15.65 B",
+          "Net Revenue/Net Sales": "₹ 3,521 Cr.",
+          "Net Profit": "₹ 1,561 Cr.",
+          "EBITDA": "₹ 2,312 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "TTM",
+          "Market Cap": "₹ 1,49,858 Cr.",
+          "Net Revenue/Net Sales": "₹ 4,905 Cr.",
+          "Net Profit": "₹ 2,066 Cr.",
+          "EBITDA": "₹ 3,245 Cr.",
+          "Employee Headcount": "N/A"
+        }
+      ],
+      "Source Links": [
+        {
+          "name": "Screener.in (Audited Multi-Year P&L Financials)",
+          "url": "https://www.screener.in/company/JIOFIN/consolidated/"
+        },
+        {
+          "name": "CompaniesMarketCap (Historical Market Valuation)",
+          "url": "https://companiesmarketcap.com/jio-financial-services/marketcap/"
+        }
+      ]
+    },
+    "table3_latest_news": {
+      "categories": {
+        "2026 Developments & Strategic Milestones": [
+          "[STRATEGIC DEVELOPMENT] JioFinance app gets two new features to make finance smarter: JioFinance+ and JioFinance360 (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] Jio Financial Services executives attend Boston investor roadshow (Year: 2026)",
+          "[FINANCIAL & M&A SIGNAL] Jio Financial Services Aims for 100 Million Customers, Expands Lending, Investment, Insurance, Payments (Year: 2026)",
+          "[STRATEGIC ALLIANCE SIGNAL] Bank of America Enters into a Joint Venture Agreement with Jio Financial Services Limited to Acquire up to 49.9% in Jio Credit Limited (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] Jio Finance Unveils New Financial Health and Rewards Tools (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] Balaji Sriram Appointed Head – Product & Marketing at Jio Payments Bank (Year: 2026)",
+          "[LEADERSHIP SIGNAL] Jio Financial Services plans AI personal CFO on JioFinance (Year: 2026)",
+          "[LEADERSHIP SIGNAL] Jio Financial Services to roll out “a personal CFO for every Indian” on its app (Year: 2026)",
+          "[LEADERSHIP SIGNAL] At the News18 #RisingBharatSummit2026, Hitesh Sethia, CEO of Jio Financial Services, explains why loyalty in finance is often just inertia driven by inconvenience. With too many choices making decisions complex, he highlights the need for a simpler, more p (Year: 2026)",
+          "[LEADERSHIP SIGNAL] Jio Financial to launch AI-powered ‘personal CFO’, membership programme (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] Jio Financial bets on AI, global partnerships to drive next phase of growth (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] Jio Payment Solutions launches cross-border payments to connect exporters with global markets (Year: 2026)",
+          "[PRODUCT & FLEET SIGNAL] Jio Payment Solutions launches cross (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] Jio Financial Services plans to scale lending payments and insurance through AI and digital distribution (Year: 2026)"
+        ],
+        "2024 Developments & Strategic Milestones": [
+          "[STRATEGIC ALLIANCE SIGNAL] On 29 August 2024, Reliance Jio announced a strategic partnership with Google during Reliance Industries' 47th AGM to drive AI adoption across India under its \"AI Everywhere for Everyone\" vision. (Year: 2024)",
+          "[STRATEGIC DEVELOPMENT] As part of this collaboration, Jio introduced the \"Jio AI-Cloud Welcome Offer\" starting Diwali 2024, granting eligible unlimited 5G and JioAirFiber subscribers up to 18 months of complimentary access to Google One AI Premium. (Year: 2024)",
+          "[STRATEGIC DEVELOPMENT] This tracking device was launched in July 2024 by Reliance Jio, as a successor to JioTag. (Year: 2024)"
+        ],
+        "2023 Developments & Strategic Milestones": [
+          "[STRATEGIC DEVELOPMENT] As of March 2023, Jio 5G service was available in 365 cities across India. (Year: 2023)",
+          "[STRATEGIC DEVELOPMENT] As of April 2023, 5G service was available across 2,500+ cities in India. (Year: 2023)",
+          "[STRATEGIC DEVELOPMENT] In August 2023, it was announced that Jio had completed its rollout of 5G services nationwide, ahead of schedule. (Year: 2023)",
+          "[STRATEGIC DEVELOPMENT] In August 2023, in the Reliance AGM, the chairman of Reliance announced that the JioAirFiber eliminates the need for the last mile fiber cable connectivity by making use of the Jio 5G wireless network, and the product was made available for purchase from 19 September 2023. (Year: 2023)",
+          "[STRATEGIC DEVELOPMENT] The company has started installing JioAirFiber devices from 1 October 2023.[citation needed] (Year: 2023)",
+          "[STRATEGIC DEVELOPMENT] On 27 October 2023, Jio launched its satellite-based GigaFiber internet service in India. (Year: 2023)",
+          "[STRATEGIC DEVELOPMENT] Reliance Jio has introduced a budget-friendly 4G phone called Jio Bharat at an affordable price of Rs. 999. The phone's sales commenced on 7 July 2023, and Reliance Jio aims to eliminate 2G technology from India through the widespread adoption of this device. (Year: 2023)"
+        ]
+      },
+      "Source Links": [
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Jio"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxQa0ZhN2lWYW5GbTdNcXhvcW1RaEVGMW4xX2JiZlFNUGlrZjd6Zkg0RDI0OFhzZTBuck93bXJfZHRKMDFqYURFcUtCTHJwMVhxd1MwV0xLcFJuQTc1ZXhUb3ltVTZZbEg1VDlIZWd1cFlQM05lYUw1UUdURTJIWFRCbW1wUUVVR2UyYzVpLU1SbmRtUk5wc1pkUUxYa1YyUlNXQmY4SndzVG1JOE4wWG1zQU9mZjQxN015UXVYdXBOZnpURzhfTGFB?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxOcmZEdERIVmpWQ0t1ek9VZjN3eG9nMlpldmtVbEc3OFhEdWlMcjdVMThoN1Y5NE54b3IxZjF5LUVreUZxb0FIdTF2NnVvY2k4bWRRU3ozRDRLcHlNUHVBU1paZzdHYURybTRGMUJ2WUlDb2RzeVRuRGtwQWRuWHE0dERHa2ZrekZiOXptZkhzSUw2MTI2TnV5eEFxMlhKUWpQX1Y4N192VldKMXg0Q08ydUJUbk4xbjROSkk3Y0c1TXhJTFdVQjM4?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi9gFBVV95cUxQWGUyM0ZjY1lid28tVXU1Mzc2eVZZZFZOMEVyR1ZTaDNZV1E2R00ybUt3S2lQR1FaazNFZk96a2tYT2ZRcV9NZWhHdVY1eWhoZU8wcW5tdW9uaGQ1UHNfQlpCYml3UUdHNlFnVHVJOEV3V1JkNVUybDZXbEk0WGpiVWZQMVllRzBiSnlwVFB4cjZXb0hTVFhYd2o0SDk1NVZUYlZYVTUzMGtfMTQwS1F4SkpUU0YxcHNCbkg3XzdXcHVDN0Rtc3NRQU1fQ3NGNHFGNmEzYmE5YUQ2Vks2bEhVU3lTTm9hVkZOeEM3MHYwODEtcWxSSkHSAfsBQVVfeXFMTXJ0cEpoRHFMN0RsR3YwdGU5NnZFNnd1WnhPQnhjRkJtM0lNNkdZbXliR25jR1dSdG1aMDNtN2hvVEtoY3VmMHdQNFNXaGZQaHB0Nzk5alpoVG1DZjRnOWFNS3JIOXNDQXBXSS1raXY5dEI1Mk01aFBCUkRseGVOQ1R4R21FTGs0N3BlblVHM3dLVklaZXcyX01OR1lVdlVWOUc3LXY2QzJuNFZ2ZWRMSWNId1kwYzJ1X3cxa2RBMm9RaGgzWUVsN1RkNlU2UUVzeHhuZldGanNlSDhhNFhYOE5INU8xUUJ1dXEydWYzMDJTUXhLX1B2NGo4dGM?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMinAJBVV95cUxNQTdiTjdoUXV5NzdTR3BsUkZ3NER0NTBCbk1iNlVQSVZjSjNxaW9NcHEzQzVlb04tbmx6QmpQRjZDT1lDUGJxMzEzdGFZeURoQlVVUW56ellBUl93ejR3MDBudVEtYU5TZUl5VG40ZTdQaFVCdTZGTGFDZEY1NlNPX2YyUEZmLXFyRF91bFp2a21lcF9TU0I3cWZIaFVkekdlemg2Q0ZvXzZMdVdobTRlZzE0Skhyc0MzQS11Ny0xaWE4Mld0VHluWTh2cVpVcnJNdVBnX0xLY0dzYXEtNjhBSF9XbFlPZEVwMUtsOUFpT1pJX0xuWUVybUdOUGNfa3Frd3JGb0hZaGUyU1RNODJWbmJBUlNMS0xEaW1mUg?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMinAFBVV95cUxNWkZ2RmFzdURfR1NGTm1KMWFzQmgyTHotODhuRjR0TFVLM0FaSHBkWUJGZ3FIV1JDRTlONHlRWTlZWWZJckc1TndDeXVKaG00bGE2aGFxaUI0djhac1RvT0o1R0dHeFJGZTcwY05oVTd0V0RYS01ua2hHams3ckpxSUsyUlpodVNhaGt3ZEdYS2E5emZXMTRiV2tiNEPSAZwBQVVfeXFMTVpGdkZhc3VEX0dTRk5tSjFhc0JoMkx6LTg4bkY0dExVSzNBWkhwZFlCRmdxSFdSQ0U5TjR5UVk5WVlmSXJHNU53Q3l1SmhtNGxhNmhhcWlCNHY4WnNUb09KNUdHR3hSRmU3MGNOaFU3dFdEWEtNbmtoR2prN3JKcUlLMlJaaHVTYWhrd2RHWEthOXpmVzE0YldrYjRD?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxQbk1MNnltcHNhd1gtWS1icGhjdVFPWl9FZHdCTWg0ZUVmcjVaYWtZWU4yc2FVcGJRYUg2Q2M1enFTazNPRmtxaURkM3JBVDRWZFRxMGxBWWxWdXVCamdTOWY2UXJLWGo1Vi1FVXdsV1N0Snh4VzlvRXZvb1JwMEhyc3VkYVNSU2VfeUhTSkpYX0EyeTZqdHFOREZPMnJPdw?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxPamFvMFZzTk1FOENtZVFSTDJVWjdqNkdvbVJWMHJBMG9PMWgyd2N0RGNhOFpQTVFaRkI0bm9Ca1BDeTlyN3hCMjhRMHJOZ1NrWHJiM2ZnVGFRSlRFWEhmbWowMkNPeEQ4UVFEWHAtNUlDWDJ2RWFfQ25weGMzdXZEZ1pTMA?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxQOE4wcTRDYVNCNjh6bS00b0gtQ2JSbHJmcmFfNmFQS1ppOVNMTi01TUJyVzVWZTI1MW9qVEdmRXdqUUhyVG1KbHg2LUZ2WEg0SHRJYllMR3hJS2J6WXBhR2tXdS1yR3Q0THVzWUpIZWRZNlg1QWxfOUdYYXl4UE9KajVyNVFRSTFlR2JlVWE1WDFCMU1odmdqWnUyOUhhTFNhdDBvYlNQM2p5RXlyODZLNG9PZl9xbEdsVWRrRXFTeFJNclIxbEZVdUo4N1dKR2l3RENmcjJKYnRpUWFNeEVRdXJCYnA0Q03SAe4BQVVfeXFMT2JjNFppTmY2b3N6NE94b0dMaldfdi1pMFByUUVFYndxVWlmVHNnekRzRkVJeFlpdG05T0tLWWxjZzRXWVNDOWc1czFjQnlrTjhtaWM3Z2VGR2xGNFJnckVIUHlTUWxaN3VaSmxuV29aNXdRX2MyQmNsLWlzM2h6VGVIdm9ialUtSC03UVhlSHYxdEt0ZG1QUl9JVHd4RmhMUEd4bjF6UFZSM0NJZVFTUURJWnFnZ2hBYnQ5N2NOTzFjYTlORXZIRlBfWjgyMkJBWDRHVFktcUdkWTNGUVRZUk1qcU94Y2UxTTA0QzR4UQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxONERjRzNSb3hTQjJqUGRDR2ctcVNWbEo3Tlc3M20tRWJtc2hpYnAyeG5XV0M0UWY0WURPVWpDRXNyalFGRjVoZjVoYnhOZXdOTkJwT3pWUGdJc2pJdmtOZEo0U2t3UWsxM1hNcjQyZ0Job3NYT2lEU0QzOVJoSTMteXV1d2JZcUEtVnA3RS1yUlRVQmpaNGVaMXBaSy1aQQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxQTm9xUm5oQ0VkZFU5dW5QbFlIVzlfRmY2VFpKM3lhSjh0V1lyWFBwaU1MT2l4cWl4V29ZQjU3QXhLUnZleWNQRzRiOGo1UVk0OXcwMDZSU29Xa1JXZUJnb2k4NGY2UkxLeTlCWEt4endWNHY3eTNraldxRnpHbGpBdVNfckUta0RPN2NLYnFPbThEaHdsRjFhY0RmZ24tbGxqdllpVVRGYWkyTnpRZmE5TFh0d1dJSWdYQkNSd0wya1puVHdSWk5mdGdwc1JRWERmMExMemJkZzNVblZ5MUtBRNIB5gFBVV95cUxPc29rTjJpcW9aOHJKNEhQdmdOaXJWa1Nkc2JPU0s1TXhRaGdEek9kVk1mN25XbEVta2VWQl96S2ZaeUZwcWFmcVlPVl82ZUNrQ2VTWUdFMDJic013ZjZZdVVrYlJaSjlGMDBoRDBwQk84VmhmT2hucTJIellNR2NKSTdwcVVDb21lcGxfQm5ndngyQ2VqX181aDQzTmJ5MFExVkFaWUMxNFRiTWk1Q0Q5THdFWWx2cFpISk1kN2cyYXZ4eWh2bnhwdzJyWXpRQ3RfMVdzV3J5VC01VEpZZzRIZW5kT3Rydw?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxOek1UNTdkNm1vb09jeGowOHpoVFJ0RklrVnJlR2tyMEpvaGNUeEFlQTZBUnFtc0wxd1owdGx3ZW01M1hnVXNsVEJCLWZTeWNUcnd1U0JuWmtyYzdvc3A3QzNGLWFmZHFNV184ekVFVVU1d09IRW9pa0FteVdtcGRtTUlkN3hUTWZXTTBveFFZT3lVOWI5eTlUb0oxREw4alQ4czB1cWlBQTR1V0ViaFhoMHZJVnoxQnNXanBnN0NId2hTN243U1h6VlFhbElnZTltel81R3BoWDB0LW_SAeABQVVfeXFMTjM3U3hnRjRVREUwWDF1bDdscVRnMHRTeTVjVnVWQUhkU2RNMVFiYmZQQnpzbm8tTEZVV2tKcVQwTkhwSGlsOUx3b1NDQnJYdUhVa0xBUmNYX1BOTnUteW5MTTVmVHRuSGJoTURKMWY5Ny0wUG9TOVp4SHE3UVVMbnVNU3QyanhVcG5jb3ZlaFo5el8ydE5zTTRVcHR0MHBBMUZXWkVZOGNvZkZTREVJYXRNZ2xaUWZydS1acFNGMERwUlJPVnp4am9Zd09IT0Y4MTRWUWY3SnVvMUVBNEFpc2Q?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi8wFBVV95cUxOeE91ZllIdWhHc3FzZVpEdDJheTlWNk5pV1AtZDhhOE5OTUVtcVgzMms4ckFFY0tSTjFaNU41SWtFRVhCNU9pUkJQWDNtRTRRYlM3MlNhQ3ZFZ0lmR0Mxa0lYb3E5R1JNVGxnbUtBaVl6eE1rcDFtNGhseU1jalF6WG5sN1lRbUZJdVJyOHVpUlFuaUFXSzlKOGtiUXliR1dCa0JiV0N1dXpqMUxnNHZmUkt6ZEJPaDdIemE3YlhUWVoyZGZ3WElpYjFGcUJqbW1JMF9fZTg1ajRVNm5QZjBVbmxiNzM4QllYcWVpVFpVOFhVSkXSAfMBQVVfeXFMTnhPdWZZSHVoR3Nxc2VaRHQyYXk5VjZOaVdQLWQ4YThOTk1FbXFYMzJrOHJBRWNLUk4xWjVONUlrRUVYQjVPaVJCUFgzbUU0UWJTNzJTYUN2RWdJZkdDMWtJWG9xOUdSTVRsZ21LQWlZenhNa3AxbTRobHlNY2pRelhubDdZUW1GSXVScjh1aVJRbmlBV0s5SjhrYlF5YkdXQmtCYldDdXV6ajFMZzR2ZlJLemRCT2g3SHphN2JYVFlaMmRmd1hJaWIxRnFCam1tSTBfX2U4NWo0VTZuUGYwVW5sYjczOEJZWHFlaVRaVThYVUpF?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxOZDQ0QWJxbUVzOHRQSTdNMlBDVXJrZUw0ZHpQTHBSY3lPWWVZRWNJakRsNE1KQ0JHWmtHVGI0V1d3VXJMN3VHOTlMenpISU9LQUdLV1U1SEJtUV9jUkpDc0N0eDd6U2tuRzZUNGgyZTFfOVljUzYwVGxzXzk4WGlKeW8wZUlwNDRDbGdIRVZNWVV0Z2xFeWpvQ2R2a0sxM1ZuRzVHaGtSVzhUNEhVaGxUVjVmaGM0V1hZMTIyZG5keWRTVW5tOFk4ZGV3Sm95XzVKSGx1NWQzRVQ5QdIB3wFBVV95cUxPRUxTb2V0MTRBV2VfbzdYYWRWdWtuVVYyUkNUUzdOOWpxa2xvUGRyMnNSVldxTXljeldRelZwR3VPb2dPcWVja3lyTDc2eUljWjRsSkJHR0J0T0VWeUZYN3ZXQkxiQmd1bl9LUncwb0hGaVJGQ01CbU10QXcxSnJBQk43ei1VdVNIN2kyMlMtU0dxZDE3Q1ZOQVVJNnpfN1pyeW5wbU15cWdPdzhFc0NlLVZYV1pMMmlvZTVzRlZ5R09ENkhIT1RXZEkydWR0b0FtR19UdUVWbmtzcmVDRkVR?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxOVUdTaGdxVE1qaHp0dE5EZ2ItcDFfbWJQd0FtUVk2RnMxc3FwMTgxUy1JamRiUVZHY0RNSHBjMVl1VUtqOXVDdi1pU3g0blFYVTVmc0U1SzNacERFckZjQ3RnQmZpcUN2UHdqZG5vRHBBa3VVakhZSUxSUUlxd0x3aXhSMFhLaWx6Q2hCRVlaemY2dGZ3c0FlekxRSWtRLVN3T042a09VUTJYaTJQRUNqcGZ6YU0tTmw5M0ZBcHhJeHZzUWdKZ2xCbE1uTVpOUjgyQ2VvOXJTZTdtd3ZULXVBaQ?oc=5"
+        }
+      ]
+    },
+    "table4_business_activities": {
+      "activities": {
+        "Core Business Profile": "India's largest telecommunications, digital connectivity, and digital media conglomerate (part of Reliance Industries), operating the world's largest standalone 5G network and extensive digital consumer ecosystem.",
+        "Brands & Trademarks": [
+          "Jio",
+          "Reliance Jio",
+          "JioFiber",
+          "JioAirFiber",
+          "JioCinema",
+          "JioSaavn",
+          "JioBharat",
+          "Jio5G",
+          "JioCloud",
+          "JioHotstar",
+          "LYF"
+        ],
+        "Key Products & Offerings": [
+          "5G & 4G LTE High-Speed Mobile Wireless Connectivity & Voice Calling",
+          "JioFiber & JioAirFiber (Fixed Wireless Access & High-Speed FTTH Home Broadband)",
+          "JioCinema OTT Streaming (Live Sports, Movies & Digital Shows)",
+          "JioSaavn Music & Podcast Streaming Service",
+          "JioBharat & JioPhone (Affordable 4G Internet-Enabled Feature Phones)",
+          "JioCloud Cloud Storage & Personal Digital Backup",
+          "JioEnterprise Solutions (Private 5G Networks, SD-WAN & Cloud Infrastructure)",
+          "JioFinance & JioPay (UPI Payments, Digital Wallet & Financial Services)",
+          "Landline",
+          "Fixed-line telephone",
+          "Mobile telephony",
+          "Wireless broadband",
+          "Internet services",
+          "Mobile phones",
+          "OTT services"
+        ],
+        "Product Categories": [
+          "Wireless Telecommunications (5G & 4G LTE Data & Voice)",
+          "Fixed Broadband & Home Wi-Fi (JioFiber & JioAirFiber)",
+          "Digital Entertainment & OTT Media (JioCinema & JioSaavn)",
+          "Affordable Consumer Hardware & IoT Devices",
+          "Enterprise Cloud, Connectivity & Cyber Solutions",
+          "Digital Financial Services & UPI Payments"
+        ],
+        "Product Type": "Telecommunications Connectivity + Digital Platforms & Consumer Hardware",
+        "Manufacturing": {
+          "active": false,
+          "details": "Not applicable — Contracts electronics ODM partners for JioPhone/JioBharat devices; operates nationwide telecom tower & optical fiber infrastructure"
+        },
+        "Online Sales / E-Commerce": {
+          "active": true,
+          "details": "Active — MyJio app ecosystem, official digital portal (jio.com), and online SIM delivery & recharge portals"
+        },
+        "Own Retail Stores": {
+          "active": true,
+          "details": "Active — Nationwide network of Reliance Digital, Jio Store retail outlets, and neighborhood digital recharge points"
+        },
+        "Franchise Model": {
+          "active": true,
+          "details": "Active — Extensive network of authorized Jio retail franchise stores, rural distributors, and local cable operator (LCO) partners"
+        },
+        "Import / Export": {
+          "active": true,
+          "details": "Active — Global international roaming agreements across 150+ countries and international submarine cable landing stations"
+        },
+        "Revenue Streams": "Mobile Wireless Subscriptions (ARPU / Data Packs) + Fixed Broadband (Fiber/AirFiber) Monthly Tariffs + Enterprise B2B Solutions + Digital Advertising & Media Content",
+        "Business Model": "B2C + B2B (Telecommunications Infrastructure, Digital Ecosystem & OTT Media)",
+        "Industry / Sector": "Telecommunications"
+      },
+      "Source Links": [
+        {
+          "name": "Wikipedia Corporate Encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Jio"
+        }
+      ]
+    }
   }
 ]
