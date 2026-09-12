@@ -78,10 +78,13 @@ A Python tool that takes any company name as input, performs canonical entity re
    - **Table #2:** 5-Year Historical and Present Financials (Revenue, Net Profit, Market Cap, Headcount).
    - **Table #3:** Signal Intelligence, Live Corporate Signals, and News Attribution.
    - **Table #4:** Operational Profile, Brands, Products, Retail vs. Customer Service distinction, and Archetype Classifiers.
+   - **Table #5:** Strategic Business Intelligence Conclusions & Growth Assessment (Growth trajectory verdict, Expansion vectors, Operational shutdowns/discontinuations, Leadership dynamics & AI transformation, Property/real estate acquisitions vs sales, M&A/demerger/capital actions, YoY revenue & margin health).
 
-5. **Dual Export with Automatic Sync:**
-   - **`company_records.csv`**: Updates existing company rows or appends new ones (ready for Excel/Sheets with clean year tags).
-   - **`company_records.json`**: Structured JSON format with nested year-wise timelines and source URLs.
+5. **Multi-Format Export with Automatic Sync:**
+   - **`company_records.csv`**: Table #1 corporate profiles and leadership directory.
+   - **`company_financials_5yr.csv`**: Table #2 audited 5-year historical and present financials.
+   - **`company_conclusions.csv`**: Table #5 strategic conclusions and growth intelligence across all 7 dimensions.
+   - **`company_records.json`**: Complete hierarchical JSON format integrating all 5 tables and verified source links.
 
 ---
 
