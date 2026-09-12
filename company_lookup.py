@@ -2844,26 +2844,54 @@ def is_news_junk(text: str) -> bool:
 
 
 def identify_signal(text: str) -> str:
-    """Identify institutional corporate intelligence signal category using precise word boundaries."""
+    """Identify institutional corporate intelligence signal category using precise, generic pattern matching."""
     t = text.lower()
+
     # 1. Leadership & Governance
-    if re.search(r"\b(?:ceo|cfo|cto|coo|cmo|chro|managing director|board of directors|executive director|interim ceo|chief executive|director general|promoted|elevated|steps down|stepped down|resigns|resigned|takes charge|named ceo|appointed as|joins as|new head|head of content|head of marketing)\b", t):
+    if re.search(r"\b(?:ceo|cfo|cto|coo|cmo|chro|managing director|board of directors|executive director|interim ceo|chief executive|director general|promoted|elevated|steps down|stepped down|resigns|resigned|takes charge|named ceo|appointed as|joins as|new head|head of content|head of marketing|board elevation|key personnel)\b", t):
         return 'LEADERSHIP SIGNAL'
-    # 2. Expansion, Routes, Hubs & Network
-    if re.search(r"\b(?:route|routes|flight between|flights between|direct flights?|non-stop flights?|connects? [a-z]+ and|flights? from|destination|destinations|expansion|expand|plant|factory|branch|branches|store|stores|opened|outlets?|datacenter|new hub|new terminal|dealerships?|assembly line)\b", t):
-        return 'EXPANSION SIGNAL'
-    # 3. Product, Aircraft Fleet & Technology Innovation
-    if re.search(r"\b(?:aircraft|fleet|airbus|boeing|embraer|a320|a321|a350|b777|b787|wet-lease|dry-lease|cabin|business class|stretch|e-jets|order|orders|widebody|new product|platform|software|ev|electric vehicle|launch|launches|unveils|unveil|models?|variant|suv|truck|car|cars|hybrid|battery)\b", t):
-        return 'PRODUCT & FLEET SIGNAL'
-    # 4. Financial Performance & M&A
-    if re.search(r"\b(?:acquir|acquisition|merger|demerger|demerged|split into|buyout|investment|invests|stake|funding|ipo|profit|revenue|ebitda|valuation|turnover|financial results|penalty|fine|discounts?)\b", t):
+
+    # 2. Contract, Major Tenders, Procurement & Project Wins (evaluated before product/operations)
+    if re.search(r"\b(?:wins? (?:order|contract|project|tender|bid|transmission project)|bags? (?:order|contract|project|deal)|secures? (?:order|contract|project|deal)|awarded (?:order|contract|project|work)|procurement|work order|purchase order|supply (?:contract|agreement|deal|order)|commercial contract|transmission project|epc (?:contract|project|deal)|power purchase agreement|\bppa\b|tariff-based competitive bidding|\btbcb\b|project win|deal win)\b", t) or any(k in t for k in ["order from", "order worth", "contract worth", "project worth", "order to supply"]):
+        return 'CONTRACT & PROJECTS SIGNAL'
+
+    # 3. Financial Performance, M&A, Capital Actions
+    if re.search(r"\b(?:acquire[sd]?|acquiring|acquisition[s]?|merger[s]?|demerger[s]?|demerged|split into|buyout[s]?|takeover[s]?|stake (?:purchase|sale|buy|hike)|divest\w*|rights issue|qip|preferential allotment|debt refinancing|refinanc\w*|fundrais\w*|raise[sd]? (?:funds|capital|rs|crore|\$)|profit[s]?|loss|revenue|ebitda|valuation|turnover|financial results|q[1-4] results|annual report|credit rating)\b", t):
         return 'FINANCIAL & M&A SIGNAL'
-    # 5. Strategic Alliances & Partnerships
-    if re.search(r"\b(?:partner|partners|partnership|alliance|codeshare|joint venture|tie-up|collaborat|mou|agreement)\b", t):
+
+    # 4. Investor & Corporate Events (investor meet, earnings calls, AGM/EGM, buybacks)
+    if re.search(r"\b(?:investor meet|analyst meet|investor day|annual general meeting|\bagm\b|extraordinary general meeting|\begm\b|earnings call|conference call|shareholder meeting|investor presentation|share buyback|buyback|renam|rebranding)\b", t):
+        return 'INVESTOR & CORPORATE SIGNAL'
+
+    # 5. Regulatory, Legal & Compliance
+    if re.search(r"\b(?:(?:regulatory|cerc|merc|sebi|cci|rbi|trai) (?:approval|order|nod|clearance|directive)|(?:grant|grants|granted) (?:transmission )?license|transmission license|license granted|antitrust|court (?:ruling|order|verdict)|nclt|tribunal|lawsuit|dispute|penalty|fine|compliance|legal notice|litigation|appeal|stay order)\b", t):
+        return 'REGULATORY & LEGAL SIGNAL'
+
+    # 6. Strategic Alliances, Partnerships & Joint Ventures
+    if re.search(r"\b(?:partner|partners|partnership|alliance|strategic tie-up|joint venture|\bjv\b|collaborat|mou|consortium|pact|co-development)\b", t):
         return 'STRATEGIC ALLIANCE SIGNAL'
-    # 6. Market Dominance & Operational Records
-    if re.search(r"\b(?:market share|passengers carried|daily flights|largest airline|busiest airline|headcount|load factor|punctuality|operational disruptions?|flight cancellations?|sales breakup|sales chart|record sales|production data|siam)\b", t):
-        return 'MARKET & OPERATIONAL SIGNAL'
+
+    # 7. Expansion & Infrastructure (plants, factories, substations, stores, routes)
+    if re.search(r"\b(?:expansion[s]?|expand[sed]?|expanding|commission\w*|(?:open|opens|opened|launch|launches|launched|sets? up|inaugurat\w*) (?:new )?(?:plant|factory|unit|facility|substation|store|branch|terminal|hub|depot|office|capacity)|plant|factory|substation|transmission line|datacenter|data center|capacity expansion|dealership network|routes?|connects? [a-z]+ and|new destination|flights? between)\b", t):
+        return 'EXPANSION SIGNAL'
+
+    # 8. ESG & Sustainability Initiatives
+    if re.search(r"\b(?:renewable energy|green power|clean energy|solar park|wind energy|net zero|carbon neutral|esg rating|sustainability report|green initiative|ev charging)\b", t):
+        return 'ESG & SUSTAINABILITY SIGNAL'
+
+    # 9. Product & Service Innovation (launches, releases, new offerings)
+    if re.search(r"\b(?:launch|launches|launched|unveils?|unveiled|rolls? out|new product|new service|new platform|new app|software suite|new variant|models?|suv|truck|passenger car|electric vehicle|\bev\b|flight service|new offering)\b", t):
+        return 'PRODUCT & SERVICE SIGNAL'
+
+    # 10. Operations, Production & Grid Delivery
+    if re.search(r"\b(?:commercial operations|capacity utilization|production milestone|record production|generation capacity|grid availability|grid reliability|power transmission stats|fleet operations|passengers carried|daily flights|operational disruption|flight delay)\b", t):
+        return 'OPERATIONS & SUPPLY SIGNAL'
+
+    # 11. Market Standing & Analyst Coverage
+    if re.search(r"\b(?:target price|brokerage|rating|upgrade|downgrade|overweight|buy call|market share|index inclusion|nifty 50|sensex|siam data|sales chart)\b", t):
+        return 'MARKET & ANALYST SIGNAL'
+
+    # 12. Strategic Development (True Fallback)
     return 'STRATEGIC DEVELOPMENT'
 
 
@@ -3059,13 +3087,18 @@ def display_latest_news(data: Dict[str, List[str]], sources: List[Dict[str, str]
             lines.append(f"\n[bold yellow]📅 {year_group}[/bold yellow]")
             for item in items[:6]:
                 formatted_item = item
-                # Highlight Signal Badge
+                # Highlight Signal Badges
                 formatted_item = re.sub(r"\[(LEADERSHIP SIGNAL)\]", r"[bold magenta][\1][/bold magenta]", formatted_item)
-                formatted_item = re.sub(r"\[(EXPANSION SIGNAL)\]", r"[bold cyan][\1][/bold cyan]", formatted_item)
                 formatted_item = re.sub(r"\[(FINANCIAL & M&A SIGNAL)\]", r"[bold green][\1][/bold green]", formatted_item)
-                formatted_item = re.sub(r"\[(PRODUCT & FLEET SIGNAL)\]", r"[bold blue][\1][/bold blue]", formatted_item)
-                formatted_item = re.sub(r"\[(STRATEGIC ALLIANCE SIGNAL)\]", r"[bold yellow][\1][/bold yellow]", formatted_item)
-                formatted_item = re.sub(r"\[(MARKET & OPERATIONAL SIGNAL)\]", r"[bold bright_white][\1][/bold bright_white]", formatted_item)
+                formatted_item = re.sub(r"\[(CONTRACT & PROJECTS SIGNAL)\]", r"[bold bright_yellow][\1][/bold bright_yellow]", formatted_item)
+                formatted_item = re.sub(r"\[(INVESTOR & CORPORATE SIGNAL)\]", r"[bold bright_cyan][\1][/bold bright_cyan]", formatted_item)
+                formatted_item = re.sub(r"\[(REGULATORY & LEGAL SIGNAL)\]", r"[bold red][\1][/bold red]", formatted_item)
+                formatted_item = re.sub(r"\[(STRATEGIC ALLIANCE SIGNAL)\]", r"[bold bright_magenta][\1][/bold bright_magenta]", formatted_item)
+                formatted_item = re.sub(r"\[(EXPANSION SIGNAL)\]", r"[bold cyan][\1][/bold cyan]", formatted_item)
+                formatted_item = re.sub(r"\[(ESG & SUSTAINABILITY SIGNAL)\]", r"[bold bright_green][\1][/bold bright_green]", formatted_item)
+                formatted_item = re.sub(r"\[(PRODUCT & SERVICE SIGNAL)\]", r"[bold blue][\1][/bold blue]", formatted_item)
+                formatted_item = re.sub(r"\[(OPERATIONS & SUPPLY SIGNAL)\]", r"[bold bright_white][\1][/bold bright_white]", formatted_item)
+                formatted_item = re.sub(r"\[(MARKET & ANALYST SIGNAL)\]", r"[bold bright_blue][\1][/bold bright_blue]", formatted_item)
                 formatted_item = re.sub(r"\[(STRATEGIC DEVELOPMENT)\]", r"[bold white][\1][/bold white]", formatted_item)
                 # Highlight Evidence Tiers
                 formatted_item = re.sub(r"\[(CONFIRMED)\]", r"[bold bright_green][\1][/bold bright_green]", formatted_item)
