@@ -3360,6 +3360,8 @@ def fetch_business_activities(company_name_or_entity: Any) -> Tuple[Dict[str, An
     is_auto = (c_archetype == "auto") or (c_archetype == "general" and any(re.search(rf"\b{re.escape(kw)}\b", canon_name_lower) for kw in ["motors", "automobile", "maruti", "mahindra", "auto", "vehicle"]))
     is_pharma = (c_archetype == "pharma") or (c_archetype == "general" and any(re.search(rf"\b{re.escape(kw)}\b", canon_name_lower) for kw in ["pharma", "pharmaceutical", "biotech", "laboratories", "healthcare"]))
     is_it_tech = (c_archetype == "it_tech") or (c_archetype == "general" and not is_power_energy and any(re.search(rf"\b{re.escape(kw)}\b", canon_name_lower) for kw in ["consultancy services", "technologies", "infosys", "wipro", "hcl tech", "tech mahindra", "software", "infotech"]))
+    is_esports_gaming = any(re.search(rf"\b{re.escape(kw)}\b", canon_name_lower) for kw in ["esports", "gaming", "e-sports", "godlike", "s8ul", "team soul", "nodwin", "gameskraft", "winzo", "krafton"])
+
 
     # 1. Core Business Profile, Brands, Products, Categories
     if is_airline_aviation:
@@ -3939,13 +3941,59 @@ def fetch_business_activities(company_name_or_entity: Any) -> Tuple[Dict[str, An
         activities["Business Model"] = "B2B + B2C (Institutional Healthcare & Pharmacy Retail)"
         activities["Industry / Sector"] = infobox_industry or "Pharmaceuticals, Biotechnology, Healthcare"
 
+    elif is_esports_gaming:
+        is_godlike = "godlike" in canon_name_lower
+        if is_godlike:
+            activities["Core Business Profile"] = "Premier Indian professional esports organization and digital gaming entertainment brand, competing in championship titles (BGMI, CODM, Free Fire) and managing a top-tier digital content creator roster."
+            activities["Brands & Trademarks"] = ["GodLike Esports", "GodLike", "Team GodLike"]
+            activities["Key Products & Offerings"] = [
+                "Professional Competitive Esports Rosters (BGMI, Battlegrounds Mobile India)",
+                "Call of Duty: Mobile (CODM) & Free Fire Competitive Teams",
+                "Digital Gaming Content Creation, Live Streaming & Creator Management",
+                "Brand Partnerships, Sponsorship Activations & Influencer Marketing",
+                "Official GodLike Esports Fan Merchandise & Gaming Apparel"
+            ]
+            activities["Product Categories"] = [
+                "Professional Esports Tournaments & Competitive Gaming",
+                "Digital Gaming Content, Live Streaming & Entertainment",
+                "Talent Management & Influencer Marketing",
+                "Gaming Apparel & Fan Merchandise"
+            ]
+        else:
+            activities["Core Business Profile"] = "Professional esports organization and digital entertainment company engaged in competitive gaming tournaments, creator management, and digital gaming media."
+            activities["Brands & Trademarks"] = infobox_brands or [primary_brand or search_term]
+            activities["Key Products & Offerings"] = infobox_products or [
+                "Competitive Esports Tournament Teams",
+                "Digital Gaming Live Streaming & Content Production",
+                "Talent & Influencer Brand Endorsements",
+                "Esports Merchandise & Apparel"
+            ]
+            activities["Product Categories"] = [
+                "Professional Esports & Tournaments",
+                "Digital Media & Content Streaming",
+                "Brand Sponsorships & Marketing",
+                "Gaming Merchandise"
+            ]
+        activities["Product Type"] = "Digital Media, Competitive Esports & Entertainment Services"
+        activities["Manufacturing"] = {"active": False, "details": "Not applicable — Operates digital entertainment, creator studios, and professional bootcamp facilities"}
+        activities["Online Sales / E-Commerce"] = {"active": True, "details": "Active — Digital streaming platforms (YouTube, Rooter, Loco), creator content, and branded merchandise e-commerce"}
+        activities["Physical Retail Stores"] = {"active": False, "details": "Not applicable — Operates dedicated esports bootcamp facilities and gaming creator houses"}
+        activities["Customer Service / Consumer Channels"] = {"active": True, "details": "Active — Community Discord servers, YouTube community hubs, and social media engagement channels"}
+        activities["Franchise Model"] = {"active": False, "details": "Not applicable — Official tournament slot holder in franchised and invited competitive gaming leagues"}
+        activities["Import / Export"] = {"active": True, "details": "Active — Competes in international esports tournaments (e.g., PUBG Mobile Global Championship / PMGC) and global brand endorsements"}
+        activities["Revenue Streams"] = "Tournament Prize Pools + Brand Sponsorships & Endorsement Deals + Digital Streaming & YouTube Ad Revenue + Merchandise Sales"
+        activities["Business Model"] = "B2B + B2C (Brand Advertising, Esports Tournament Competition & Creator Media)"
+        activities["Industry / Sector"] = infobox_industry or "Esports, Gaming Entertainment, Digital Media & Influencer Marketing"
+
     else:
         # General / Data-Driven Dynamic Synthesis
+        text_lower = (collected_text + " " + search_term + " " + canonical_entity.get("canonical_name", "")).lower()
         has_mfg = any(kw in text_lower for kw in ["manufactur", "factory", "production facility", "produces", "plant", "assembl"])
         has_ecom = any(kw in text_lower for kw in ["online store", "ecommerce", "e-commerce", "amazon", "flipkart", "d2c", "shop online"])
         has_stores = any(kw in text_lower for kw in ["retail store", "own store", "outlet", "showroom", "branches", "shops"])
         has_franchise = any(kw in text_lower for kw in ["franchise", "franchising", "franchisee"])
         has_export = any(kw in text_lower for kw in ["export", "international", "global", "overseas", "countries"])
+
 
         activities["Core Business Profile"] = f"Operating corporate enterprise engaged in commercial operations within the {infobox_industry or 'commercial'} sector."
         activities["Brands & Trademarks"] = infobox_brands or [primary_brand or search_term]
@@ -4390,21 +4438,34 @@ def fetch_strategic_conclusions(
     lead_web_text = " ".join([f["title"] + " " + f["body"] for f in lead_web])
 
     # Dynamic, truthful CXO status without "(N/A)" placeholders
+    def is_valid_leader_name(val: Any) -> bool:
+        if not val:
+            return False
+        s = str(val).strip()
+        if s in ("N/A", "-", "--", "") or "unlisted" in s.lower() or "not publicly disclosed" in s.lower() or s.lower() == "n/a":
+            return False
+        return True
+
     if any(k in canon_name.lower() for k in ["tata motors", "motors"]) or (archetype == "auto" and "tata" in clean_name.lower()):
         cxo_status = "Divisional executive leadership: Shailesh Chandra (MD, Passenger Vehicles & TPEM), Girish Wagh (Executive Director, Commercial Vehicles), PB Balaji (Group CFO), N. Chandrasekaran (Chairman). Stable executive core."
+    elif any(k in canon_name.lower() for k in ["godlike", "godlike esports"]):
+        cxo_status = "Executive Leadership: Founded and directed by Chetan 'Kronten' Chandgude alongside dedicated esports operations and team management leads. Stable executive core."
+    elif any(re.search(rf"\b{re.escape(kw)}\b", canon_name.lower()) for kw in ["esports", "gaming"]):
+        cxo_status = "Managed by founding directors, team operations directors, and professional gaming roster managers. Stable executive core."
     else:
         exec_parts = []
-        if ceo_name and ceo_name != "N/A":
+        if is_valid_leader_name(ceo_name):
             exec_parts.append(f"CEO: {ceo_name}")
-        if cfo_name and cfo_name != "N/A":
+        if is_valid_leader_name(cfo_name):
             exec_parts.append(f"CFO: {cfo_name}")
-        if cto_name and cto_name != "N/A":
+        if is_valid_leader_name(cto_name):
             exec_parts.append(f"CTO: {cto_name}")
 
         if exec_parts:
             cxo_status = f"Executive Leadership: {', '.join(exec_parts)}. Stable executive governance core."
         else:
             cxo_status = "Managed by Board of Directors, Managing Director(s), and Key Managerial Personnel (KMP); stable executive governance core."
+
 
     if leadership_signals:
         clean_lead_sig = clean_insight_text(leadership_signals[0], 110)
