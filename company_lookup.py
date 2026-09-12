@@ -289,7 +289,7 @@ def extract_person_name(raw_text: str, role: str = "", company_name: str = "") -
     if len(lower_words) != len(set(lower_words)):
         return "N/A"
 
-    # Reject grammatical words, conjunctions, prepositions, determiners, pronouns, corporate noise
+    # Reject grammatical words, conjunctions, prepositions, determiners, pronouns, reporting verbs, corporate noise
     invalid_name_tokens = {
         "and", "or", "nor", "but", "key", "the", "a", "an", "of", "in", "to", "for",
         "with", "on", "at", "by", "from", "as", "is", "was", "are", "were", "be",
@@ -300,7 +300,16 @@ def extract_person_name(raw_text: str, role: str = "", company_name: str = "") -
         "managerial", "executives", "officers", "people", "team", "members", "staff",
         "committee", "management", "board", "leadership", "designation", "appointed",
         "appointment", "resigned", "resignation", "profile", "overview", "names",
-        "appoints", "current", "former", "interim", "acting", "new", "ex"
+        "appoints", "current", "former", "interim", "acting", "new", "ex",
+        # Headline reporting verbs and question words (prevents 'Reveals How', 'Explains AI', etc.)
+        "reveals", "reveal", "explains", "explain", "says", "say", "said",
+        "talks", "talk", "speaks", "speak", "shares", "share", "discusses", "discuss",
+        "shows", "show", "tells", "tell", "warns", "warn", "urges", "urge",
+        "weighs", "weigh", "highlights", "highlight", "unveils", "unveil",
+        "outlines", "outline", "calls", "call", "steps", "step", "opens", "open",
+        "how", "why", "when", "where", "whose", "way", "ways", "insights", "insight",
+        "journey", "impact", "future", "trends", "trend", "vision", "roadmap",
+        "strategy", "strategies", "analysis", "opinion", "interview", "exclusive", "report", "reports"
     }
     if any(w.lower() in invalid_name_tokens for w in name_words):
         return "N/A"
@@ -1626,7 +1635,7 @@ def search_executive_web(company: str, role: str) -> str:
 
                         # Pattern 2: "[Company]'s CEO/CFO/CTO [Name]" or "[Company] CEO/CFO/CTO, [Name]"
                         p2 = re.findall(
-                            comp_esc + r"\s+(?:new\s+)?(?:current\s+)?(?:Global\s+)?" + role_regex + r"(?:\s*[-–—:]\s*|,\s*|\s+is\s+|\s+)([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})",
+                            comp_esc + r"\s+(?:new\s+)?(?:current\s+)?(?:Global\s+)?" + role_regex + r"(?:\s*[-–—:]\s*|,\s*|\s+is\s+|\s+(?!(?:reveals?|explains?|shares?|says?|said|talks?|speaks?|discusses?|shows?|tells?|warns?|unveils?|outlines?|highlights?|on|about|how|why|what|when)\b))([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})",
                             comb, re.I
                         )
                         for c in p2:
