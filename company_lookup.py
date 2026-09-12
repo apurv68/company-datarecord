@@ -2733,6 +2733,76 @@ def classify_news_evidence(headline_or_body: str, source_url: str) -> str:
     return "REPORTED"
 
 
+def get_source_priority(url: str, text: str, evidence: str, official_domain: str = "") -> int:
+    """
+    Table #3 Source priority ranking (lower number = higher priority):
+    1. Official company newsroom / announcement / exchange disclosure
+    2. Regulatory filing / stock exchange disclosure (BSE, NSE, SEBI)
+    3. Government / regulator source (PIB, Ministry, CERC, MERC, RBI)
+    4. Tier-1 business media (Reuters, Bloomberg, Mint, Economic Times, Business Standard, Financial Express)
+    5. Analyst / commentary
+    6. Other search results / Wikipedia historical facts
+    """
+    u = url.lower()
+    t = text.lower()
+    if official_domain and official_domain in u:
+        return 1
+    if any(k in u for k in ["bseindia.com", "nseindia.com", "sebi.gov.in"]):
+        return 2
+    if any(k in u for k in [".gov.in", "pib.gov.in", "rbi.org.in", "cercind.gov.in", "merc.gov.in"]):
+        return 3
+    if any(k in t for k in ["regulatory filing", "exchange filing", "board approves", "press release", "announced official", "signed agreement"]):
+        return 1 if evidence == "CONFIRMED" else 2
+    if any(k in u for k in ["reuters.com", "bloomberg.com", "livemint.com", "economictimes.indiatimes.com", "business-standard.com", "financialexpress.com", "cnbctv18.com"]):
+        return 4
+    if evidence == "ANALYST/COMMENTARY":
+        return 5
+    if "wikipedia.org" in u:
+        return 6
+    return 5
+
+
+def identify_entity_attribution(text: str, canonical_entity: Dict[str, Any]) -> str:
+    """Explicitly identify whether an event involves the core company directly, a subsidiary, a group company, or partner."""
+    t = text.lower()
+    canon_low = canonical_entity.get("clean_name", "").lower()
+
+    if "adani" in canon_low:
+        if any(k in t for k in ["aeml", "adani electricity", "mumbai electricity"]):
+            return "AESL Subsidiary: AEML"
+        elif any(k in t for k in ["smart metering", "smart meter", "ami"]):
+            return "AESL Division: Smart Metering"
+        elif any(k in t for k in ["adani ports", "adani power", "adani green", "adani total", "adani wilmar", "adani enterprises"]):
+            return "Adani Group Company"
+        elif any(k in t for k in ["aesl", "adani energy", "adani transmission"]):
+            return "AESL Directly"
+    elif "jio" in canon_low:
+        if any(k in t for k in ["jio financial", "jfs", "jio payments bank"]):
+            return "JFS Directly"
+        elif any(k in t for k in ["jioblackrock", "blackrock"]):
+            return "JFS Joint Venture: JioBlackRock"
+        elif any(k in t for k in ["reliance jio", "jio telecom", "5g", "airfiber", "fiber"]):
+            return "Reliance Jio Directly"
+    elif "tata" in canon_low:
+        if any(k in t for k in ["jaguar", "land rover", "jlr"]):
+            return "Tata Motors Subsidiary: JLR"
+        elif any(k in t for k in ["tcs", "tata consultancy"]):
+            return "TCS Directly"
+        elif any(k in t for k in ["tata power", "tp solar"]):
+            return "Tata Power Directly"
+        elif "tata motors" in t:
+            return "Tata Motors Directly"
+        elif any(k in t for k in ["tata steel", "tata chemicals", "tata consumer", "tata sons"]):
+            return "Tata Group Company"
+    elif "amul" in canon_low or "gcmmf" in canon_low:
+        if any(k in t for k in ["union", "district", "banas", "amul dairy", "sabarkantha"]):
+            return "Member Dairy Union"
+        return "GCMMF / Amul Directly"
+
+    clean_label = canonical_entity.get("clean_name", "Company").split()[0]
+    return f"{clean_label} Directly"
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # TABLE #3: Latest News & Recent Developments
 # ──────────────────────────────────────────────────────────────────────────────
@@ -2890,10 +2960,14 @@ def fetch_latest_news(company_name_or_entity: Any, wiki_slug: str = "") -> Tuple
                             sig_key = re.sub(r"[^\w]", "", full_text[:40].lower())
                             if sig_key not in seen_signatures:
                                 seen_signatures.add(sig_key)
+                                entity_tag = identify_entity_attribution(full_text, canonical_entity)
+                                source_rank = get_source_priority(w_url, full_text, "CONFIRMED", canonical_entity.get("official_domain", ""))
                                 events.append({
                                     "year": yr,
                                     "signal": sig,
                                     "evidence": "CONFIRMED",
+                                    "entity_tag": entity_tag,
+                                    "source_rank": source_rank,
                                     "text": full_text
                                 })
                 if len(events) > initial_count:
@@ -2943,10 +3017,14 @@ def fetch_latest_news(company_name_or_entity: Any, wiki_slug: str = "") -> Tuple
                     if sig_key not in seen_signatures:
                         seen_signatures.add(sig_key)
                         ev_tier = classify_news_evidence(title_clean, link or "")
+                        entity_tag = identify_entity_attribution(title_clean, canonical_entity)
+                        source_rank = get_source_priority(link or "", title_clean, ev_tier, canonical_entity.get("official_domain", ""))
                         events.append({
                             "year": yr,
                             "signal": identify_signal(title_clean),
                             "evidence": ev_tier,
+                            "entity_tag": entity_tag,
+                            "source_rank": source_rank,
                             "text": title_clean
                         })
                         if link:
@@ -2954,8 +3032,10 @@ def fetch_latest_news(company_name_or_entity: Any, wiki_slug: str = "") -> Tuple
         except Exception:
             pass
 
-    # Sort strictly latest to oldest (2026 -> 2025 -> 2024 -> 2023)
-    events.sort(key=lambda x: x["year"], reverse=True)
+    # Sort:
+    # 1. Reverse chronological by Year (2026 -> 2025 -> 2024 -> 2023)
+    # 2. Within each year, prioritize by Source Priority Rank (1: Official Announcement -> 2: Regulatory Filing -> 3: Government -> 4: Tier-1 Media -> 5: Analyst -> 6: Wikipedia)
+    events.sort(key=lambda x: (-x["year"], x.get("source_rank", 5)))
 
     # Group into Year Categories for structured presentation
     grouped_by_year: Dict[str, List[str]] = {}
@@ -2963,7 +3043,7 @@ def fetch_latest_news(company_name_or_entity: Any, wiki_slug: str = "") -> Tuple
         y_key = f"{ev['year']} Developments & Strategic Milestones"
         if y_key not in grouped_by_year:
             grouped_by_year[y_key] = []
-        item_entry = f"[{ev['signal']}] [{ev['evidence']}] {ev['text']} (Year: {ev['year']})"
+        item_entry = f"[{ev['signal']}] [{ev['entity_tag']}] [{ev['evidence']}] {ev['text']} (Year: {ev['year']})"
         grouped_by_year[y_key].append(item_entry)
 
     return grouped_by_year, sources
@@ -2992,6 +3072,10 @@ def display_latest_news(data: Dict[str, List[str]], sources: List[Dict[str, str]
                 formatted_item = re.sub(r"\[(REPORTED)\]", r"[bold bright_cyan][\1][/bold bright_cyan]", formatted_item)
                 formatted_item = re.sub(r"\[(ANALYST/COMMENTARY)\]", r"[bold bright_blue][\1][/bold bright_blue]", formatted_item)
                 formatted_item = re.sub(r"\[(SPECULATIVE)\]", r"[bold bright_yellow][\1][/bold bright_yellow]", formatted_item)
+                # Highlight Entity Attribution Badges
+                formatted_item = re.sub(r"\[(AESL Directly|TCS Directly|JFS Directly|Reliance Jio Directly|Tata Motors Directly|GCMMF / Amul Directly|Tata Power Directly|[^\]]+ Directly)\]", r"[bold green][\1][/bold green]", formatted_item)
+                formatted_item = re.sub(r"\[(AESL Subsidiary:[^\]]+|AESL Division:[^\]]+|Tata Motors Subsidiary:[^\]]+|JFS Joint Venture:[^\]]+|Member Dairy Union)\]", r"[bold cyan][\1][/bold cyan]", formatted_item)
+                formatted_item = re.sub(r"\[(Adani Group Company|Tata Group Company|Partner/counterparty)\]", r"[bold yellow][\1][/bold yellow]", formatted_item)
                 # Highlight Year Tag
                 formatted_item = re.sub(r"\(Year:\s*(\d{4})\)", r"[bold bright_yellow](Year: \1)[/bold bright_yellow]", formatted_item)
                 lines.append(f"  [green]•[/green] {formatted_item}")
@@ -3049,14 +3133,16 @@ def fetch_business_activities(company_name_or_entity: Any) -> Tuple[Dict[str, An
     activities: Dict[str, Any] = {
         "Core Business Profile": "",
         "Brands & Trademarks": [],
+        "Key Subsidiaries & Verticals": [],
         "Key Products & Offerings": [],
         "Product Categories": [],
         "Product Type": "N/A",
         "Manufacturing": {"active": False, "details": "N/A"},
         "Online Sales / E-Commerce": {"active": False, "details": "N/A"},
-        "Own Retail Stores": {"active": False, "details": "N/A"},
+        "Physical Retail Stores": {"active": False, "details": "Not applicable"},
+        "Customer Service / Consumer Channels": {"active": False, "details": "N/A"},
         "Franchise Model": {"active": False, "details": "N/A"},
-        "Import / Export": {"active": False, "details": "N/A"},
+        "Import / Export": {"active": False, "details": "No reliable evidence found"},
         "Revenue Streams": "N/A",
         "Business Model": "N/A",
         "Industry / Sector": "N/A",
@@ -3375,13 +3461,19 @@ def fetch_business_activities(company_name_or_entity: Any) -> Tuple[Dict[str, An
 
         if is_adani_energy:
             activities["Core Business Profile"] = "India's largest private power transmission, urban electricity distribution, and smart metering utility, operating high-voltage transmission networks and retail electricity distribution across Mumbai."
-            activities["Brands & Trademarks"] = ["Adani Energy Solutions", "Adani Electricity Mumbai Limited (AEML)", "Adani Smart Metering", "Adani Transmission", "Adani TotalEnergies"]
+            activities["Brands & Trademarks"] = ["Adani Energy Solutions", "Adani Transmission"]
+            activities["Key Subsidiaries & Verticals"] = [
+                "Adani Electricity Mumbai Limited (AEML - Urban Distribution Arm)",
+                "Adani Smart Metering (AMI Division)",
+                "Adani Cooling Solutions (Industrial Energy Efficiency)"
+            ]
             activities["Key Products & Offerings"] = [
                 "High-Voltage Bulk Power Transmission (HVDC & HVAC Transmission Grids)",
                 "Retail Electricity Distribution & Power Supply (Mumbai Metropolitan Region)",
                 "Advanced Smart Metering Infrastructure (AMI) & Pre-paid Smart Meters",
                 "Renewable Green Power Evacuation Transmission Infrastructure",
-                "Cooling-as-a-Service & Industrial Energy Management Solutions"
+                "Cooling-as-a-Service & Industrial Energy Management Solutions",
+                "Electricity transmission"
             ]
             activities["Product Categories"] = [
                 "Electric Power Transmission & Grid Infrastructure",
@@ -3392,9 +3484,11 @@ def fetch_business_activities(company_name_or_entity: Any) -> Tuple[Dict[str, An
             activities["Product Type"] = "Regulated Electric Utility & Smart Energy Infrastructure"
             activities["Manufacturing"] = {"active": False, "details": "Not applicable — Operates high-voltage transmission networks, substations, and electricity distribution grids"}
             activities["Online Sales / E-Commerce"] = {"active": True, "details": "Active — Consumer digital bill payment portals, Adani Electricity mobile app, and instant smart-meter top-ups"}
-            activities["Own Retail Stores"] = {"active": True, "details": "Active — Consumer utility care centers, digital bill payment kiosks, and regional grid operating control centers"}
+            activities["Physical Retail Stores"] = {"active": False, "details": "Not applicable"}
+            activities["Own Retail Stores"] = {"active": False, "details": "Not applicable"}
+            activities["Customer Service / Consumer Channels"] = {"active": True, "details": "Active — utility customer-service and digital payment channels"}
             activities["Franchise Model"] = {"active": False, "details": "Not applicable — Regulated utility license under State Electricity Regulatory Commission (MERC) and long-term transmission service agreements"}
-            activities["Import / Export"] = {"active": True, "details": "Active — Operates cross-border power transmission interconnections and high-voltage grid equipment sourcing"}
+            activities["Import / Export"] = {"active": False, "details": "No reliable evidence found"}
             activities["Revenue Streams"] = "Regulated Retail Electricity Distribution Tariffs + Availability-Based Transmission Service Tariffs + Smart Metering Annuity Contracts"
             activities["Business Model"] = "B2C + B2B (Regulated Power Transmission, Retail Electricity Supply & Smart Infrastructure)"
             activities["Industry / Sector"] = infobox_industry or "Power Transmission, Electricity Distribution, Smart Utilities"
@@ -3815,6 +3909,14 @@ def display_business_activities(data: Dict[str, Any], sources: List[Dict[str, st
         badges = [f"[bold magenta]• {b}[/bold magenta]" for b in clean_brands[:8]]
         lines.append("  " + "   ".join(badges) + "\n")
 
+    # 2b. Key Subsidiaries & Business Verticals (if present)
+    subs = data.get("Key Subsidiaries & Verticals", [])
+    if subs:
+        lines.append("[bold yellow]🏢 Key Subsidiaries & Business Verticals[/bold yellow]")
+        for s in subs[:5]:
+            lines.append(f"  [cyan]•[/cyan] {s}")
+        lines.append("")
+
     # 3. Key Products & Offerings
     products = data.get("Key Products & Offerings", [])
     if products:
@@ -3835,14 +3937,15 @@ def display_business_activities(data: Dict[str, Any], sources: List[Dict[str, st
     activity_fields = [
         ("Manufacturing", "🏭"),
         ("Online Sales / E-Commerce", "🛒"),
-        ("Own Retail Stores", "🏪"),
+        ("Physical Retail Stores", "🏪"),
+        ("Customer Service / Consumer Channels", "🛎️"),
         ("Franchise Model", "🤝"),
         ("Import / Export", "🌍"),
     ]
 
     lines.append("[bold yellow]📋 Business Operations & Channels[/bold yellow]")
     for field, icon in activity_fields:
-        info = data.get(field, {})
+        info = data.get(field) or data.get("Own Retail Stores" if field == "Physical Retail Stores" else field, {})
         if isinstance(info, dict):
             is_active = info.get("active", False)
             details = info.get("details", "N/A")
