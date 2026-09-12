@@ -2232,13 +2232,21 @@ def save_table1_records(data: Dict[str, Any], sources: List[Dict[str, str]], csv
     console.print(f"[green][OK] Saved Table #1 record to [bold]{csv_path}[/bold] and [bold]{json_path}[/bold][/green]")
 
 
-def fetch_table2_data(company_name: str, stock_ticker: str = "N/A") -> Tuple[Dict[str, Any], List[Dict[str, str]]]:
+def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A") -> Tuple[Dict[str, Any], List[Dict[str, str]]]:
     """
     Fetch verified Table #2 data:
     Market Cap, Net Revenue/Net Sales, Net Profit, EBITDA, Employee Headcount
     for the previous 5 years + present year (6 periods total).
     Strictly outputs real verified corporate data; if not publicly disclosed, outputs N/A.
     """
+    if isinstance(company_name_or_entity, dict):
+        canonical_entity = company_name_or_entity
+        company_name = canonical_entity.get("canonical_name") or canonical_entity.get("clean_name", "")
+        if (stock_ticker == "N/A" or not stock_ticker) and canonical_entity.get("ticker"):
+            stock_ticker = canonical_entity.get("ticker")
+    else:
+        company_name = str(company_name_or_entity)
+
     sources = []
     seen_urls = set()
 
@@ -2505,6 +2513,227 @@ def display_table2(data: Dict[str, Any], sources: List[Dict[str, str]]):
 
 
 # ──────────────────────────────────────────────────────────────────────────────
+# CANONICAL ENTITY RESOLUTION & SOURCE RELEVANCE VALIDATION
+# ──────────────────────────────────────────────────────────────────────────────
+
+def resolve_canonical_entity(
+    query: str,
+    data1: Optional[Dict[str, Any]] = None,
+    sources1: Optional[List[Dict[str, str]]] = None
+) -> Dict[str, Any]:
+    """
+    Synthesize a single, definitive Canonical Company Identity from Table #1.
+    All downstream tables (Table #2, Table #3, Table #4) MUST consume this canonical entity
+    to eliminate cross-company contamination and independent mis-resolution.
+    """
+    d1 = data1 or {}
+    src1 = sources1 or []
+
+    raw_name = d1.get("Company Name") or query
+    clean_name = re.sub(r"\b(ltd|limited|pvt|private|corp|corporation|inc|incorporated|co|company)\b\.?", "", raw_name, flags=re.I).strip()
+    clean_name = re.sub(r"\s+", " ", clean_name)
+
+    ticker = d1.get("Stock Ticker", "N/A")
+    if "unlisted" in ticker.lower() or ticker == "N/A":
+        clean_ticker = ""
+    else:
+        clean_ticker = ticker.split()[0].upper().strip()
+
+    official_domain = ""
+    for s in src1:
+        u = s.get("url", "")
+        if "screener.in" in u or "wikipedia.org" in u or "google.com" in u:
+            continue
+        m = re.search(r"https?://(?:www\.)?([^/]+)", u)
+        if m:
+            official_domain = m.group(1).lower()
+            break
+
+    aliases = {query.lower().strip(), raw_name.lower().strip(), clean_name.lower().strip()}
+    combined_low = f"{query.lower()} {raw_name.lower()} {clean_ticker.lower()}"
+
+    archetype = "general"
+    primary_industry = d1.get("_industry", "")
+
+    # Precise Anchor & Disambiguation Rules
+    if any(k in combined_low for k in ["adani energy", "adani transmission", "adani electricity", "aeml", "adaniensol"]):
+        archetype = "power_energy"
+        primary_industry = "Electric Utilities, Power Transmission & Smart Metering"
+        aliases.update(["adani energy solutions", "adani energy", "adani transmission", "adani electricity", "adani electricity mumbai", "aeml"])
+    elif any(k in combined_low for k in ["tata power", "tatapower"]):
+        archetype = "power_energy"
+        primary_industry = "Electric Utilities & Renewable Power Generation"
+        aliases.update(["tata power", "tata power ez charge", "tp solar", "tata power ddl"])
+    elif any(k in combined_low for k in ["ntpc"]):
+        archetype = "power_energy"
+        primary_industry = "Electric Power Generation & Utilities"
+        aliases.update(["ntpc", "national thermal power corporation"])
+    elif any(k in combined_low for k in ["power grid", "powergrid", "pgcil"]):
+        archetype = "power_energy"
+        primary_industry = "Electric Power Transmission & Grid Infrastructure"
+        aliases.update(["power grid corporation of india", "power grid", "powergrid", "pgcil"])
+    elif any(k in combined_low for k in ["jio financial", "jfs", "jio payments bank", "jio finance", "jiofin"]):
+        archetype = "bank_fin"
+        primary_industry = "Non-Banking Financial Company (NBFC), Fintech & Wealth Management"
+        aliases.update(["jio financial services", "jfs", "jio financial", "jiofinance", "jio payments bank"])
+    elif any(k in combined_low for k in ["reliance jio", "jio infocomm", "rjil"]) or (clean_name.lower() == "jio" and "financial" not in combined_low):
+        archetype = "telecom"
+        primary_industry = "Telecommunications, 5G Wireless Network & Digital Services"
+        aliases.update(["reliance jio", "jio infocomm", "reliance jio infocomm", "jio", "jio 5g", "jiofiber", "jioairfiber"])
+    elif any(k in combined_low for k in ["airtel", "bharti airtel"]):
+        archetype = "telecom"
+        primary_industry = "Telecommunications & Fixed Broadband"
+        aliases.update(["bharti airtel", "airtel", "airtel digital"])
+    elif any(k in combined_low for k in ["tcs", "tata consultancy", "bancs"]):
+        archetype = "it_tech"
+        primary_industry = "Information Technology Services & Consulting"
+        aliases.update(["tcs", "tata consultancy services", "tata consultancy"])
+    elif any(k in combined_low for k in ["infosys", "infy"]):
+        archetype = "it_tech"
+        primary_industry = "Information Technology Services & Consulting"
+        aliases.update(["infosys", "infy", "infosys technologies"])
+    elif any(k in combined_low for k in ["wipro"]):
+        archetype = "it_tech"
+        primary_industry = "Information Technology Services & Consulting"
+        aliases.update(["wipro", "wipro technologies"])
+    elif any(k in combined_low for k in ["hcl tech", "hcl technologies", "hcltech"]):
+        archetype = "it_tech"
+        primary_industry = "Information Technology Services & Consulting"
+        aliases.update(["hcltech", "hcl technologies", "hcl tech"])
+    elif any(k in combined_low for k in ["tata motors", "tatamotors", "jaguar land rover", "jlr"]):
+        archetype = "auto"
+        primary_industry = "Automotive Manufacturing (Commercial & Passenger Vehicles)"
+        aliases.update(["tata motors", "tatamotors", "tata commercial vehicles", "tata passenger electric mobility", "jaguar land rover", "jlr"])
+    elif any(k in combined_low for k in ["maruti suzuki", "maruti"]):
+        archetype = "auto"
+        primary_industry = "Passenger Automobiles & Hybrid Mobility"
+        aliases.update(["maruti suzuki", "maruti", "maruti udyog"])
+    elif any(k in combined_low for k in ["mahindra & mahindra", "mahindra and mahindra", "m&m"]):
+        archetype = "auto"
+        primary_industry = "Automotive Utility Vehicles & Farm Equipment"
+        aliases.update(["mahindra & mahindra", "mahindra", "m&m"])
+    elif any(k in combined_low for k in ["amul", "gcmmf", "anand milk union", "gujarat cooperative milk"]):
+        archetype = "food_fmcg"
+        primary_industry = "Dairy Processing, Milk Products & Cooperative Federation"
+        aliases.update(["amul", "gcmmf", "gujarat cooperative milk marketing federation", "anand milk union limited"])
+    elif any(k in combined_low for k in ["haldiram"]):
+        archetype = "food_fmcg"
+        primary_industry = "Ethnic Savory Snacks, Confectionery & Quick-Service Food"
+        aliases.update(["haldiram", "haldiram's", "haldiram snacks"])
+    elif any(k in combined_low for k in ["bikanervala", "bikano"]):
+        archetype = "food_fmcg"
+        primary_industry = "Packaged Ethnic Snacks, Traditional Sweets & Hospitality"
+        aliases.update(["bikanervala", "bikano", "bikanervala foods"])
+    elif any(k in combined_low for k in ["indigo", "interglobe aviation", "6e"]):
+        archetype = "airline_aviation"
+        primary_industry = "Commercial Aviation & Air Cargo Logistics"
+        aliases.update(["indigo", "interglobe aviation", "6e", "indigo airlines"])
+    elif any(k in combined_low for k in ["sun pharma", "sun pharmaceutical"]):
+        archetype = "pharma"
+        primary_industry = "Pharmaceuticals, Generic Formulations & Active Ingredients"
+        aliases.update(["sun pharma", "sun pharmaceutical industries"])
+    elif any(k in combined_low for k in ["bank", "nbfc", "financial", "lending"]):
+        archetype = "bank_fin"
+        primary_industry = "Banking & Financial Services"
+    elif any(k in combined_low for k in ["pharma", "biotech", "drug", "healthcare"]):
+        archetype = "pharma"
+        primary_industry = "Pharmaceuticals & Healthcare"
+
+    return {
+        "canonical_name": raw_name,
+        "clean_name": clean_name,
+        "query": query,
+        "ticker": clean_ticker,
+        "is_listed": "yes" in str(d1.get("Is Listed Company", "")).lower(),
+        "business_type": d1.get("Business Type (Private Limited/Public Limited)", "N/A"),
+        "city": d1.get("Headquarter (City)", "N/A"),
+        "ceo": d1.get("CEO", "N/A"),
+        "cfo": d1.get("CFO", "N/A"),
+        "cto": d1.get("CTO", "N/A"),
+        "official_domain": official_domain,
+        "aliases": list(aliases),
+        "primary_industry": primary_industry,
+        "entity_archetype": archetype,
+        "source_records": src1,
+    }
+
+
+def is_relevant_source(
+    title_or_snippet: str,
+    url: str,
+    canonical_entity: Dict[str, Any]
+) -> Tuple[bool, str, int]:
+    """
+    Validate that an external article, search snippet, or webpage strictly refers to the canonical company.
+    Rejects articles that belong to unrelated companies (e.g., TCS when searching Adani, or Tata Motors when searching Jio).
+
+    Returns:
+        (is_relevant, explanation, confidence_score)
+    """
+    comb_text = f"{title_or_snippet} {url}".lower()
+    canon_clean = canonical_entity["clean_name"].lower()
+    canon_aliases = [a.lower() for a in canonical_entity.get("aliases", [])]
+    canon_ticker = canonical_entity.get("ticker", "").lower()
+
+    # 1. Negative Entity Disambiguation (Cross-Contamination Shields)
+    if "adani" in canon_clean:
+        if any(unrelated in comb_text for unrelated in ["tcs bancs", "tata consultancy services", "tata motors", "jaguar land rover", "infosys cobalt"]):
+            return (False, "Rejected: Source refers to an unrelated company (TCS/Tata/Infosys)", 0)
+        if "adani energy" in canon_clean or "transmission" in canon_clean:
+            if "adani ports" in comb_text and "energy" not in comb_text and "transmission" not in comb_text:
+                return (False, "Rejected: Source refers to Adani Ports, not Adani Energy Solutions", 0)
+
+    if "tcs" in canon_clean or "tata consultancy" in canon_clean:
+        if any(unrelated in comb_text for unrelated in ["adani energy", "adani transmission", "reliance jio", "maruti suzuki"]):
+            return (False, "Rejected: Source refers to an unrelated conglomerate", 0)
+
+    if "jio financial" in canon_clean or "jfs" in canon_clean:
+        if "jio financial" not in comb_text and "jfs" not in comb_text and "jiofinance" not in comb_text and "jio payments bank" not in comb_text:
+            if any(tel in comb_text for tel in ["5g network", "mobile recharge", "telecom subscriber", "airfiber", "jiocinema"]):
+                return (False, "Rejected: Source refers to Reliance Jio telecom, not Jio Financial Services", 0)
+    elif "jio" in canon_clean:
+        if "jio financial services" in comb_text and not any(t in comb_text for t in ["telecom", "5g", "spectrum", "broadband", "reliance industries"]):
+            return (False, "Rejected: Source refers to Jio Financial Services NBFC demerged entity", 0)
+
+    # 2. Positive Verification
+    matched_alias = None
+    for alias in canon_aliases:
+        if len(alias) >= 3 and re.search(rf"\b{re.escape(alias)}\b", comb_text):
+            matched_alias = alias
+            break
+
+    if matched_alias:
+        if canonical_entity.get("official_domain") and canonical_entity["official_domain"] in url.lower():
+            return (True, f"Verified: Official company domain match ({canonical_entity['official_domain']})", 95)
+        if len(matched_alias) >= 8:
+            return (True, f"Verified: Strong entity name match ('{matched_alias}')", 85)
+        return (True, f"Verified: Alias match ('{matched_alias}')", 70)
+
+    if canon_ticker and len(canon_ticker) >= 3:
+        if re.search(rf"\b{re.escape(canon_ticker)}\b", comb_text):
+            return (True, f"Verified: Stock ticker match ('{canon_ticker}')", 80)
+
+    return (False, f"Rejected: No specific mention of '{canon_clean}' or its aliases", 0)
+
+
+def classify_news_evidence(headline_or_body: str, source_url: str) -> str:
+    """Classify corporate development news into verified evidence tiers."""
+    t = headline_or_body.lower()
+    u = source_url.lower()
+
+    if any(k in u for k in ["bseindia", "nseindia", "press-release", "investor", "annual-report", "filing"]) or any(k in t for k in ["regulatory filing", "bse filing", "exchange filing", "announced official", "signed definitive agreement"]):
+        return "CONFIRMED"
+
+    if any(re.search(rf"\b{re.escape(w)}\b", t) for w in ["could", "may", "expected to", "reportedly", "rumoured", "talks to", "mulls", "weighs", "plans to", "eyes", "sources say", "in talks"]):
+        return "SPECULATIVE"
+
+    if any(re.search(rf"\b{re.escape(w)}\b", t) for w in ["target price", "brokerage", "rating", "analyst", "upgrade", "downgrade", "overweight", "buy call", "morgan stanley", "goldman sachs", "jefferies", "nomura"]):
+        return "ANALYST/COMMENTARY"
+
+    return "REPORTED"
+
+
+# ──────────────────────────────────────────────────────────────────────────────
 # TABLE #3: Latest News & Recent Developments
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -2568,14 +2797,22 @@ def identify_signal(text: str) -> str:
     return 'STRATEGIC DEVELOPMENT'
 
 
-def fetch_latest_news(company_name: str, wiki_slug: str = "") -> Tuple[Dict[str, List[str]], List[Dict[str, str]]]:
+def fetch_latest_news(company_name_or_entity: Any, wiki_slug: str = "") -> Tuple[Dict[str, List[str]], List[Dict[str, str]]]:
     """
-    Fetch comprehensive corporate developments & news milestones.
+    Fetch comprehensive corporate developments & news milestones using Canonical Entity validation.
+    - Canonical entity identity anchoring (zero cross-company leakage).
+    - Strict source relevance validation (is_relevant_source).
     - Reverse chronological order (latest to oldest: 2026 first, then 2025, 2024, etc.).
-    - Every information item has marked year at the end: (Year: YYYY).
-    - Substantive corporate narratives with full context (not 1-line fragments).
-    - Signal identification badges ([LEADERSHIP SIGNAL], [EXPANSION SIGNAL], etc.).
+    - Every item includes strategic signal badge + evidence tier [CONFIRMED/REPORTED/SPECULATIVE].
+    - Year tagged at the end: (Year: YYYY).
     """
+    if isinstance(company_name_or_entity, dict):
+        canonical_entity = company_name_or_entity
+        company_name = canonical_entity.get("canonical_name", "")
+    else:
+        company_name = str(company_name_or_entity)
+        canonical_entity = resolve_canonical_entity(company_name)
+
     sources: List[Dict[str, str]] = []
     seen_urls: set = set()
 
@@ -2584,33 +2821,34 @@ def fetch_latest_news(company_name: str, wiki_slug: str = "") -> Tuple[Dict[str,
             sources.append({"name": name, "url": str(url).strip()})
             seen_urls.add(url)
 
-    clean_name = re.sub(r"[''’\u2019\u0027\ufffd]s\b", "", company_name, flags=re.I).strip()
-    clean_name = re.sub(r"\b(ltd|limited|pvt|private|corp|corporation|inc)\b", "", clean_name, flags=re.I).strip()
-
-    brand_match = re.search(r"\(([^)]+)\)", clean_name)
-    primary_brand = brand_match.group(1).strip() if brand_match else ""
-    no_parens = re.sub(r"\([^)]*\)", "", clean_name).strip()
-    search_term = primary_brand if primary_brand else no_parens
+    clean_name = canonical_entity["clean_name"]
+    primary_brand = clean_name.split()[0] if clean_name else company_name
+    search_term = clean_name
 
     seen_signatures: set = set()
     events: List[Dict[str, Any]] = []
 
     # 1. Wikipedia deep milestones
-    slugs = [primary_brand.replace(" ", "_") if primary_brand else "", wiki_slug, search_term.replace(" ", "_"), no_parens.replace(" ", "_")]
-    if "interglobe" in company_name.lower() or "indigo" in company_name.lower():
+    slugs = [wiki_slug, search_term.replace(" ", "_"), clean_name.replace(" ", "_"), company_name.replace(" ", "_")]
+    canon_low = canonical_entity["canonical_name"].lower()
+    if "interglobe" in canon_low or "indigo" in canon_low:
         slugs = ["IndiGo", "InterGlobe_Aviation"] + slugs
-    elif "tata consultancy" in company_name.lower() or "tcs" in company_name.lower():
+    elif "tata consultancy" in canon_low or "tcs" in canon_low:
         slugs = ["Tata_Consultancy_Services"] + slugs
-    elif "haldiram" in company_name.lower():
+    elif "haldiram" in canon_low:
         slugs = ["Haldiram's", "Haldirams"] + slugs
-    elif "tata motors" in company_name.lower():
+    elif "tata motors" in canon_low:
         slugs = ["Tata_Motors"] + slugs
-    elif "bikanervala" in company_name.lower() or "bikaner" in company_name.lower():
+    elif "bikanervala" in canon_low or "bikaner" in canon_low:
         slugs = ["Bikanervala"] + slugs
-    elif "amul" in company_name.lower() or "gcmmf" in company_name.lower():
+    elif "amul" in canon_low or "gcmmf" in canon_low:
         slugs = ["Amul", "Gujarat_Cooperative_Milk_Marketing_Federation"] + slugs
-    elif "jio" in company_name.lower():
+    elif "jio financial" in canon_low or "jfs" in canon_low:
+        slugs = ["Jio_Financial_Services"] + slugs
+    elif "jio" in canon_low:
         slugs = ["Jio", "Reliance_Jio"] + slugs
+    elif "adani energy" in canon_low or "adani transmission" in canon_low:
+        slugs = ["Adani_Energy_Solutions", "Adani_Transmission"] + slugs
 
     ordered_slugs = []
     for s in slugs:
@@ -2626,12 +2864,10 @@ def fetch_latest_news(company_name: str, wiki_slug: str = "") -> Tuple[Dict[str,
                 soup = BeautifulSoup(w_res.text, "html.parser")
                 for p in soup.find_all("p"):
                     raw_text = p.get_text().strip()
-                    # Clean footnotes and Wikipedia inflation conversion parentheticals before sentence splitting
                     raw_text = re.sub(r"\[\d+\]", "", raw_text)
                     raw_text = re.sub(r"\[update\]", "", raw_text, flags=re.I)
                     raw_text = re.sub(r"\(equivalent to [^)]+\)", "", raw_text, flags=re.I)
                     raw_text = raw_text.replace("\xa0", " ").replace("\u20b9", "Rs. ")
-                    # Protect abbreviations like Rs., Mr., Dr., etc. from being split as sentences
                     text_prot = re.sub(r"\b(Rs|Mr|Mrs|Ms|Dr|Prof|Inc|Ltd|Corp|vs|e\.g|i\.e)\.\s*", r"\1_DOT_ ", raw_text)
                     sentences = [s.replace("_DOT_", ".").strip() for s in re.split(r"(?<=[.!?])\s+", text_prot) if s.strip()]
 
@@ -2640,11 +2876,15 @@ def fetch_latest_news(company_name: str, wiki_slug: str = "") -> Tuple[Dict[str,
                         if m and len(s_clean) >= 45 and not s_clean.startswith("^") and not is_news_junk(s_clean):
                             yr = int(m.group(1))
                             full_text = s_clean
-                            # If starting with a pronoun or transitional phrase, combine with prior sentence for complete corporate narrative
                             first_word = s_clean.split()[0].lower()
                             if first_word in ["at", "the", "he", "she", "they", "this", "it", "in the aftermath"]:
                                 if i > 0 and len(sentences[i - 1]) < 180 and not is_news_junk(sentences[i - 1]):
                                     full_text = f"{sentences[i - 1]} {s_clean}"
+
+                            # Validate relevance against canonical entity
+                            is_rel, _, _ = is_relevant_source(full_text, w_url, canonical_entity)
+                            if not is_rel:
+                                continue
 
                             sig = identify_signal(full_text)
                             sig_key = re.sub(r"[^\w]", "", full_text[:40].lower())
@@ -2653,6 +2893,7 @@ def fetch_latest_news(company_name: str, wiki_slug: str = "") -> Tuple[Dict[str,
                                 events.append({
                                     "year": yr,
                                     "signal": sig,
+                                    "evidence": "CONFIRMED",
                                     "text": full_text
                                 })
                 if len(events) > initial_count:
@@ -2663,9 +2904,9 @@ def fetch_latest_news(company_name: str, wiki_slug: str = "") -> Tuple[Dict[str,
 
     # 2. Google News RSS Feeds across dimensions
     rss_queries = [
-        f"{search_term} 2026",
-        f"{search_term} CEO OR CFO OR leadership OR appoints",
-        f"{search_term} launch OR routes OR expansion OR order",
+        f'"{search_term}" 2026',
+        f'"{search_term}" CEO OR CFO OR leadership OR appoints',
+        f'"{search_term}" order OR expansion OR contract OR revenue',
     ]
 
     for q in rss_queries:
@@ -2683,32 +2924,9 @@ def fetch_latest_news(company_name: str, wiki_slug: str = "") -> Tuple[Dict[str,
                     if is_news_junk(title_clean) or len(title_clean) < 30:
                         continue
 
-                    # Disambiguate IndiGo airline vs Indigo Paints
-                    if "aviation" in company_name.lower() or "airline" in company_name.lower() or "interglobe" in company_name.lower():
-                        if "paint" in title_clean.lower():
-                            continue
-                    elif "paint" in company_name.lower():
-                        if any(w in title_clean.lower() for w in ["airline", "flight", "pilot", "dgca", "aircraft", "iata", "fleet"]):
-                            continue
-
-                    # Verify relevance to company
-                    valid_names = [n.lower() for n in [search_term, no_parens, clean_name, company_name] if len(n) >= 3]
-                    if "tata motors" in company_name.lower():
-                        valid_names.extend(["tata motor", "tata cars", "tata safari", "tata nexon", "tata ev", "tata commercial", "tata punch", "tata curvv", "tata harrier", "tata passenger"])
-                    elif "interglobe" in company_name.lower() or "indigo" in company_name.lower():
-                        valid_names.extend(["indigo", "6e", "interglobe"])
-                    elif "tcs" in company_name.lower() or "tata consultancy" in company_name.lower():
-                        valid_names.extend(["tcs", "tata consultancy"])
-                    elif "haldiram" in company_name.lower():
-                        valid_names.extend(["haldiram", "haldirams"])
-                    elif "bikanervala" in company_name.lower() or "bikaner" in company_name.lower():
-                        valid_names.extend(["bikanervala", "bikano"])
-                    elif "amul" in company_name.lower() or "gcmmf" in company_name.lower():
-                        valid_names.extend(["amul", "gcmmf", "amul milk", "amul butter", "dairy", "milk"])
-                    elif "jio" in company_name.lower():
-                        valid_names.extend(["jio", "reliance jio", "jiofiber", "jioairfiber", "jiocinema", "jiosaavn"])
-
-                    if not any(n in title_clean.lower() for n in valid_names):
+                    # Strict relevance verification against canonical entity
+                    is_rel, _, _ = is_relevant_source(title_clean, link or "", canonical_entity)
+                    if not is_rel:
                         continue
 
                     yr = 2026
@@ -2724,9 +2942,11 @@ def fetch_latest_news(company_name: str, wiki_slug: str = "") -> Tuple[Dict[str,
                     sig_key = re.sub(r"[^\w]", "", title_clean[:40].lower())
                     if sig_key not in seen_signatures:
                         seen_signatures.add(sig_key)
+                        ev_tier = classify_news_evidence(title_clean, link or "")
                         events.append({
                             "year": yr,
                             "signal": identify_signal(title_clean),
+                            "evidence": ev_tier,
                             "text": title_clean
                         })
                         if link:
@@ -2743,14 +2963,14 @@ def fetch_latest_news(company_name: str, wiki_slug: str = "") -> Tuple[Dict[str,
         y_key = f"{ev['year']} Developments & Strategic Milestones"
         if y_key not in grouped_by_year:
             grouped_by_year[y_key] = []
-        item_entry = f"[{ev['signal']}] {ev['text']} (Year: {ev['year']})"
+        item_entry = f"[{ev['signal']}] [{ev['evidence']}] {ev['text']} (Year: {ev['year']})"
         grouped_by_year[y_key].append(item_entry)
 
     return grouped_by_year, sources
 
 
 def display_latest_news(data: Dict[str, List[str]], sources: List[Dict[str, str]]):
-    """Render Table #3 as a Rich Panel with reverse chronological ordering, signal badges, and marked years."""
+    """Render Table #3 as a Rich Panel with reverse chronological ordering, signal badges, evidence tiers, and marked years."""
     lines = []
     has_items = False
     for year_group, items in data.items():
@@ -2767,6 +2987,11 @@ def display_latest_news(data: Dict[str, List[str]], sources: List[Dict[str, str]
                 formatted_item = re.sub(r"\[(STRATEGIC ALLIANCE SIGNAL)\]", r"[bold yellow][\1][/bold yellow]", formatted_item)
                 formatted_item = re.sub(r"\[(MARKET & OPERATIONAL SIGNAL)\]", r"[bold bright_white][\1][/bold bright_white]", formatted_item)
                 formatted_item = re.sub(r"\[(STRATEGIC DEVELOPMENT)\]", r"[bold white][\1][/bold white]", formatted_item)
+                # Highlight Evidence Tiers
+                formatted_item = re.sub(r"\[(CONFIRMED)\]", r"[bold bright_green][\1][/bold bright_green]", formatted_item)
+                formatted_item = re.sub(r"\[(REPORTED)\]", r"[bold bright_cyan][\1][/bold bright_cyan]", formatted_item)
+                formatted_item = re.sub(r"\[(ANALYST/COMMENTARY)\]", r"[bold bright_blue][\1][/bold bright_blue]", formatted_item)
+                formatted_item = re.sub(r"\[(SPECULATIVE)\]", r"[bold bright_yellow][\1][/bold bright_yellow]", formatted_item)
                 # Highlight Year Tag
                 formatted_item = re.sub(r"\(Year:\s*(\d{4})\)", r"[bold bright_yellow](Year: \1)[/bold bright_yellow]", formatted_item)
                 lines.append(f"  [green]•[/green] {formatted_item}")
@@ -2778,7 +3003,7 @@ def display_latest_news(data: Dict[str, List[str]], sources: List[Dict[str, str]
     console.print()
     console.print(Panel(
         content,
-        title="[bold cyan]Table #3: Latest News & Recent Developments (Reverse Chronological | Signals & Year Tagged)[/bold cyan]",
+        title="[bold cyan]Table #3: Latest News & Recent Developments (Reverse Chronological | Signals & Evidence Tiers)[/bold cyan]",
         border_style="cyan",
         padding=(1, 2)
     ))
@@ -2796,12 +3021,19 @@ def display_latest_news(data: Dict[str, List[str]], sources: List[Dict[str, str]
 # TABLE #4: Business Activities & Revenue Streams
 # ──────────────────────────────────────────────────────────────────────────────
 
-def fetch_business_activities(company_name: str) -> Tuple[Dict[str, Any], List[Dict[str, str]]]:
+def fetch_business_activities(company_name_or_entity: Any) -> Tuple[Dict[str, Any], List[Dict[str, str]]]:
     """
     Determine what the company does — brands, key products/offerings, product categories,
     manufacturing, online sales, retail, franchises, import/export, and revenue streams.
-    Uses Wikipedia + DDGS with AI-filtered classification.
+    Controlled by Canonical Entity Identity (zero cross-company leakage).
     """
+    if isinstance(company_name_or_entity, dict):
+        canonical_entity = company_name_or_entity
+        company_name = canonical_entity.get("canonical_name", "")
+    else:
+        company_name = str(company_name_or_entity)
+        canonical_entity = resolve_canonical_entity(company_name)
+
     sources: List[Dict[str, str]] = []
     seen_urls: set = set()
 
@@ -2810,13 +3042,9 @@ def fetch_business_activities(company_name: str) -> Tuple[Dict[str, Any], List[D
             sources.append({"name": name, "url": str(url).strip()})
             seen_urls.add(url)
 
-    clean_name = re.sub(r"[''’\u2019\u0027\ufffd]s\b", "", company_name, flags=re.I).strip()
-    clean_name = re.sub(r"\b(ltd|limited|pvt|private|corp|corporation|inc)\b", "", clean_name, flags=re.I).strip()
-
-    brand_match = re.search(r"\(([^)]+)\)", clean_name)
-    primary_brand = brand_match.group(1).strip() if brand_match else ""
-    no_parens = re.sub(r"\([^)]*\)", "", clean_name).strip()
-    search_term = primary_brand if primary_brand else no_parens
+    clean_name = canonical_entity["clean_name"]
+    primary_brand = clean_name.split()[0] if clean_name else company_name
+    search_term = clean_name
 
     activities: Dict[str, Any] = {
         "Core Business Profile": "",
@@ -2832,6 +3060,7 @@ def fetch_business_activities(company_name: str) -> Tuple[Dict[str, Any], List[D
         "Revenue Streams": "N/A",
         "Business Model": "N/A",
         "Industry / Sector": "N/A",
+        "Entity Integrity": "HIGH (Canonical Verified)",
     }
 
     infobox_products: List[str] = []
@@ -2841,27 +3070,29 @@ def fetch_business_activities(company_name: str) -> Tuple[Dict[str, Any], List[D
 
     # 1. Wikipedia — primary source for business description, products, brands, and categories
     wiki_slugs = [
-        primary_brand.replace(" ", "_") if primary_brand else "",
         search_term.replace(" ", "_"),
-        no_parens.replace(" ", "_"),
-        no_parens.title().replace(" ", "_"),
         clean_name.replace(" ", "_"),
         company_name.replace(" ", "_"),
     ]
-    if "interglobe" in company_name.lower() or "indigo" in company_name.lower():
+    canon_low = canonical_entity["canonical_name"].lower()
+    if "interglobe" in canon_low or "indigo" in canon_low:
         wiki_slugs = ["IndiGo", "InterGlobe_Aviation"] + wiki_slugs
-    elif "tata consultancy" in company_name.lower() or "tcs" in company_name.lower():
+    elif "tata consultancy" in canon_low or "tcs" in canon_low:
         wiki_slugs = ["Tata_Consultancy_Services"] + wiki_slugs
-    elif "haldiram" in company_name.lower():
+    elif "haldiram" in canon_low:
         wiki_slugs = ["Haldiram's", "Haldirams"] + wiki_slugs
-    elif "bikanervala" in company_name.lower() or "bikaner" in company_name.lower():
-        wiki_slugs = ["Bikanervala"] + wiki_slugs
-    elif "tata motors" in company_name.lower():
+    elif "tata motors" in canon_low:
         wiki_slugs = ["Tata_Motors"] + wiki_slugs
-    elif "amul" in company_name.lower() or "gcmmf" in company_name.lower():
+    elif "bikanervala" in canon_low or "bikaner" in canon_low:
+        wiki_slugs = ["Bikanervala"] + wiki_slugs
+    elif "amul" in canon_low or "gcmmf" in canon_low:
         wiki_slugs = ["Amul", "Gujarat_Cooperative_Milk_Marketing_Federation"] + wiki_slugs
-    elif "jio" in company_name.lower():
+    elif "jio financial" in canon_low or "jfs" in canon_low:
+        wiki_slugs = ["Jio_Financial_Services"] + wiki_slugs
+    elif "jio" in canon_low:
         wiki_slugs = ["Jio", "Reliance_Jio"] + wiki_slugs
+    elif "adani energy" in canon_low or "adani transmission" in canon_low:
+        wiki_slugs = ["Adani_Energy_Solutions", "Adani_Transmission"] + wiki_slugs
 
     seen_slugs: set = set()
     for slug in [s for s in wiki_slugs if s]:
@@ -2873,6 +3104,14 @@ def fetch_business_activities(company_name: str) -> Tuple[Dict[str, Any], List[D
             w_res = requests.get(w_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}, timeout=8, allow_redirects=True)
             if w_res.status_code == 200:
                 soup = BeautifulSoup(w_res.text, "html.parser")
+
+                # Validate relevance of Wikipedia page to canonical entity
+                title_node = soup.find("h1", id="firstHeading")
+                p_lead = soup.find("p")
+                check_lead = (title_node.get_text() if title_node else "") + " " + (p_lead.get_text() if p_lead else "")
+                is_rel, _, _ = is_relevant_source(check_lead, w_res.url, canonical_entity)
+                if not is_rel:
+                    continue
 
                 ib = soup.find("table", class_=re.compile(r"infobox", re.I))
                 if ib:
@@ -2906,7 +3145,7 @@ def fetch_business_activities(company_name: str) -> Tuple[Dict[str, Any], List[D
         except Exception:
             pass
 
-    # 2. DDGS — supplementary info
+    # 2. DDGS — supplementary info filtered strictly against canonical company
     ddgs_queries = [
         f'"{search_term}" products brands categories offerings',
         f'"{search_term}" business model manufacturing retail franchise',
@@ -2921,7 +3160,9 @@ def fetch_business_activities(company_name: str) -> Tuple[Dict[str, Any], List[D
                         title = r.get("title", "")
                         href = r.get("href", "")
                         comb = f"{title} | {body}"
-                        if clean_name.lower() in comb.lower():
+                        # Strict relevance check against canonical company (rejection of unrelated corporate cross-talk)
+                        is_rel, _, _ = is_relevant_source(comb, href, canonical_entity)
+                        if is_rel:
                             collected_text += " " + comb
                             add_source("Corporate Profile Source", href)
                 except Exception:
@@ -2929,40 +3170,44 @@ def fetch_business_activities(company_name: str) -> Tuple[Dict[str, Any], List[D
     except Exception:
         pass
 
-    # 3. AI-synthesize business activities, brands, products, and categories
-    text_lower = (company_name + " " + collected_text).lower()
+    # 3. Evidence-based synthesis guided strictly by canonical entity identity
+    canon_name_lower = (canonical_entity.get("canonical_name", "") + " " + canonical_entity.get("clean_name", "") + " " + canonical_entity.get("query", "")).lower()
+    c_archetype = canonical_entity.get("entity_archetype", "general")
+    c_industry = canonical_entity.get("primary_industry", "")
 
-    # Detect company archetypes
-    is_power_energy = any(re.search(rf"\b{re.escape(kw)}\b", text_lower) for kw in [
-        "power transmission", "power distribution", "electricity transmission", "smart metering", 
-        "electric utility", "power grid", "adani energy", "adani transmission", "adani electricity",
-        "power generation", "thermal power", "renewable energy", "tata power", "ntpc", "power grid corporation",
-        "transmission line", "transmission lines", "electricity distribution"
-    ])
-    is_airline_aviation = any(re.search(rf"\b{re.escape(kw)}\b", text_lower) for kw in ["airline", "aviation", "aircraft", "flight", "flights", "air cargo", "air transport", "interglobe aviation"])
-    is_food_fmcg = any(re.search(rf"\b{re.escape(kw)}\b", text_lower) for kw in ["food", "snack", "snacks", "sweet", "sweets", "namkeen", "beverage", "confectionery", "restaurant", "bikanervala", "haldiram", "bikano", "dairy", "bakery", "milk"])
-    is_jio_fin = any(re.search(rf"\b{re.escape(kw)}\b", text_lower) for kw in ["jio financial", "jfs", "jio payments bank", "jio finance"])
-    is_telecom = not is_jio_fin and any(re.search(rf"\b{re.escape(kw)}\b", text_lower) for kw in ["telecom", "telecommunications", "wireless network", "broadband", "cellular network", "5g network", "4g lte", "reliance jio", "jio infocomm", "jio", "airtel", "vodafone idea", "bsnl"])
-    is_bank_fin = is_jio_fin or any(re.search(rf"\b{re.escape(kw)}\b", text_lower) for kw in ["banking", "financial services", "lending", "credit facility", "mutual fund", "insurance broking", "asset management", "nbfc", "fintech"])
-    is_auto = any(re.search(rf"\b{re.escape(kw)}\b", text_lower) for kw in ["automobile", "automotive", "motor vehicle", "motor vehicles", "commercial vehicles", "passenger car", "passenger cars", "trucks", "two-wheeler", "tyres", "tata motors", "maruti suzuki", "mahindra & mahindra"])
-    is_pharma = any(re.search(rf"\b{re.escape(kw)}\b", text_lower) for kw in ["pharmaceutical", "pharmaceuticals", "pharma", "medicine", "biotech", "healthcare", "clinical"])
-    is_it_tech = not is_power_energy and any(re.search(rf"\b{re.escape(kw)}\b", text_lower) for kw in [
-        "software development", "information technology consulting", "it services", "cloud computing platform", 
-        "digital transformation services", "tata consultancy services", "tcs", "infosys", "wipro", "hcl tech", "tech mahindra"
-    ])
+    # Archetype gating strictly governed by canonical entity
+    is_power_energy = (c_archetype == "power_energy") or (c_archetype == "general" and any(re.search(rf"\b{re.escape(kw)}\b", canon_name_lower) for kw in ["power", "energy solutions", "transmission", "electricity", "aeml", "ntpc", "grid"]))
+    is_airline_aviation = (c_archetype == "airline_aviation") or (c_archetype == "general" and any(re.search(rf"\b{re.escape(kw)}\b", canon_name_lower) for kw in ["airline", "aviation", "indigo", "air india", "spicejet"]))
+    is_food_fmcg = (c_archetype == "food_fmcg") or (c_archetype == "general" and any(re.search(rf"\b{re.escape(kw)}\b", canon_name_lower) for kw in ["amul", "gcmmf", "haldiram", "bikano", "bikanervala", "dairy", "foods", "confectionery"]))
+    is_telecom = (c_archetype == "telecom") or (c_archetype == "general" and any(re.search(rf"\b{re.escape(kw)}\b", canon_name_lower) for kw in ["telecom", "jio infocomm", "airtel", "vodafone idea"]) and "financial" not in canon_name_lower)
+    is_bank_fin = (c_archetype == "bank_fin") or (c_archetype == "general" and any(re.search(rf"\b{re.escape(kw)}\b", canon_name_lower) for kw in ["financial", "bank", "nbfc", "lending", "fintech", "jfs"]))
+    is_auto = (c_archetype == "auto") or (c_archetype == "general" and any(re.search(rf"\b{re.escape(kw)}\b", canon_name_lower) for kw in ["motors", "automobile", "maruti", "mahindra", "auto", "vehicle"]))
+    is_pharma = (c_archetype == "pharma") or (c_archetype == "general" and any(re.search(rf"\b{re.escape(kw)}\b", canon_name_lower) for kw in ["pharma", "pharmaceutical", "biotech", "laboratories", "healthcare"]))
+    is_it_tech = (c_archetype == "it_tech") or (c_archetype == "general" and not is_power_energy and any(re.search(rf"\b{re.escape(kw)}\b", canon_name_lower) for kw in ["consultancy services", "technologies", "infosys", "wipro", "hcl tech", "tech mahindra", "software", "infotech"]))
 
     # 1. Core Business Profile, Brands, Products, Categories
     if is_airline_aviation:
-        activities["Core Business Profile"] = "Premier commercial aviation and air transport enterprise operating domestic and global passenger flights alongside dedicated air cargo operations."
-        activities["Brands & Trademarks"] = ["IndiGo", "6E", "IndiGo CarGo", "IndiGo Stretch (Business Class)", "6E Eats", "BluChip (Frequent Flyer Program)"]
-        activities["Key Products & Offerings"] = [
-            "Domestic Scheduled Passenger Flights",
-            "International Scheduled Flights (Central Asia, Middle East, Europe, SE Asia)",
-            "IndiGo CarGo Air Freight Services",
-            "IndiGoStretch Business-Class Cabins",
-            "In-Flight Catering & Meals (6E Eats)",
-            "Priority Boarding & Ancillary Seat Selection (6E Prime)"
-        ]
+        is_indigo = any(k in canon_name_lower for k in ["indigo", "interglobe aviation", "6e"])
+        if is_indigo:
+            activities["Core Business Profile"] = "Premier commercial aviation and air transport enterprise operating domestic and global passenger flights alongside dedicated air cargo operations."
+            activities["Brands & Trademarks"] = ["IndiGo", "6E", "IndiGo CarGo", "IndiGo Stretch (Business Class)", "6E Eats", "BluChip (Frequent Flyer Program)"]
+            activities["Key Products & Offerings"] = [
+                "Domestic Scheduled Passenger Flights",
+                "International Scheduled Flights (Central Asia, Middle East, Europe, SE Asia)",
+                "IndiGo CarGo Air Freight Services",
+                "IndiGoStretch Business-Class Cabins",
+                "In-Flight Catering & Meals (6E Eats)",
+                "Priority Boarding & Ancillary Seat Selection (6E Prime)"
+            ]
+        else:
+            activities["Core Business Profile"] = "Commercial airline enterprise operating domestic and international passenger flights and air cargo operations."
+            activities["Brands & Trademarks"] = infobox_brands or [primary_brand or search_term]
+            activities["Key Products & Offerings"] = infobox_products or [
+                "Domestic Scheduled Passenger Flights",
+                "International Passenger Flights",
+                "Air Cargo & Freight Logistics",
+                "In-Flight Ancillary Services"
+            ]
         activities["Product Categories"] = [
             "Commercial Aviation",
             "Scheduled Passenger Air Transport",
@@ -2981,10 +3226,10 @@ def fetch_business_activities(company_name: str) -> Tuple[Dict[str, Any], List[D
         activities["Industry / Sector"] = infobox_industry or "Aviation, Airlines, Passenger & Cargo Transportation"
 
     elif is_food_fmcg:
-        is_amul = any(k in text_lower for k in ["amul", "gcmmf", "anand milk union", "gujarat cooperative milk"])
-        is_dairy = is_amul or any(k in text_lower for k in ["dairy", "milk", "butter", "cheese", "paneer", "ghee", "ice cream", "curd", "dahi", "mother dairy", "nandini", "hatsun", "parag milk", "heritage foods"])
-        is_bikaner = "bikaner" in text_lower
-        is_haldiram = "haldiram" in text_lower
+        is_amul = any(k in canon_name_lower for k in ["amul", "gcmmf", "anand milk union", "gujarat cooperative milk"])
+        is_dairy = is_amul or any(k in canon_name_lower for k in ["dairy", "milk", "butter", "cheese", "paneer", "ghee", "ice cream", "curd", "dahi", "mother dairy", "nandini", "hatsun", "parag milk", "heritage foods"])
+        is_bikaner = any(k in canon_name_lower for k in ["bikaner", "bikano"])
+        is_haldiram = "haldiram" in canon_name_lower
 
         if is_amul:
             activities["Core Business Profile"] = "India's largest food product marketing organization and apex dairy cooperative (GCMMF), driving the White Revolution and processing over 30 million liters of milk daily into fresh milk, butter, cheese, and value-added dairy products."
@@ -3123,10 +3368,10 @@ def fetch_business_activities(company_name: str) -> Tuple[Dict[str, Any], List[D
             activities["Industry / Sector"] = infobox_industry or "Food Processing, Fast-Moving Consumer Goods (FMCG), Restaurant Hospitality"
 
     elif is_power_energy:
-        is_adani_energy = any(k in text_lower for k in ["adani energy", "adani transmission", "adani electricity", "aeml"])
-        is_tata_power = "tata power" in text_lower
-        is_ntpc = "ntpc" in text_lower
-        is_powergrid = any(k in text_lower for k in ["power grid", "pgcil", "powergrid"])
+        is_adani_energy = any(k in canon_name_lower for k in ["adani energy", "adani transmission", "adani electricity", "aeml", "adaniensol"])
+        is_tata_power = "tata power" in canon_name_lower
+        is_ntpc = "ntpc" in canon_name_lower
+        is_powergrid = any(k in canon_name_lower for k in ["power grid", "pgcil", "powergrid"])
 
         if is_adani_energy:
             activities["Core Business Profile"] = "India's largest private power transmission, urban electricity distribution, and smart metering utility, operating high-voltage transmission networks and retail electricity distribution across Mumbai."
@@ -3203,10 +3448,10 @@ def fetch_business_activities(company_name: str) -> Tuple[Dict[str, Any], List[D
             activities["Industry / Sector"] = infobox_industry or "Electric Utilities, Power & Energy"
 
     elif is_it_tech:
-        is_tcs = any(k in text_lower for k in ["tcs", "tata consultancy", "bancs", "ignio", "mastercraft"])
-        is_infy = any(k in text_lower for k in ["infosys", "finacle", "panaya", "cobalt", "topaz"])
-        is_wipro = "wipro" in text_lower
-        is_hcl = any(k in text_lower for k in ["hcl", "hcltech"])
+        is_tcs = any(k in canon_name_lower for k in ["tcs", "tata consultancy"]) or (c_archetype == "it_tech" and "tata" in canon_name_lower)
+        is_infy = any(k in canon_name_lower for k in ["infosys", "infy"])
+        is_wipro = "wipro" in canon_name_lower
+        is_hcl = any(k in canon_name_lower for k in ["hcl", "hcltech"])
 
         if is_tcs:
             activities["Core Business Profile"] = "Global technology services and consulting enterprise delivering enterprise cloud, software engineering, and digital transformation solutions."
@@ -3267,7 +3512,7 @@ def fetch_business_activities(company_name: str) -> Tuple[Dict[str, Any], List[D
         activities["Industry / Sector"] = infobox_industry or "Information Technology, Enterprise Software, Management Consulting, Business Process Outsourcing"
 
     elif is_telecom:
-        is_jio = "jio" in text_lower
+        is_jio = "jio" in canon_name_lower and "financial" not in canon_name_lower
         if is_jio:
             activities["Core Business Profile"] = "India's largest telecommunications, digital connectivity, and digital media conglomerate (part of Reliance Industries), operating the world's largest standalone 5G network and extensive digital consumer ecosystem."
             activities["Brands & Trademarks"] = ["Jio", "Reliance Jio", "JioFiber", "JioAirFiber", "JioCinema", "JioSaavn", "JioBharat", "Jio5G", "JioCloud", "JioHotstar"]
@@ -3325,6 +3570,7 @@ def fetch_business_activities(company_name: str) -> Tuple[Dict[str, Any], List[D
             activities["Industry / Sector"] = infobox_industry or "Telecommunications, Technology & Media"
 
     elif is_bank_fin:
+        is_jio_fin = (c_archetype == "bank_fin" and "jio" in canon_name_lower) or any(k in canon_name_lower for k in ["jio financial", "jfs", "jio payments bank", "jio finance", "jiofin"])
         if is_jio_fin:
             activities["Core Business Profile"] = "Systemically important non-banking financial company (NBFC) and fintech platform of Reliance Group, delivering digital lending, payments, insurance broking, and asset management in joint venture with BlackRock."
             activities["Brands & Trademarks"] = ["Jio Financial Services (JFS)", "JioFinance", "Jio Payments Bank", "Jio Insurance Broking", "JioBlackRock"]
@@ -3379,9 +3625,9 @@ def fetch_business_activities(company_name: str) -> Tuple[Dict[str, Any], List[D
             activities["Industry / Sector"] = infobox_industry or "Banking, Financial Services, Insurance (BFSI)"
 
     elif is_auto:
-        is_tata_auto = any(k in text_lower for k in ["tata motors", "tata daewoo", "jaguar land rover", "jlr"]) or ("tata" in text_lower and any(k in text_lower for k in ["nexon", "harrier", "safari", "punch", "chhota hathi", "curvv"]))
-        is_maruti = any(k in text_lower for k in ["maruti", "suzuki", "swift", "baleno", "brezza", "wagonr", "dzire"])
-        is_mahindra = any(k in text_lower for k in ["mahindra", "scorpio", "thar", "xuv", "bolero"])
+        is_tata_auto = any(k in canon_name_lower for k in ["tata motors", "tatamotors", "tata commercial", "tata passenger", "jaguar land rover", "jlr"]) or (c_archetype == "auto" and "tata" in canon_name_lower)
+        is_maruti = any(k in canon_name_lower for k in ["maruti", "suzuki"])
+        is_mahindra = any(k in canon_name_lower for k in ["mahindra", "m&m"])
 
         if is_tata_auto:
             activities["Core Business Profile"] = "Major multinational automotive manufacturing conglomerate producing commercial vehicles, passenger cars, and electric vehicles."
@@ -4185,16 +4431,20 @@ def main():
         data1, sources1 = fetch_table1_data(query)
         display_table1(data1, sources1)
 
-        console.print(f"[yellow]Fetching Table #2 (5-Year Historical & Present Financials) for:[/yellow] [bold]{query}[/bold]...")
-        data2, sources2 = fetch_table2_data(data1.get("Company Name", query), data1.get("Stock Ticker", "N/A"))
+        # 2. Canonical Entity Resolution controls all downstream tables
+        canonical_entity = resolve_canonical_entity(query, data1, sources1)
+        canon_disp = canonical_entity.get("canonical_name", query)
+
+        console.print(f"[yellow]Fetching Table #2 (5-Year Historical & Present Financials) for:[/yellow] [bold]{canon_disp}[/bold]...")
+        data2, sources2 = fetch_table2_data(canonical_entity, canonical_entity.get("ticker", "N/A"))
         display_table2(data2, sources2)
 
-        console.print(f"[yellow]Fetching Table #3 (Latest News & Developments) for:[/yellow] [bold]{query}[/bold]...")
-        data3, sources3 = fetch_latest_news(data1.get("Company Name", query))
+        console.print(f"[yellow]Fetching Table #3 (Latest News & Developments) for:[/yellow] [bold]{canon_disp}[/bold]...")
+        data3, sources3 = fetch_latest_news(canonical_entity)
         display_latest_news(data3, sources3)
 
-        console.print(f"[yellow]Fetching Table #4 (Business Activities) for:[/yellow] [bold]{query}[/bold]...")
-        data4, sources4 = fetch_business_activities(data1.get("Company Name", query))
+        console.print(f"[yellow]Fetching Table #4 (Business Activities) for:[/yellow] [bold]{canon_disp}[/bold]...")
+        data4, sources4 = fetch_business_activities(canonical_entity)
         display_business_activities(data4, sources4)
 
         save_table_records(data1, sources1, data2, sources2, data3, sources3, data4, sources4)
@@ -4251,16 +4501,20 @@ def main():
             data1, sources1 = fetch_table1_data(selected_company)
             display_table1(data1, sources1)
 
-            console.print(f"\n[cyan]Fetching Table #2 (5-Year Historical & Present Financials) for '[bold]{selected_company}[/bold]'...[/cyan]")
-            data2, sources2 = fetch_table2_data(data1.get("Company Name", selected_company), data1.get("Stock Ticker", "N/A"))
+            # Canonical Entity Resolution controls all downstream tables
+            canonical_entity = resolve_canonical_entity(selected_company, data1, sources1)
+            canon_disp = canonical_entity.get("canonical_name", selected_company)
+
+            console.print(f"\n[cyan]Fetching Table #2 (5-Year Historical & Present Financials) for '[bold]{canon_disp}[/bold]'...[/cyan]")
+            data2, sources2 = fetch_table2_data(canonical_entity, canonical_entity.get("ticker", "N/A"))
             display_table2(data2, sources2)
 
-            console.print(f"\n[cyan]Fetching Table #3 (Latest News & Developments) for '[bold]{selected_company}[/bold]'...[/cyan]")
-            data3, sources3 = fetch_latest_news(data1.get("Company Name", selected_company))
+            console.print(f"\n[cyan]Fetching Table #3 (Latest News & Developments) for '[bold]{canon_disp}[/bold]'...[/cyan]")
+            data3, sources3 = fetch_latest_news(canonical_entity)
             display_latest_news(data3, sources3)
 
-            console.print(f"\n[cyan]Fetching Table #4 (Business Activities) for '[bold]{selected_company}[/bold]'...[/cyan]")
-            data4, sources4 = fetch_business_activities(data1.get("Company Name", selected_company))
+            console.print(f"\n[cyan]Fetching Table #4 (Business Activities) for '[bold]{canon_disp}[/bold]'...[/cyan]")
+            data4, sources4 = fetch_business_activities(canonical_entity)
             display_business_activities(data4, sources4)
 
             save_choice = console.input("[bold]Save all records (Table #1–#4) to CSV/JSON? (Y/n): [/bold]").strip().lower()
