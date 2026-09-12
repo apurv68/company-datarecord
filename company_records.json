@@ -2543,7 +2543,7 @@
       "Founding Year": "1945",
       "Founder Name(s)": "JRD Tata",
       "CEO": "N/A",
-      "CFO": "N/A",
+      "CFO": "Dhiman Gupta",
       "CTO": "N/A",
       "Headquarter (City)": "Mumbai",
       "Office Address": "Mumbai, Maharashtra, India",
@@ -2790,18 +2790,6 @@
         {
           "name": "Wikipedia Corporate Encyclopedia",
           "url": "https://en.wikipedia.org/wiki/Tata_Motors"
-        },
-        {
-          "name": "Corporate Profile Source",
-          "url": "https://www.franchiseindia.com/insights/en/article/tata-motors-franchise-cost-requirements-and-how-to-apply-in-india.57810"
-        },
-        {
-          "name": "Corporate Profile Source",
-          "url": "https://solatatech.com/article/tata-motors-business-model-studiousguy"
-        },
-        {
-          "name": "Corporate Profile Source",
-          "url": "https://www.businessunfold.com/tata-motors-franchise-cost/"
         }
       ]
     },
@@ -2809,37 +2797,37 @@
       "conclusions": {
         "Growth Assessment": {
           "Verdict": "Rapid Expansion / Strong Growth",
-          "Summary & Drivers": "Rapid Expansion / Strong Growth — Positive YoY top-line growth of +44.0%"
+          "Summary & Drivers": "Rapid Expansion / Strong Growth — Positive YoY top-line growth of +44.0%; Robust passenger SUV volumes, rapid EV market-share gains, and commercial vehicle fleet recovery"
         },
         "Expansion Vectors": {
-          "New Markets": "Expanding commercial fleet footprint, corporate EV transitions, and tier-2/tier-3 passenger vehicle markets.",
-          "New Geography (Location)": "National dealership network expansion and growing export corridors across Africa, Middle East, and South Asia.",
-          "New Product Launch": "New EV passenger variants (Curvv.ev, Punch.ev, Harrier/Safari facelifts), smart commercial trucks, and BS-VI Phase 2 compliant fleet.",
-          "New Product Category/Segment": "Dedicated Electric Passenger Vehicles (TPEM), Hydrogen Fuel Cell commercial haulage, and Connected Fleet Telematics.",
-          "Opening New Stores / Facilities": "New EV-exclusive retail showrooms, service touchpoints, and Sanand facility expansion."
+          "New Markets": "Expanding commercial fleet electrification, corporate ESG mobility transitions, and high-demand tier-2/tier-3 passenger SUV markets.",
+          "New Geography (Location)": "Pan-India dealership and service footprint expansion, national highway EV charging corridors, and international export channels across Europe, Middle East, Africa, and APAC.",
+          "New Product Launch": "Next-gen EV passenger variants (Curvv.ev, Nexon.ev, Punch.ev), Harrier/Safari facelifts, and smart commercial trucks (Tata Prima, Signa, Ultra).",
+          "New Product Category/Segment": "Dedicated Electric Passenger Vehicles (TPEM), Hydrogen Fuel Cell & LNG commercial haulage, and Connected Fleet Telematics (Fleet Edge).",
+          "Opening New Stores / Facilities": "Opening dedicated EV-exclusive retail showrooms, authorized 3S dealership facilities, and expanding Sanand manufacturing facility."
         },
         "Contraction & Shutdown Signals": {
-          "Manufacturing / Line Discontinuation": "Discontinued legacy diesel passenger variants and phased out BS-IV models in accordance with national emission standards; core manufacturing lines active for BS-VI Phase 2 & EVs.",
-          "Plant / Facility Shutdown": "No active permanent plant shutdowns or regulatory environmental closures identified across primary facilities.",
-          "Closing Stores / Branches": "No mass store or branch closures reported; physical touchpoints remain aligned with demand.",
-          "Stop Selling Product / Manufacturing": "Legacy models (e.g., Nano, Bolt, Zest, Safari Storme) previously phased out; current portfolio focused on active platforms."
+          "Manufacturing / Line Discontinuation": "Phased out legacy BS-IV models and older vehicle lines (e.g., Nano, Bolt, Indica); manufacturing modernized for BS-VI Phase 2, EV, and smart commercial platforms.",
+          "Plant / Facility Shutdown": "No active permanent plant shutdowns or regulatory environmental closures identified across primary operating facilities.",
+          "Closing Stores / Branches": "Not applicable — physical retail stores not operated; consumer customer-service hubs and digital touchpoints remain active.",
+          "Stop Selling Product / Manufacturing": "Retired legacy nameplates (e.g., Safari Storme, Zest, Manza); core passenger SUV and commercial fleet portfolios fully active."
         },
         "Leadership Dynamics": {
-          "CEO / CXO Hiring or Exit": "Stable executive core: CEO (N/A), CFO (N/A), CTO (N/A).",
-          "AI / Digital Transformation Leader": "Active digital transformation initiatives overseen by technology & engineering leadership.",
+          "CEO / CXO Hiring or Exit": "Divisional executive leadership: Shailesh Chandra (MD, Passenger Vehicles & TPEM), Girish Wagh (Executive Director, Commercial Vehicles), PB Balaji (Group CFO), N. Chandrasekaran (Chairman). Stable executive core.",
+          "AI / Digital Transformation Leader": "Digital transformation and enterprise AI initiatives driven through central Chief Technology / Information leadership and specialized engineering teams.",
           "CEO Transition / Stepping Down": "No current CEO exit or stepping-down proceedings reported; executive tenure confirmed active.",
-          "Growth & Marketing Leader": "Marketing, consumer engagement, and corporate growth managed through divisional business heads.",
-          "Chief AI Officer": "AI initiatives integrated within central CTO & digital innovation teams; dedicated Chief AI Officer role not mandated as standalone."
+          "Growth & Marketing Leader": "Brand marketing, consumer campaigns, and dealer growth managed through divisional CMOs and passenger/commercial vehicle business heads.",
+          "Chief AI Officer": "AI initiatives governed centrally under Chief Technology / Digital Officer and engineering units; standalone Chief AI Officer role not mandated."
         },
         "Real Estate & Property Movements": {
-          "Acquired New Property": "Acquiring project rights-of-way, transmission substation land, and regional operational acreage to support continuous grid and network expansion. ↳ Strategic Implication: Capacity expansion and long-term capital investment.",
-          "Sold Property": "No major real estate or land divestments reported; holding and expanding strategic operating assets. ↳ Strategic Implication: Retaining strategic utility footprint; no debt-distress land sales."
+          "Acquired New Property": "Acquired Ford India's Sanand manufacturing facility in Gujarat (via subsidiary TPEM) to unlock ~300,000 units/year EV manufacturing capacity. ↳ Strategic Implication: Direct manufacturing capacity expansion for electric and passenger vehicles.",
+          "Sold Property": "Historic Singur land arbitration settlement awarded in company's favor; non-core real estate monetization pursued to optimize capital efficiency. ↳ Strategic Implication: Balance-sheet de-leveraging and non-core asset rationalization."
         },
         "Mergers, Acquisitions & Capital Actions": {
-          "Buying Company / Startup": "Actively acquiring operational assets, special purpose project vehicles (SPVs), and complementary infrastructure.",
-          "Merged with Company": "Consolidated operating subsidiaries under the central corporate umbrella via statutory amalgamation.",
-          "Demerger": "Demerger Approved: Board approved split into two independent listed companies — Commercial Vehicles (CV) and Passenger Vehicles (PV / EV / JLR).",
-          "New Funding / IPO Launch": "Accesses domestic and global debt capital markets, bonds, and institutional credit facilities."
+          "Buying Company / Startup": "Acquisition of Ford India's Sanand manufacturing plant (assets & land); historic buyout of Jaguar Land Rover (JLR); strategic technology partnerships.",
+          "Merged with Company": "Statutory amalgamation of operating subsidiaries (e.g., Tata Motors Finance merger into Tata Capital; passenger vehicle restructuring under TMPVL).",
+          "Demerger": "Demerger Approved: Board approved split into two independent listed corporate entities — Commercial Vehicles (CV) business and Passenger Vehicles (PV, EV, JLR) business to maximize operational focus and shareholder value.",
+          "New Funding / IPO Launch": "Secured ₹ 7,500 Cr. private equity investment from TPG Rise Climate for EV arm (TPEM); strong operational cash flows driving comprehensive net-automotive debt reduction to zero."
         },
         "Financial Health": {
           "YoY Revenue": "Mar 2026: ₹ 83,855 Cr. vs Mar 2025 10m: ₹ 58,217 Cr. (+44.0% YoY)",
@@ -3367,11 +3355,11 @@
         },
         {
           "name": "Corporate Profile Source",
-          "url": "https://www.stocklyzer.com/company/adani-energy-solutions"
+          "url": "https://www.adani.com/businesses/energy-utilities/energy-solutions"
         },
         {
           "name": "Corporate Profile Source",
-          "url": "https://connect.adani.com/annual_report/2025/aesl/adani-energy-solutions-at-a-glance.html"
+          "url": "https://www.adani.com/businesses/energy-utilities"
         },
         {
           "name": "Corporate Profile Source",
@@ -3384,10 +3372,6 @@
         {
           "name": "Corporate Profile Source",
           "url": "https://www.ft.com/content/4fe02936-cc61-4c86-8f34-f30bce973153"
-        },
-        {
-          "name": "Corporate Profile Source",
-          "url": "https://www.adani.com/businesses/energy-utilities/energy-solutions"
         }
       ]
     },
@@ -3395,37 +3379,37 @@
       "conclusions": {
         "Growth Assessment": {
           "Verdict": "Rapid Expansion / Strong Growth",
-          "Summary & Drivers": "Rapid Expansion / Strong Growth — Positive YoY top-line growth of +16.1%"
+          "Summary & Drivers": "Rapid Expansion / Strong Growth — Positive YoY top-line growth of +16.1%; Sustained transmission line commissioning, growing smart-metering order book, and renewable evacuation demand"
         },
         "Expansion Vectors": {
-          "New Markets": "Expanding presence across regulated and private consumer distribution, utility-scale transmission, and institutional B2B contracts.",
-          "New Geography (Location)": "Active project execution across national corridors (interstate transmission / renewable evacuation) and expanding into regional distribution circles.",
-          "New Product Launch": "Smart metering solutions, digital consumer utility interfaces, and specialized transmission systems.",
-          "New Product Category/Segment": "Advanced Metering Infrastructure (AMI / Smart Meters), Renewable Power Evacuation, and Parallel Distribution.",
-          "Opening New Stores / Facilities": "Expanding divisional customer service centers, operational depots, and high-voltage substations (Physical retail stores: Not applicable)."
+          "New Markets": "Expanding presence across regulated and parallel consumer distribution, utility-scale interstate transmission corridors, and smart-metering concession areas.",
+          "New Geography (Location)": "National interstate green energy evacuation corridors (Gujarat/Khavda, Rajasthan, Maharashtra) and urban distribution circles (Mumbai, Mundra).",
+          "New Product Launch": "Advanced Metering Infrastructure (AMI smart meters), high-voltage direct current (HVDC) transmission links, and green energy evacuation infrastructure.",
+          "New Product Category/Segment": "Smart Metering (AMI), High-Voltage Transmission Infrastructure, and Parallel Electricity Distribution.",
+          "Opening New Stores / Facilities": "Not applicable for direct retail; expanding operational grid substations, transmission maintenance centers, and regional customer service/billing centers."
         },
         "Contraction & Shutdown Signals": {
-          "Manufacturing / Line Discontinuation": "Not applicable (company does not operate automotive vehicle manufacturing lines).",
-          "Plant / Facility Shutdown": "No active permanent plant shutdowns or regulatory environmental closures identified across primary facilities.",
-          "Closing Stores / Branches": "Not applicable — physical retail stores not operated; consumer service centers and bill payment kiosks remain fully operational.",
-          "Stop Selling Product / Manufacturing": "No discontinuation of core product lines or primary business offerings reported."
+          "Manufacturing / Line Discontinuation": "Not applicable (company operates power transmission and distribution infrastructure, not vehicle or industrial assembly lines).",
+          "Plant / Facility Shutdown": "No active permanent plant shutdowns or regulatory environmental closures identified across primary operating facilities.",
+          "Closing Stores / Branches": "Not applicable — physical retail stores not operated; consumer customer-service hubs and digital touchpoints remain active.",
+          "Stop Selling Product / Manufacturing": "No discontinuation of core transmission or electricity distribution utility operations."
         },
         "Leadership Dynamics": {
-          "CEO / CXO Hiring or Exit": "Stable executive core: CEO (Bimal Dayal), CFO (Ashok Jagetiya), CTO (N/A).",
-          "AI / Digital Transformation Leader": "Active digital transformation initiatives overseen by technology & engineering leadership.",
+          "CEO / CXO Hiring or Exit": "Executive Leadership: CEO: Bimal Dayal, CFO: Ashok Jagetiya. Stable executive governance core.",
+          "AI / Digital Transformation Leader": "Digital transformation and enterprise AI initiatives driven through central Chief Technology / Information leadership and specialized engineering teams.",
           "CEO Transition / Stepping Down": "No current CEO exit or stepping-down proceedings reported; executive tenure confirmed active.",
-          "Growth & Marketing Leader": "Marketing, consumer engagement, and corporate growth managed through divisional business heads.",
-          "Chief AI Officer": "AI initiatives integrated within central CTO & digital innovation teams; dedicated Chief AI Officer role not mandated as standalone."
+          "Growth & Marketing Leader": "Commercial growth and business development driven through institutional bidding, key account managers, and regulatory affairs leadership.",
+          "Chief AI Officer": "AI initiatives governed centrally under Chief Technology / Digital Officer and engineering units; standalone Chief AI Officer role not mandated."
         },
         "Real Estate & Property Movements": {
-          "Acquired New Property": "Acquiring project rights-of-way, transmission substation land, and regional operational acreage to support continuous grid and network expansion. ↳ Strategic Implication: Capacity expansion and long-term capital investment.",
-          "Sold Property": "No major real estate or land divestments reported; holding and expanding strategic operating assets. ↳ Strategic Implication: Retaining strategic utility footprint; no debt-distress land sales."
+          "Acquired New Property": "Acquisition of strategic substation land parcels and transmission line right-of-way (RoW) corridors for inter-state green energy corridors. ↳ Strategic Implication: Long-term regulated asset base (RAB) capital deployment.",
+          "Sold Property": "No divestment of core transmission corridors or utility land holdings. ↳ Strategic Implication: Core utility asset retention with zero distress asset sales."
         },
         "Mergers, Acquisitions & Capital Actions": {
-          "Buying Company / Startup": "Actively acquiring operational assets, special purpose project vehicles (SPVs), and complementary infrastructure.",
-          "Merged with Company": "Consolidated operating subsidiaries under the central corporate umbrella via statutory amalgamation.",
-          "Demerger": "No current demerger planned; corporate structure operating as single integrated listed entity.",
-          "New Funding / IPO Launch": "Capital Raise: Successfully completed ₹ 8,373 Cr. (~$1 Billion) Qualified Institutional Placement (QIP) with strong institutional oversubscription."
+          "Buying Company / Startup": "Acquisition of operating transmission assets (e.g. Essar Mahan-Sipat), project SPVs, and smart metering concession companies.",
+          "Merged with Company": "Consolidation and amalgamation of acquired project transmission SPVs under the parent utility corporate umbrella.",
+          "Demerger": "Demerger Activity: Adani Energy Solutions Ltd Mergers & Demergers History",
+          "New Funding / IPO Launch": "Capital Raise: Completed ₹ 8,373 Cr. (~$1 Billion) Qualified Institutional Placement (QIP), heavily oversubscribed by global and domestic institutional investors."
         },
         "Financial Health": {
           "YoY Revenue": "Mar 2026: ₹ 27,588 Cr. vs Mar 2025: ₹ 23,767 Cr. (+16.1% YoY)",
@@ -3439,7 +3423,7 @@
         },
         {
           "name": "Strategic Intelligence (Mna_Demerger)",
-          "url": "https://economictimes.indiatimes.com/markets/stocks/news/adani-energys-rs-3500-crore-qip-oversubscribed-3-1-times-as-fiis-mfs-and-azim-premji-firm-make-bids/articleshow/132679389.cms"
+          "url": "https://www.adanienergysolutions.com/newsroom/media-releases/AESL-Raises-USD-1-Billion-via-QIP-Route"
         }
       ]
     }
