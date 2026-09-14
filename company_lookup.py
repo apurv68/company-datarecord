@@ -64,7 +64,7 @@ def load_env_file(filepath: str = ".env"):
 load_env_file()
 
 
-def call_gemini(prompt: str, system_instruction: str = "", max_tokens: int = 1200, temperature: float = 0.2) -> Optional[str]:
+def call_gemini(prompt: str, system_instruction: str = "", max_tokens: int = 2048, temperature: float = 0.2) -> Optional[str]:
     """
     Call Google Gemini REST API using the configured GEMINI_API_KEY.
     Falls back gracefully if no key is configured or on any error.
@@ -73,7 +73,13 @@ def call_gemini(prompt: str, system_instruction: str = "", max_tokens: int = 120
     if not api_key:
         return None
 
-    models = ["gemini-3.6-flash", "gemini-flash-latest", "gemini-3.5-flash", "gemini-2.5-flash"]
+    models = [
+        "gemini-3.5-flash-lite",
+        "gemini-3.1-flash-lite",
+        "gemini-3.6-flash",
+        "gemini-flash-latest",
+        "gemini-3.5-flash"
+    ]
     for model_name in models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
         payload: Dict[str, Any] = {
@@ -87,7 +93,7 @@ def call_gemini(prompt: str, system_instruction: str = "", max_tokens: int = 120
             payload["systemInstruction"] = {"parts": [{"text": system_instruction}]}
 
         try:
-            res = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=12)
+            res = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=18)
             if res.status_code == 200:
                 data = res.json()
                 candidates = data.get("candidates", [])
@@ -97,10 +103,11 @@ def call_gemini(prompt: str, system_instruction: str = "", max_tokens: int = 120
                         text = parts[0].get("text", "").strip()
                         if text:
                             return text
-            elif res.status_code in (404, 400):
+            else:
+                # On 429, 404, 500, 503 etc, try next available model immediately
                 continue
         except Exception:
-            pass
+            continue
     return None
 
 
@@ -389,6 +396,7 @@ def extract_person_name(raw_text: str, role: str = "", company_name: str = "") -
         "services", "solutions", "digital", "consulting", "consultancy",
         "india", "indian", "group", "corp", "enterprise", "enterprises",
         "limited", "ltd", "pvt", "private", "public", "inc", "llc",
+        
         "infosys", "wipro", "tata", "reliance", "network", "networks",
         "labs", "studio", "studios", "media", "cloud", "data", "cyber",
         "infotech", "telecom", "communications", "analytics", "automation",
@@ -3233,6 +3241,37 @@ def fetch_latest_news(company_name_or_entity: Any, wiki_slug: str = "") -> Tuple
     # 2. Within each year, prioritize by Source Priority Rank (1: Official Announcement -> 2: Regulatory Filing -> 3: Government -> 4: Tier-1 Media -> 5: Analyst -> 6: Wikipedia)
     events.sort(key=lambda x: (-x["year"], x.get("source_rank", 5)))
 
+    # AI-Enhanced 2-Line Intelligence Synthesis for Top News Events
+    if os.environ.get("GEMINI_API_KEY") and events:
+        top_events = events[:8]
+        try:
+            headlines_prompt = "\n".join(f"{i+1}. [{ev['year']}] {ev['text']}" for i, ev in enumerate(top_events))
+            p = (
+                f"You are a Senior Corporate Intelligence Analyst.\n"
+                f"Company: {canonical_entity.get('canonical_name', clean_name)}\n\n"
+                f"For each numbered news headline below, generate a high-density 2-line strategic context explaining:\n"
+                f"Line 1: Core event, factual details, and business reason.\n"
+                f"Line 2: Operational impact, financial relevance, or market implication.\n\n"
+                f"Requirements:\n"
+                f"- Exactly 2 concise lines per item (separated by a newline).\n"
+                f"- Return ONLY a JSON array of strings matching the items in order. Example: [\"Line 1...\\nLine 2...\", ...]\n"
+                f"- No markdown code blocks, just raw JSON array.\n\n"
+                f"Headlines:\n{headlines_prompt}"
+            )
+            raw_ai = call_gemini(p, max_tokens=1500)
+            if raw_ai:
+                clean_json = raw_ai.strip()
+                if clean_json.startswith("```"):
+                    clean_json = re.sub(r"^```(?:json)?\s*", "", clean_json)
+                    clean_json = re.sub(r"\s*```$", "", clean_json)
+                briefs = json.loads(clean_json)
+                if isinstance(briefs, list):
+                    for idx, brief in enumerate(briefs):
+                        if idx < len(top_events) and brief and isinstance(brief, str) and len(brief.strip()) > 15:
+                            top_events[idx]["brief"] = brief.strip()
+        except Exception:
+            pass
+
     # Group into Year Categories for structured presentation
     grouped_by_year: Dict[str, List[str]] = {}
     for ev in events:
@@ -3240,6 +3279,8 @@ def fetch_latest_news(company_name_or_entity: Any, wiki_slug: str = "") -> Tuple
         if y_key not in grouped_by_year:
             grouped_by_year[y_key] = []
         item_entry = f"[{ev['signal']}] [{ev['entity_tag']}] [{ev['evidence']}] {ev['text']} (Year: {ev['year']})"
+        if ev.get("brief"):
+            item_entry += f"\n    ↳ Intelligence Brief: {ev['brief']}"
         grouped_by_year[y_key].append(item_entry)
 
     return grouped_by_year, sources
@@ -3254,7 +3295,14 @@ def display_latest_news(data: Dict[str, List[str]], sources: List[Dict[str, str]
             has_items = True
             lines.append(f"\n[bold yellow]📅 {year_group}[/bold yellow]")
             for item in items[:6]:
-                formatted_item = item
+                brief_lines = []
+                if "\n    ↳ Intelligence Brief: " in item:
+                    headline_part, brief_part = item.split("\n    ↳ Intelligence Brief: ", 1)
+                    brief_lines = [b.strip() for b in brief_part.split("\n") if b.strip()]
+                else:
+                    headline_part = item
+
+                formatted_item = headline_part
                 # Highlight Signal Badges
                 formatted_item = re.sub(r"\[(LEADERSHIP SIGNAL)\]", r"[bold magenta][\1][/bold magenta]", formatted_item)
                 formatted_item = re.sub(r"\[(FINANCIAL & M&A SIGNAL)\]", r"[bold green][\1][/bold green]", formatted_item)
@@ -3280,6 +3328,8 @@ def display_latest_news(data: Dict[str, List[str]], sources: List[Dict[str, str]
                 # Highlight Year Tag
                 formatted_item = re.sub(r"\(Year:\s*(\d{4})\)", r"[bold bright_yellow](Year: \1)[/bold bright_yellow]", formatted_item)
                 lines.append(f"  [green]•[/green] {formatted_item}")
+                for bl in brief_lines:
+                    lines.append(f"    [dim cyan]↳[/dim cyan] [white]{bl}[/white]")
 
     if not has_items:
         lines.append("[dim]No verified recent corporate developments found.[/dim]")
@@ -4779,6 +4829,54 @@ def fetch_strategic_conclusions(
         }
     }
 
+    # AI-Enhanced Full 2-3 Line Strategic Assessments for Table #5
+    if os.environ.get("GEMINI_API_KEY"):
+        try:
+            t5_prompt = (
+                f"You are a Senior Corporate Business Intelligence Analyst.\n"
+                f"Synthesize an authoritative 2-3 line executive assessment for {canon_name} across the 7 corporate pillars below.\n\n"
+                f"Grounding Data:\n"
+                f"- Financial Health: {yoy_rev_text} | {yoy_margin_text}\n"
+                f"- Executive Leadership: CEO: {ceo_name}, CFO: {cfo_name}, CTO: {cto_name}\n"
+                f"- Business Sector/Archetype: {archetype}\n"
+                f"- Primary Offerings: {', '.join(t4_prods[:4]) if t4_prods else 'Core commercial products'}\n"
+                f"- Recent Signals: {news_text_blob[:600]}\n\n"
+                f"Pillars to Assess (each MUST be exactly 2-3 informative sentences):\n"
+                f"1. growth: Revenue trajectory, growth verdict ({growth_verdict}), and primary demand drivers.\n"
+                f"2. expansion: Geographic moves, distribution/store network growth, and new product launch vectors.\n"
+                f"3. contraction: Facility/plant status, SKU rationalization, store closures, and discontinued operations.\n"
+                f"4. leadership: Executive stability, CXO appointments/transitions, and digital/AI governance.\n"
+                f"5. real_estate: Property/plant acquisitions, leased hubs vs asset sales and strategic rationale.\n"
+                f"6. mna: M&A, subsidiaries consolidation, demerger plans, and capital raising/debt health.\n"
+                f"7. financial_health: YoY top-line trajectory, operating/profit margin trends, and balance sheet resilience.\n\n"
+                f"Return ONLY a JSON object with keys 'growth', 'expansion', 'contraction', 'leadership', 'real_estate', 'mna', 'financial_health'.\n"
+                f"Each value must be a 2-3 sentence string. No markdown formatting, just raw JSON."
+            )
+            ai_res = call_gemini(t5_prompt, max_tokens=2048)
+            if ai_res:
+                clean_t5 = ai_res.strip()
+                if clean_t5.startswith("```"):
+                    clean_t5 = re.sub(r"^```(?:json)?\s*", "", clean_t5)
+                    clean_t5 = re.sub(r"\s*```$", "", clean_t5)
+                parsed_t5 = json.loads(clean_t5)
+                if isinstance(parsed_t5, dict):
+                    if parsed_t5.get("growth"):
+                        conclusions["Growth Assessment"]["Strategic Analysis"] = parsed_t5["growth"].strip()
+                    if parsed_t5.get("expansion"):
+                        conclusions["Expansion Vectors"]["Strategic Analysis"] = parsed_t5["expansion"].strip()
+                    if parsed_t5.get("contraction"):
+                        conclusions["Contraction & Shutdown Signals"]["Strategic Analysis"] = parsed_t5["contraction"].strip()
+                    if parsed_t5.get("leadership"):
+                        conclusions["Leadership Dynamics"]["Strategic Analysis"] = parsed_t5["leadership"].strip()
+                    if parsed_t5.get("real_estate"):
+                        conclusions["Real Estate & Property Movements"]["Strategic Analysis"] = parsed_t5["real_estate"].strip()
+                    if parsed_t5.get("mna"):
+                        conclusions["Mergers, Acquisitions & Capital Actions"]["Strategic Analysis"] = parsed_t5["mna"].strip()
+                    if parsed_t5.get("financial_health"):
+                        conclusions["Financial Health"]["Strategic Analysis"] = parsed_t5["financial_health"].strip()
+        except Exception:
+            pass
+
     return conclusions, sources
 
 
@@ -4790,14 +4888,21 @@ def display_strategic_conclusions(data: Dict[str, Any], sources: List[Dict[str, 
     ga = data.get("Growth Assessment", {})
     verdict = ga.get("Verdict", "Growing")
     summary = ga.get("Summary & Drivers", "Sustained operational expansion.")
+    analysis = ga.get("Strategic Analysis", "")
     v_style = "bold green" if any(k in verdict.lower() for k in ["rapid", "strong", "growing", "expansion"]) else ("bold yellow" if "steady" in verdict.lower() else "bold red")
     lines.append("[bold yellow]📊 1. Growth & Expansion Trajectory[/bold yellow]")
     lines.append(f"  [cyan]•[/cyan] [bold white]Growth Verdict:[/bold white] [{v_style}]{verdict}[/{v_style}]")
-    lines.append(f"  [cyan]•[/cyan] [bold white]Strategic Drivers:[/bold white] {summary}\n")
+    if analysis:
+        lines.append(f"  [dim cyan]↳[/dim cyan] [bold white]Executive Assessment (2-3 Lines):[/bold white] {analysis}\n")
+    else:
+        lines.append(f"  [cyan]•[/cyan] [bold white]Strategic Drivers:[/bold white] {summary}\n")
 
     # 2. Strategic Expansion Vectors
     ev = data.get("Expansion Vectors", {})
+    ev_analysis = ev.get("Strategic Analysis", "")
     lines.append("[bold yellow]🌐 2. Strategic Expansion Vectors[/bold yellow]")
+    if ev_analysis:
+        lines.append(f"  [dim cyan]↳[/dim cyan] [bold white]Executive Assessment (2-3 Lines):[/bold white] {ev_analysis}")
     lines.append(f"  [green]•[/green] [bold white]New Markets:[/bold white] {ev.get('New Markets', 'N/A')}")
     lines.append(f"  [green]•[/green] [bold white]New Geography (Location):[/bold white] {ev.get('New Geography (Location)', 'N/A')}")
     lines.append(f"  [green]•[/green] [bold white]New Product Launch:[/bold white] {ev.get('New Product Launch', 'N/A')}")
@@ -4806,7 +4911,10 @@ def display_strategic_conclusions(data: Dict[str, Any], sources: List[Dict[str, 
 
     # 3. Contraction & Operational Shutdown Signals
     cs = data.get("Contraction & Shutdown Signals", {})
+    cs_analysis = cs.get("Strategic Analysis", "")
     lines.append("[bold yellow]🔻 3. Contraction & Operational Shutdown Signals[/bold yellow]")
+    if cs_analysis:
+        lines.append(f"  [dim cyan]↳[/dim cyan] [bold white]Executive Assessment (2-3 Lines):[/bold white] {cs_analysis}")
     lines.append(f"  [red]•[/red] [bold white]Manufacturing / Line Discontinuation:[/bold white] {cs.get('Manufacturing / Line Discontinuation', 'N/A')}")
     lines.append(f"  [red]•[/red] [bold white]Plant / Facility Shutdown:[/bold white] {cs.get('Plant / Facility Shutdown', 'N/A')}")
     lines.append(f"  [red]•[/red] [bold white]Closing Stores / Branches:[/bold white] {cs.get('Closing Stores / Branches', 'N/A')}")
@@ -4814,7 +4922,10 @@ def display_strategic_conclusions(data: Dict[str, Any], sources: List[Dict[str, 
 
     # 4. Leadership & Governance Dynamics
     ld = data.get("Leadership Dynamics", {})
+    ld_analysis = ld.get("Strategic Analysis", "")
     lines.append("[bold yellow]👥 4. Leadership & Governance Dynamics[/bold yellow]")
+    if ld_analysis:
+        lines.append(f"  [dim cyan]↳[/dim cyan] [bold white]Executive Assessment (2-3 Lines):[/bold white] {ld_analysis}")
     lines.append(f"  [cyan]•[/cyan] [bold white]CEO / CXO Hiring or Exit:[/bold white] {ld.get('CEO / CXO Hiring or Exit', 'N/A')}")
     lines.append(f"  [cyan]•[/cyan] [bold white]AI / Digital Transformation Leader:[/bold white] {ld.get('AI / Digital Transformation Leader', 'N/A')}")
     lines.append(f"  [cyan]•[/cyan] [bold white]CEO Transition / Stepping Down:[/bold white] {ld.get('CEO Transition / Stepping Down', 'N/A')}")
@@ -4823,13 +4934,19 @@ def display_strategic_conclusions(data: Dict[str, Any], sources: List[Dict[str, 
 
     # 5. Real Estate & Property Movements
     re_mov = data.get("Real Estate & Property Movements", {})
+    re_analysis = re_mov.get("Strategic Analysis", "")
     lines.append("[bold yellow]🏢 5. Real Estate & Property Movements[/bold yellow]")
+    if re_analysis:
+        lines.append(f"  [dim cyan]↳[/dim cyan] [bold white]Executive Assessment (2-3 Lines):[/bold white] {re_analysis}")
     lines.append(f"  [magenta]•[/magenta] [bold white]Acquired New Property:[/bold white] {re_mov.get('Acquired New Property', 'N/A')}")
     lines.append(f"  [magenta]•[/magenta] [bold white]Sold Property:[/bold white] {re_mov.get('Sold Property', 'N/A')}\n")
 
     # 6. Mergers, Acquisitions & Capital Actions
     ma = data.get("Mergers, Acquisitions & Capital Actions", {})
+    ma_analysis = ma.get("Strategic Analysis", "")
     lines.append("[bold yellow]🤝 6. Mergers, Acquisitions & Capital Actions (M&A)[/bold yellow]")
+    if ma_analysis:
+        lines.append(f"  [dim cyan]↳[/dim cyan] [bold white]Executive Assessment (2-3 Lines):[/bold white] {ma_analysis}")
     lines.append(f"  [yellow]•[/yellow] [bold white]Buying Company / Startup:[/bold white] {ma.get('Buying Company / Startup', 'N/A')}")
     lines.append(f"  [yellow]•[/yellow] [bold white]Merged with Company:[/bold white] {ma.get('Merged with Company', 'N/A')}")
     lines.append(f"  [yellow]•[/yellow] [bold white]Demerger / Spinoff:[/bold white] {ma.get('Demerger', 'N/A')}")
@@ -4837,7 +4954,10 @@ def display_strategic_conclusions(data: Dict[str, Any], sources: List[Dict[str, 
 
     # 7. Financial Health & YoY Performance
     fh = data.get("Financial Health", {})
+    fh_analysis = fh.get("Strategic Analysis", "")
     lines.append("[bold yellow]📈 7. Financial Health & YoY Performance[/bold yellow]")
+    if fh_analysis:
+        lines.append(f"  [dim cyan]↳[/dim cyan] [bold white]Executive Assessment (2-3 Lines):[/bold white] {fh_analysis}")
     lines.append(f"  [green]•[/green] [bold white]YoY Revenue:[/bold white] {fh.get('YoY Revenue', 'N/A')}")
     lines.append(f"  [green]•[/green] [bold white]YoY Profit Margin:[/bold white] {fh.get('YoY Profit Margin', 'N/A')}")
 
