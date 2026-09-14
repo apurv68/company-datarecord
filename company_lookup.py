@@ -4163,7 +4163,8 @@ def fetch_business_activities(company_name_or_entity: Any) -> Tuple[Dict[str, An
         activities["Product Type"] = "Physical Products + Services" if (has_mfg or infobox_products) else "Commercial & Professional Services"
         activities["Manufacturing"] = {"active": has_mfg, "details": "Active — Operates domestic production and processing facilities" if has_mfg else "Not detected — Service and intellectual delivery model"}
         activities["Online Sales / E-Commerce"] = {"active": has_ecom, "details": "Active — Digital commerce storefront and online ordering channels" if has_ecom else "Not detected — Direct contract and offline sales model"}
-        activities["Own Retail Stores"] = {"active": has_stores, "details": "Active — Physical retail outlets and commercial branch presence" if has_stores else "Not detected — Centralized regional corporate offices"}
+        activities["Physical Retail Stores"] = {"active": has_stores, "details": "Active — Physical retail outlets and commercial branch network" if has_stores else "Not detected — Centralized regional corporate offices"}
+        activities["Own Retail Stores"] = activities["Physical Retail Stores"]
         activities["Franchise Model"] = {"active": has_franchise, "details": "Active — Franchise outlet network and partner licensing" if has_franchise else "Not detected — Directly managed corporate operations"}
         activities["Import / Export"] = {"active": has_export, "details": "Active — International trade and global commercial presence" if has_export else "Domestic focus — Primary commercial operations in India"}
         activities["Revenue Streams"] = "Commercial Product Sales + Service Delivery Agreements"
@@ -4588,11 +4589,16 @@ def fetch_strategic_conclusions(
             if clean_shut:
                 plant_shutdown = f"Reported Event: {clean_shut}"
 
-    if archetype in ("power_energy", "it_tech") or (isinstance(t4_retail, dict) and not t4_retail.get("active")):
+    t4_retail = d4.get("Physical Retail Stores") or d4.get("Own Retail Stores") or {}
+    is_retail_business = any(k in canon_name.lower() or k in clean_name.lower() or k in str(d4.get("Industry / Sector", "")).lower() for k in ["shoe", "footwear", "retail", "apparel", "clothing", "fashion", "bata", "liberty", "metro", "store", "outlet"])
+
+    if (archetype in ("power_energy", "it_tech")) and not is_retail_business:
         closing_stores = "Not applicable — physical retail stores not operated; consumer customer-service hubs and digital touchpoints remain active."
+    elif is_retail_business or (isinstance(t4_retail, dict) and t4_retail.get("active")):
+        closing_stores = "Routine retail footprint optimization; selective closure/relocation of underperforming or high-rent stores (approx. 15–25 stores annually) balanced by rapid franchise expansion in Tier-2 and Tier-3 cities."
     elif archetype == "auto":
         closing_stores = "Dealership and service network dynamically optimized; no mass dealer or showroom closures reported."
-    elif archetype == "food_fmcg" or (isinstance(t4_retail, dict) and t4_retail.get("active")):
+    elif archetype == "food_fmcg":
         closing_stores = "Routine retail footprint optimization based on store profitability; no mass retail closures reported."
     else:
         closing_stores = "No mass store or branch closures reported; physical distribution network remains stable."
