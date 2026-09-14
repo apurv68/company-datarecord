@@ -18,6 +18,7 @@ import re
 import time
 import xml.etree.ElementTree as ET
 import email.utils
+from datetime import datetime
 from typing import Dict, Any, Optional, List, Tuple
 
 # Ensure UTF-8 output on Windows consoles with immediate line buffering
@@ -2269,20 +2270,16 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A") ->
 
     # 1. Determine Screener ticker/slug
     ticker = None
+    is_unlisted_entity = False
     if stock_ticker and stock_ticker != "N/A":
-        m = re.search(r'([A-Z0-9]+)', stock_ticker.replace("NSE/BSE:", "").replace("BSE:", "").replace("NSE:", "").strip())
-        if m:
-            ticker = m.group(1)
-
-    if not ticker:
-        try:
-            s_res = requests.get(f"https://www.screener.in/api/company/search/?q={clean_name}", headers={'User-Agent': 'Mozilla/5.0'}, timeout=5)
-            if s_res.status_code == 200:
-                s_data = s_res.json()
-                if s_data and isinstance(s_data, list):
-                    ticker = s_data[0].get("url", "").strip("/").split("/")[-1]
-        except Exception:
-            pass
+        if "unlisted" in str(stock_ticker).lower():
+            is_unlisted_entity = True
+        else:
+            m = re.search(r'([A-Z0-9]+)', stock_ticker.replace("NSE/BSE:", "").replace("BSE:", "").replace("NSE:", "").strip())
+            if m:
+                ticker = m.group(1)
+    else:
+        is_unlisted_entity = True
 
     periods = []
     rev_by_period = {}
@@ -2290,57 +2287,96 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A") ->
     pat_by_period = {}
     present_mcap = "N/A"
 
-    # 2. Extract audited P&L from Screener if listed/available
-    if ticker:
+    def extract_valid_screener_pl(soup_obj, s_url_str):
+        """Extract multi-year P&L from Screener, strictly enforcing that data must be recent (<= 3 years old)."""
+        pl = soup_obj.find('section', id='profit-loss')
+        if not pl:
+            return None, {}, {}, {}, "N/A"
+
+        raw_headers = [re.sub(r"\s+", " ", th.get_text()).strip() for th in pl.find('thead').find_all('th')]
+        year_headers = [h for h in raw_headers if h]
+
+        # Recency check: Table must have columns covering recent years (>= current_year - 3)
+        def extract_year(h):
+            m = re.search(r'\b(20\d\d)\b', h)
+            return int(m.group(1)) if m else 0
+
+        years = [extract_year(h) for h in year_headers if extract_year(h) > 0]
+        latest_year = max(years) if years else 0
+        current_year = datetime.now().year
+
+        # If the latest reporting period in the table is older than (current_year - 3) (e.g. 2017),
+        # this table is obsolete/delisted historical data, NOT the last 5 years. Reject it.
+        if latest_year < (current_year - 3):
+            return None, {}, {}, {}, "N/A"
+
+        # Take last 6 columns (5 previous years + present/TTM)
+        selected_headers = year_headers[-6:] if len(year_headers) >= 6 else year_headers
+        p_list = selected_headers
+
+        r_dict = {}
+        e_dict = {}
+        pt_dict = {}
+
+        for tr in pl.find('tbody').find_all('tr'):
+            cells = [re.sub(r"\s+", " ", td.get_text()).strip() for td in tr.find_all(['td', 'th'])]
+            if cells:
+                row_title = re.sub(r'[^a-zA-Z\s]', '', cells[0]).strip().lower()
+                vals = cells[1:][-len(p_list):]
+                if "sales" in row_title:
+                    for p, v in zip(p_list, vals):
+                        r_dict[p] = f"₹ {v} Cr." if v and v != "-" else "N/A"
+                elif "operating profit" in row_title:
+                    for p, v in zip(p_list, vals):
+                        e_dict[p] = f"₹ {v} Cr." if v and v != "-" else "N/A"
+                elif "net profit" in row_title:
+                    for p, v in zip(p_list, vals):
+                        pt_dict[p] = f"₹ {v} Cr." if v and v != "-" else "N/A"
+
+        p_mcap = "N/A"
+        top_ratios = soup_obj.find('ul', id='top-ratios')
+        if top_ratios:
+            for li in top_ratios.find_all('li'):
+                name_el = li.find('span', class_='name')
+                val_el = li.find('span', class_='number')
+                if name_el and val_el and 'market cap' in name_el.get_text().lower():
+                    p_mcap = f"₹ {val_el.get_text().strip()} Cr."
+
+        return p_list, r_dict, e_dict, pt_dict, p_mcap
+
+    # 2. Extract audited P&L from Screener if listed ticker is available and not an unlisted entity
+    if ticker and not is_unlisted_entity:
         for suffix in ["/consolidated/", "/"]:
             s_url = f"https://www.screener.in/company/{ticker}{suffix}"
             try:
                 res = requests.get(s_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=6)
                 if res.status_code == 200:
                     soup = BeautifulSoup(res.text, 'html.parser')
-                    pl = soup.find('section', id='profit-loss')
-                    if pl:
+                    p_res, r_res, e_res, pt_res, m_res = extract_valid_screener_pl(soup, s_url)
+                    if p_res:
                         add_source("Screener.in (Audited Multi-Year P&L Financials)", s_url)
-                        raw_headers = [re.sub(r"\s+", " ", th.get_text()).strip() for th in pl.find('thead').find_all('th')]
-                        year_headers = [h for h in raw_headers if h]
-                        # Take last 6 columns (5 previous years + present/TTM)
-                        selected_headers = year_headers[-6:] if len(year_headers) >= 6 else year_headers
-                        periods = selected_headers
-
-                        for tr in pl.find('tbody').find_all('tr'):
-                            cells = [re.sub(r"\s+", " ", td.get_text()).strip() for td in tr.find_all(['td', 'th'])]
-                            if cells:
-                                row_title = re.sub(r'[^a-zA-Z\s]', '', cells[0]).strip().lower()
-                                vals = cells[1:][-len(periods):]
-                                if "sales" in row_title:
-                                    for p, v in zip(periods, vals):
-                                        rev_by_period[p] = f"₹ {v} Cr." if v and v != "-" else "N/A"
-                                elif "operating profit" in row_title:
-                                    for p, v in zip(periods, vals):
-                                        ebitda_by_period[p] = f"₹ {v} Cr." if v and v != "-" else "N/A"
-                                elif "net profit" in row_title:
-                                    for p, v in zip(periods, vals):
-                                        pat_by_period[p] = f"₹ {v} Cr." if v and v != "-" else "N/A"
-
-                        top_ratios = soup.find('ul', id='top-ratios')
-                        if top_ratios:
-                            for li in top_ratios.find_all('li'):
-                                name_el = li.find('span', class_='name')
-                                val_el = li.find('span', class_='number')
-                                if name_el and val_el and 'market cap' in name_el.get_text().lower():
-                                    present_mcap = f"₹ {val_el.get_text().strip()} Cr."
+                        periods = p_res
+                        rev_by_period = r_res
+                        ebitda_by_period = e_res
+                        pat_by_period = pt_res
+                        if m_res != "N/A":
+                            present_mcap = m_res
                         break
             except Exception:
                 pass
 
-    # 2b. Fallback: Search Screener API if direct ticker URL failed or returned no periods
-    if not periods:
+    # 2b. Fallback: Search Screener API ONLY if company is NOT unlisted, and direct ticker failed
+    if not periods and not is_unlisted_entity:
         try:
             s_res = requests.get(f"https://www.screener.in/api/company/search/?q={requests.utils.quote(clean_name)}", headers={'User-Agent': 'Mozilla/5.0'}, timeout=5)
             if s_res.status_code == 200:
                 s_data = s_res.json()
                 if s_data and isinstance(s_data, list):
-                    for item in s_data[:3]:
+                    for item in s_data[:5]:
+                        cand_name = item.get("name", "").lower()
+                        # Reject inactive / merged / defunct entities
+                        if any(bad in cand_name for bad in ["(merged)", "(defunct)", "amalgamated", "former"]):
+                            continue
                         cand_url = item.get("url", "")
                         cand_ticker = cand_url.strip("/").split("/")[-1] if "/company/" in cand_url else ""
                         if "/consolidated/" in cand_url:
@@ -2352,34 +2388,16 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A") ->
                                     res = requests.get(s_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=6)
                                     if res.status_code == 200:
                                         soup = BeautifulSoup(res.text, 'html.parser')
-                                        pl = soup.find('section', id='profit-loss')
-                                        if pl:
+                                        p_res, r_res, e_res, pt_res, m_res = extract_valid_screener_pl(soup, s_url)
+                                        if p_res:
                                             add_source("Screener.in (Audited Multi-Year P&L Financials)", s_url)
-                                            raw_headers = [re.sub(r"\s+", " ", th.get_text()).strip() for th in pl.find('thead').find_all('th')]
-                                            year_headers = [h for h in raw_headers if h]
-                                            selected_headers = year_headers[-6:] if len(year_headers) >= 6 else year_headers
-                                            periods = selected_headers
-                                            for tr in pl.find('tbody').find_all('tr'):
-                                                cells = [re.sub(r"\s+", " ", td.get_text()).strip() for td in tr.find_all(['td', 'th'])]
-                                                if cells:
-                                                    row_title = re.sub(r'[^a-zA-Z\s]', '', cells[0]).strip().lower()
-                                                    vals = cells[1:][-len(periods):]
-                                                    if "sales" in row_title:
-                                                        for p, v in zip(periods, vals):
-                                                            rev_by_period[p] = f"₹ {v} Cr." if v and v != "-" else "N/A"
-                                                    elif "operating profit" in row_title:
-                                                        for p, v in zip(periods, vals):
-                                                            ebitda_by_period[p] = f"₹ {v} Cr." if v and v != "-" else "N/A"
-                                                    elif "net profit" in row_title:
-                                                        for p, v in zip(periods, vals):
-                                                            pat_by_period[p] = f"₹ {v} Cr." if v and v != "-" else "N/A"
-                                            top_ratios = soup.find('ul', id='top-ratios')
-                                            if top_ratios and present_mcap == "N/A":
-                                                for li in top_ratios.find_all('li'):
-                                                    name_el = li.find('span', class_='name')
-                                                    val_el = li.find('span', class_='number')
-                                                    if name_el and val_el and 'market cap' in name_el.get_text().lower():
-                                                        present_mcap = f"₹ {val_el.get_text().strip()} Cr."
+                                            periods = p_res
+                                            rev_by_period = r_res
+                                            ebitda_by_period = e_res
+                                            pat_by_period = pt_res
+                                            if m_res != "N/A" and present_mcap == "N/A":
+                                                present_mcap = m_res
+                                            ticker = cand_ticker
                                             break
                                 except Exception:
                                     pass
@@ -2388,13 +2406,14 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A") ->
         except Exception:
             pass
 
-    # If unlisted / no Screener data, establish default 6 fiscal periods (FY21 to FY26)
+    # 3. Canonical 5-Year Timeline Guarantee
+    # If unlisted or no recent Screener data, strictly establish default 6 recent fiscal periods (FY21 to FY26)
     if not periods:
         periods = ["FY21 (2020-21)", "FY22 (2021-22)", "FY23 (2022-23)", "FY24 (2023-24)", "FY25 (2024-25)", "FY26 / Present"]
 
-    # 3. Market Cap History
+    # 3b. Market Cap History
     mcap_by_period = {}
-    is_private = (stock_ticker == "N/A" or "unlisted" in stock_ticker.lower()) and present_mcap == "N/A"
+    is_private = is_unlisted_entity or ((stock_ticker == "N/A" or "unlisted" in str(stock_ticker).lower()) and present_mcap == "N/A")
 
     if is_private:
         for p in periods:
