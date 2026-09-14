@@ -44,6 +44,66 @@ EXPORT_TABLE5_CSV_PATH = "company_conclusions.csv"
 EXPORT_JSON_PATH = "company_records.json"
 
 
+def load_env_file(filepath: str = ".env"):
+    """Load key-value pairs from .env into os.environ if present."""
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), filepath)
+    if os.path.isfile(env_path):
+        try:
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip("'\"")
+                        if k and v:
+                            os.environ[k] = v
+        except Exception:
+            pass
+
+load_env_file()
+
+
+def call_gemini(prompt: str, system_instruction: str = "", max_tokens: int = 1200, temperature: float = 0.2) -> Optional[str]:
+    """
+    Call Google Gemini REST API using the configured GEMINI_API_KEY.
+    Falls back gracefully if no key is configured or on any error.
+    """
+    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if not api_key:
+        return None
+
+    models = ["gemini-3.6-flash", "gemini-flash-latest", "gemini-3.5-flash", "gemini-2.5-flash"]
+    for model_name in models:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+        payload: Dict[str, Any] = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": temperature,
+                "maxOutputTokens": max_tokens
+            }
+        }
+        if system_instruction:
+            payload["systemInstruction"] = {"parts": [{"text": system_instruction}]}
+
+        try:
+            res = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=12)
+            if res.status_code == 200:
+                data = res.json()
+                candidates = data.get("candidates", [])
+                if candidates:
+                    parts = candidates[0].get("content", {}).get("parts", [])
+                    if parts:
+                        text = parts[0].get("text", "").strip()
+                        if text:
+                            return text
+            elif res.status_code in (404, 400):
+                continue
+        except Exception:
+            pass
+    return None
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # SOURCE PRIORITY HIERARCHY (higher number = more trustworthy)
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1608,6 +1668,7 @@ def search_executive_web(company: str, role: str) -> str:
         rf"\b(?:stepped down|resigned|retired)\s+as\s+(?:the\s+)?{role_regex}\s+(?:at|of)\s+{comp_esc}\b",
     ]
 
+    collected_snippets = []
     try:
         with DDGS(timeout=8) as ddgs:
             for q in queries:
@@ -1617,6 +1678,8 @@ def search_executive_web(company: str, role: str) -> str:
                         body = r.get("body", "")
                         comb = f"{title} | {body}"
                         comb_lower = comb.lower()
+                        if comp_core.lower() in comb_lower:
+                            collected_snippets.append(comb)
 
                         if comp_core.lower() not in comb_lower:
                             continue
@@ -1699,6 +1762,26 @@ def search_executive_web(company: str, role: str) -> str:
                     continue
     except Exception:
         pass
+
+    # AI-Enhanced Verification Layer
+    if os.environ.get("GEMINI_API_KEY") and collected_snippets:
+        sample_context = "\n".join(collected_snippets[:6])
+        prompt = (
+            f"Identify the current real human executive for:\n"
+            f"Company: {company}\n"
+            f"Target Role: {role_full} ({role})\n\n"
+            f"Search Evidence:\n{sample_context}\n\n"
+            f"Task: Return ONLY the person's exact full name (e.g. 'Krishan Kumar Chutani' or 'K. Krithivasan'). "
+            f"If the company is privately held/unlisted without a disclosed {role}, or if no clear current individual is named, output 'N/A'. "
+            f"Do NOT include honorifics (Mr./Dr.), job titles, verbs, or explanations."
+        )
+        ai_ans = call_gemini(prompt, max_tokens=30)
+        if ai_ans:
+            clean_ai = ai_ans.strip().strip("'\"").strip(".")
+            if clean_ai != "N/A" and len(clean_ai.split()) in (2, 3, 4):
+                verified = extract_person_name(clean_ai, role=role, company_name=company)
+                if verified != "N/A":
+                    return verified
 
     if scores:
         sorted_cands = sorted(scores.items(), key=lambda x: x[1], reverse=True)
@@ -4375,6 +4458,25 @@ def fetch_strategic_conclusions(
 
     growth_summary = f"{growth_verdict} — " + ("; ".join(growth_drivers) if growth_drivers else "Sustained operational expansion and infrastructure deployment across active business units.")
 
+    # Optional Gemini AI refinement for Table #5 executive synthesis
+    if os.environ.get("GEMINI_API_KEY"):
+        try:
+            synth_prompt = (
+                f"You are a Senior Corporate Intelligence Analyst.\n"
+                f"Company: {canon_name}\n"
+                f"YoY Revenue: {yoy_rev_text}\n"
+                f"YoY Margin: {yoy_margin_text}\n"
+                f"Base Verdict: {growth_verdict}\n"
+                f"Signals: {news_text_blob[:400]}\n\n"
+                f"Task: Write a concise 1-2 sentence executive growth summary and primary drivers. "
+                f"Must start with '{growth_verdict} — '. Do not use markdown headers or bullets."
+            )
+            ai_growth = call_gemini(synth_prompt, max_tokens=120)
+            if ai_growth and len(ai_growth.strip()) > 25 and growth_verdict.lower() in ai_growth.lower():
+                growth_summary = ai_growth.strip().strip('"\'')
+        except Exception:
+            pass
+
     # B. Expansion Vectors
     t4_cats = d4.get("Product Categories", [])
     t4_prods = d4.get("Key Products & Offerings", [])
@@ -5370,10 +5472,13 @@ def is_valid_company_name(name: str) -> bool:
 
 
 def main():
+    has_gemini = bool(os.environ.get("GEMINI_API_KEY", "").strip())
+    gemini_status = "[bold green]⚡ Gemini AI Intelligence Layer: Connected (High-Precision NER & Synthesis Active)[/bold green]" if has_gemini else "[dim]ℹ Gemini AI Key: Not detected in .env (running in rule-based heuristic mode)[/dim]"
     console.print(Panel.fit(
         "[bold cyan]Structured Corporate Data Intelligence Engine[/bold cyan]\n"
         "[white]Views: [bold yellow]Table #1 (Identity & Leadership)[/bold yellow] | [bold yellow]Table #2 (5-Year Financials)[/bold yellow]\n"
-        "       [bold yellow]Table #3 (Latest News)[/bold yellow] | [bold yellow]Table #4 (Business Activities)[/bold yellow] | [bold yellow]Table #5 (Strategic Conclusions)[/bold yellow][/white]",
+        "       [bold yellow]Table #3 (Latest News)[/bold yellow] | [bold yellow]Table #4 (Business Activities)[/bold yellow] | [bold yellow]Table #5 (Strategic Conclusions)[/bold yellow][/white]\n\n"
+        f"{gemini_status}",
         border_style="cyan"
     ))
 
