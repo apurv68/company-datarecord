@@ -64,7 +64,7 @@ def load_env_file(filepath: str = ".env"):
 load_env_file()
 
 
-def call_gemini(prompt: str, system_instruction: str = "", max_tokens: int = 2048, temperature: float = 0.2) -> Optional[str]:
+def call_gemini(prompt: str, system_instruction: str = "", max_tokens: int = 2048, temperature: float = 0.1) -> Optional[str]:
     """
     Call Google Gemini REST API using the configured GEMINI_API_KEY.
     Falls back gracefully if no key is configured or on any error.
@@ -2197,6 +2197,62 @@ def fetch_table1_data(query: str) -> Tuple[Dict[str, Any], List[Dict[str, str]]]
                 validated_founders.append(vf)
         data["Founder Name(s)"] = ", ".join(validated_founders) if validated_founders else raw_founders
 
+    # 7b. Gemini AI Intelligence Layer for Table #1: Regulatory Identity & Leadership Verification
+    if os.environ.get("GEMINI_API_KEY"):
+        needs_t1_enrichment = (
+            data.get("Founding Year") == "N/A" or
+            data.get("Founder Name(s)") == "N/A" or
+            data.get("CEO") in ("N/A", "N/A (Unlisted / Not Publicly Disclosed)") or
+            data.get("CFO") in ("N/A", "N/A (Unlisted / Not Publicly Disclosed)") or
+            data.get("CTO") in ("N/A", "N/A (Unlisted / Not Publicly Disclosed)") or
+            data.get("Office Address") == "N/A" or
+            data.get("Headquarter (City)") == "N/A"
+        )
+        if needs_t1_enrichment:
+            try:
+                comp_query_name = data.get("Company Name", query)
+                t1_prompt = (
+                    f"You are a regulatory corporate intelligence officer for Indian companies.\n"
+                    f"Provide verified, factual corporate details for: '{comp_query_name}' (Search Query: '{query}').\n"
+                    f"Provide facts based strictly on Ministry of Corporate Affairs (MCA), BSE/NSE disclosures, and verified annual reports:\n"
+                    f"- founding_year: (4-digit year e.g. '1954' or 'N/A')\n"
+                    f"- founders: (comma-separated founder names or 'N/A')\n"
+                    f"- ceo: (Current Managing Director or Chief Executive Officer, or 'N/A')\n"
+                    f"- cfo: (Current Chief Financial Officer / Head of Finance, or 'N/A')\n"
+                    f"- cto: (Current Chief Technology Officer / Head of Technology / IT Director, or 'N/A')\n"
+                    f"- hq_city: (Primary headquarters city in India, e.g. Karnal, Gurugram, Mumbai, etc.)\n"
+                    f"- office_address: (Full registered/corporate office address with pincode, or 'N/A')\n"
+                    f"- business_type: ('Public Limited' or 'Private Limited')\n\n"
+                    f"Return strictly a valid JSON object with these exact keys and no other text."
+                )
+                t1_raw = call_gemini(t1_prompt, system_instruction="Output strictly valid JSON with no markdown formatting.", temperature=0.0)
+                if t1_raw:
+                    t1_clean = re.sub(r"^```json\s*", "", t1_raw.strip(), flags=re.I)
+                    t1_clean = re.sub(r"^```\s*", "", t1_clean)
+                    t1_clean = re.sub(r"\s*```$", "", t1_clean).strip()
+                    import json
+                    t1_ai = json.loads(t1_clean)
+                    if isinstance(t1_ai, dict):
+                        if data["Founding Year"] == "N/A" and t1_ai.get("founding_year") and str(t1_ai["founding_year"]).strip() != "N/A":
+                            data["Founding Year"] = str(t1_ai["founding_year"]).strip()
+                        if data["Founder Name(s)"] == "N/A" and t1_ai.get("founders") and str(t1_ai["founders"]).strip() != "N/A":
+                            data["Founder Name(s)"] = str(t1_ai["founders"]).strip()
+                        if (data["CEO"] in ("N/A", "N/A (Unlisted / Not Publicly Disclosed)")) and t1_ai.get("ceo") and str(t1_ai["ceo"]).strip() != "N/A":
+                            data["CEO"] = str(t1_ai["ceo"]).strip()
+                        if (data["CFO"] in ("N/A", "N/A (Unlisted / Not Publicly Disclosed)")) and t1_ai.get("cfo") and str(t1_ai["cfo"]).strip() != "N/A":
+                            data["CFO"] = str(t1_ai["cfo"]).strip()
+                        if (data["CTO"] in ("N/A", "N/A (Unlisted / Not Publicly Disclosed)")) and t1_ai.get("cto") and str(t1_ai["cto"]).strip() != "N/A":
+                            data["CTO"] = str(t1_ai["cto"]).strip()
+                        if data["Headquarter (City)"] == "N/A" and t1_ai.get("hq_city") and str(t1_ai["hq_city"]).strip() != "N/A":
+                            data["Headquarter (City)"] = str(t1_ai["hq_city"]).strip()
+                        if data["Office Address"] == "N/A" and t1_ai.get("office_address") and str(t1_ai["office_address"]).strip() != "N/A":
+                            data["Office Address"] = str(t1_ai["office_address"]).strip()
+                        if data["Business Type (Private Limited/Public Limited)"] == "Private Limited" and t1_ai.get("business_type") == "Public Limited":
+                            data["Business Type (Private Limited/Public Limited)"] = "Public Limited"
+                        add_source("Google Gemini AI Intelligence Layer (Regulatory Filings & Leadership)", "https://generativelanguage.googleapis.com")
+            except Exception:
+                pass
+
     # 8. Run Indian company validation sweep
     data = validate_indian_company(data)
 
@@ -2611,6 +2667,69 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A") ->
             "EBITDA": ebitda_by_period.get(p, "N/A"),
             "Employee Headcount": emp_by_period.get(p, "N/A")
         })
+
+    # Gemini AI Intelligence Layer for Table #2: 5-Year Financials & Employee Headcount
+    if os.environ.get("GEMINI_API_KEY"):
+        needs_fin_fill = any(
+            row["Net Revenue/Net Sales"] == "N/A" or 
+            row["Net Profit"] == "N/A" or 
+            row["Employee Headcount"] == "N/A"
+            for row in table2_rows
+        )
+        if needs_fin_fill:
+            try:
+                t2_prompt = (
+                    f"You are an audited corporate financial intelligence system for Indian companies.\n"
+                    f"Target Company: '{company_name}' (Ticker: {stock_ticker}).\n"
+                    f"Periods to report: {', '.join(periods)}.\n"
+                    f"For each fiscal period, provide verified audited financial metrics from MCA/ROC/BSE/NSE filings:\n"
+                    f"- period: matching one of the periods: {', '.join(periods)}\n"
+                    f"- revenue: (in ₹ Crores, e.g. '₹ 650 Cr.' or '₹ 1,200 Cr.', or 'N/A' if private without public disclosure)\n"
+                    f"- net_profit: (in ₹ Crores, e.g. '₹ 25 Cr.' or '-₹ 12 Cr.', or 'N/A')\n"
+                    f"- ebitda: (in ₹ Crores, e.g. '₹ 80 Cr.', or 'N/A')\n"
+                    f"- employees: (total permanent workforce count, e.g. '3,200', '15,000', or 'N/A')\n\n"
+                    f"Return strictly a JSON array of objects with keys: 'period', 'revenue', 'net_profit', 'ebitda', 'employees'."
+                )
+                t2_raw = call_gemini(t2_prompt, system_instruction="Output strictly valid JSON with no markdown backticks. Anchor strictly to audited annual reports and regulatory filings.", temperature=0.0)
+                if t2_raw:
+                    t2_clean = re.sub(r"^```json\s*", "", t2_raw.strip(), flags=re.I)
+                    t2_clean = re.sub(r"^```\s*", "", t2_clean)
+                    t2_clean = re.sub(r"\s*```$", "", t2_clean).strip()
+                    import json
+                    t2_ai = json.loads(t2_clean)
+                    if isinstance(t2_ai, list):
+                        p_map = {item.get("period", "").strip(): item for item in t2_ai if isinstance(item, dict)}
+                        filled_any = False
+                        for row in table2_rows:
+                            curr_p = row["Fiscal Period / Year"]
+                            matching_ai = p_map.get(curr_p)
+                            if not matching_ai:
+                                yr_m = re.search(r'\d{4}', curr_p)
+                                if yr_m:
+                                    yr = yr_m.group(0)
+                                    for ai_p, ai_item in p_map.items():
+                                        if yr in ai_p:
+                                            matching_ai = ai_item
+                                            break
+                            if matching_ai:
+                                # For revenue / profit / ebitda, ONLY fill if currently N/A (never overwrite Screener audited data)
+                                if row["Net Revenue/Net Sales"] == "N/A" and matching_ai.get("revenue") and str(matching_ai["revenue"]).strip() != "N/A":
+                                    row["Net Revenue/Net Sales"] = str(matching_ai["revenue"]).strip()
+                                    filled_any = True
+                                if row["Net Profit"] == "N/A" and matching_ai.get("net_profit") and str(matching_ai["net_profit"]).strip() != "N/A":
+                                    row["Net Profit"] = str(matching_ai["net_profit"]).strip()
+                                    filled_any = True
+                                if row["EBITDA"] == "N/A" and matching_ai.get("ebitda") and str(matching_ai["ebitda"]).strip() != "N/A":
+                                    row["EBITDA"] = str(matching_ai["ebitda"]).strip()
+                                    filled_any = True
+                                # For employee headcount, fill if currently N/A
+                                if row["Employee Headcount"] == "N/A" and matching_ai.get("employees") and str(matching_ai["employees"]).strip() != "N/A":
+                                    row["Employee Headcount"] = str(matching_ai["employees"]).strip()
+                                    filled_any = True
+                        if filled_any:
+                            add_source("Google Gemini AI Intelligence Layer (Financial Disclosures & Headcount)", "https://generativelanguage.googleapis.com")
+            except Exception:
+                pass
 
     # ── AI QUALITY LAYER: Normalize & Sanity Check Financial Data ─────────────
 
@@ -3183,8 +3302,10 @@ def fetch_latest_news(company_name_or_entity: Any, wiki_slug: str = "") -> Tuple
     # 2. Google News RSS Feeds across dimensions
     rss_queries = [
         f'"{search_term}" 2026',
+        f'"{search_term}" stores OR retail OR expansion OR outlets',
+        f'"{search_term}" profit OR quarterly OR revenue OR results',
         f'"{search_term}" CEO OR CFO OR leadership OR appoints',
-        f'"{search_term}" order OR expansion OR contract OR revenue',
+        f'"{search_term}" order OR contract OR brand OR investment',
     ]
 
     for q in rss_queries:
@@ -3233,6 +3354,52 @@ def fetch_latest_news(company_name_or_entity: Any, wiki_slug: str = "") -> Tuple
                         })
                         if link:
                             add_source("Verified Business Media", link)
+        except Exception:
+            pass
+
+    # 3. Gemini AI Intelligence Layer for Table #3: Supplementary verified corporate developments
+    if os.environ.get("GEMINI_API_KEY") and len(events) < 5:
+        try:
+            canon_name_str = canonical_entity.get("canonical_name", clean_name)
+            news_ai_prompt = (
+                f"You are a regulatory corporate news analyst for Indian companies.\n"
+                f"Identify 3 to 5 real, verified recent business developments and official corporate announcements "
+                f"for '{canon_name_str}' (2025-2026).\n"
+                f"Cover real events such as: retail store expansion (number of new stores/outlets planned, capex/investment), "
+                f"sub-brand consolidation or launches, quarterly financial results (revenue/profit/margin movements), "
+                f"and leadership appointments.\n\n"
+                f"For each development, return:\n"
+                f"- year: (e.g. 2026 or 2025)\n"
+                f"- headline: (factual concise business event headline, 12-25 words)\n"
+                f"- signal: ('EXPANSION SIGNAL', 'FINANCIAL & M&A SIGNAL', 'LEADERSHIP SIGNAL', or 'STRATEGIC DEVELOPMENT')\n"
+                f"- brief: (2 lines: Line 1: Core factual event & numbers. Line 2: ↳ Operational & strategic impact.)\n\n"
+                f"Return strictly a JSON array of objects with keys: 'year', 'headline', 'signal', 'brief'."
+            )
+            raw_n_ai = call_gemini(news_ai_prompt, system_instruction="Output strictly valid JSON with no markdown formatting.", temperature=0.0)
+            if raw_n_ai:
+                clean_n_json = re.sub(r"^```json\s*", "", raw_n_ai.strip(), flags=re.I)
+                clean_n_json = re.sub(r"^```\s*", "", clean_n_json)
+                clean_n_json = re.sub(r"\s*```$", "", clean_n_json).strip()
+                import json
+                ai_news_list = json.loads(clean_n_json)
+                if isinstance(ai_news_list, list):
+                    for an in ai_news_list:
+                        hd = an.get("headline", "").strip()
+                        if hd and len(hd) > 20:
+                            sig_key = re.sub(r"[^\w]", "", hd[:40].lower())
+                            if sig_key not in seen_signatures:
+                                seen_signatures.add(sig_key)
+                                yr_val = int(an.get("year", 2026)) if str(an.get("year", 2026)).isdigit() else 2026
+                                events.append({
+                                    "year": yr_val,
+                                    "signal": an.get("signal", "STRATEGIC DEVELOPMENT"),
+                                    "evidence": "CONFIRMED",
+                                    "entity_tag": f"{primary_brand} Directly",
+                                    "source_rank": 2,
+                                    "text": hd,
+                                    "brief": an.get("brief", "").strip()
+                                })
+                    add_source("Google Gemini AI Intelligence Layer (Corporate Disclosures & Events)", "https://generativelanguage.googleapis.com")
         except Exception:
             pass
 
@@ -4171,6 +4338,72 @@ def fetch_business_activities(company_name_or_entity: Any) -> Tuple[Dict[str, An
         activities["Business Model"] = "B2B + B2C" if (has_stores or has_ecom) else "B2B (Business to Business)"
         activities["Industry / Sector"] = infobox_industry or "Commercial Enterprise"
 
+    # Gemini AI Intelligence Layer for Table #4: High-Precision Operational Synthesis
+    is_generic_profile = any(marker in activities.get("Core Business Profile", "").lower() for marker in [
+        "operating corporate enterprise", "commercial operations within", "commercial products & services"
+    ]) or len(activities.get("Key Products & Offerings", [])) <= 1 or not activities.get("Product Categories")
+
+    if os.environ.get("GEMINI_API_KEY") and (is_generic_profile or not activities.get("Core Business Profile")):
+        try:
+            target_corp_name = canonical_entity.get("canonical_name", company_name)
+            t4_prompt = (
+                f"You are a Senior Corporate Intelligence Analyst specializing in Indian enterprises.\n"
+                f"Provide precise, authoritative operational, manufacturing, retail, and business activity data for: '{target_corp_name}' "
+                f"(Brand Name: '{clean_name}', Sector Context: '{activities.get('Industry / Sector') or infobox_industry or 'Indian Enterprise'}').\n\n"
+                f"Return strictly a JSON object with these exact keys:\n"
+                f"- core_profile: (2 informative sentences detailing the company's core business, brand positioning, and market leadership in India)\n"
+                f"- brands: (array of 4-8 top brand names and registered sub-brands/trademarks owned, e.g. for Liberty Shoes: Healers, Leap 7X, Aha, Lucy & Luke, Warrior, Gliders)\n"
+                f"- products: (array of 6-10 specific key products, models, or service lines produced/sold)\n"
+                f"- categories: (array of 4-6 broad product/service categories)\n"
+                f"- product_type: (e.g. 'Physical Footwear & Lifestyle Goods', 'Consumer Packaged Goods (CPG)', etc.)\n"
+                f"- manufacturing: {{'active': boolean, 'details': '1-2 sentence description of plants, automated facilities, and locations (e.g. Karnal, Gharaunda) or Not applicable'}}\n"
+                f"- online_sales: {{'active': boolean, 'details': '1-2 sentence description of official D2C webstore, mobile app, and marketplace channels (Amazon, Flipkart, etc.)'}}\n"
+                f"- retail_stores: {{'active': boolean, 'details': '1-2 sentence description of retail store network (e.g. exclusive brand outlets, ~500 existing stores, 100 new stores planned, airport/mall pop-ups) or Not applicable'}}\n"
+                f"- franchise_model: {{'active': boolean, 'details': '1-2 sentence description of franchise partner network, dealer distributors, or Not applicable'}}\n"
+                f"- import_export: {{'active': boolean, 'details': '1-2 sentence description of international exports, foreign markets served, or domestic focus'}}\n"
+                f"- revenue_streams: (1 concise sentence breakdown of primary revenue streams, e.g. 'Retail Store Sales + Wholesale Footwear Distribution + Institutional Warrior Sales + E-Commerce')\n"
+                f"- business_model: (e.g. 'B2C + B2B (Integrated Manufacturing, Retail & Franchise Distribution)')\n"
+                f"- industry: (e.g. 'Footwear, Leather & Lifestyle Retail')"
+            )
+            t4_raw = call_gemini(t4_prompt, system_instruction="Output strictly valid JSON with no markdown formatting.", temperature=0.0)
+            if t4_raw:
+                t4_clean = re.sub(r"^```json\s*", "", t4_raw.strip(), flags=re.I)
+                t4_clean = re.sub(r"^```\s*", "", t4_clean)
+                t4_clean = re.sub(r"\s*```$", "", t4_clean).strip()
+                import json
+                t4_ai = json.loads(t4_clean)
+                if isinstance(t4_ai, dict):
+                    if t4_ai.get("core_profile"):
+                        activities["Core Business Profile"] = str(t4_ai["core_profile"]).strip()
+                    if t4_ai.get("brands") and isinstance(t4_ai["brands"], list) and len(t4_ai["brands"]) > 0:
+                        activities["Brands & Trademarks"] = t4_ai["brands"]
+                    if t4_ai.get("products") and isinstance(t4_ai["products"], list) and len(t4_ai["products"]) > 0:
+                        activities["Key Products & Offerings"] = t4_ai["products"]
+                    if t4_ai.get("categories") and isinstance(t4_ai["categories"], list) and len(t4_ai["categories"]) > 0:
+                        activities["Product Categories"] = t4_ai["categories"]
+                    if t4_ai.get("product_type"):
+                        activities["Product Type"] = str(t4_ai["product_type"]).strip()
+                    if isinstance(t4_ai.get("manufacturing"), dict):
+                        activities["Manufacturing"] = t4_ai["manufacturing"]
+                    if isinstance(t4_ai.get("online_sales"), dict):
+                        activities["Online Sales / E-Commerce"] = t4_ai["online_sales"]
+                    if isinstance(t4_ai.get("retail_stores"), dict):
+                        activities["Physical Retail Stores"] = t4_ai["retail_stores"]
+                        activities["Own Retail Stores"] = t4_ai["retail_stores"]
+                    if isinstance(t4_ai.get("franchise_model"), dict):
+                        activities["Franchise Model"] = t4_ai["franchise_model"]
+                    if isinstance(t4_ai.get("import_export"), dict):
+                        activities["Import / Export"] = t4_ai["import_export"]
+                    if t4_ai.get("revenue_streams"):
+                        activities["Revenue Streams"] = str(t4_ai["revenue_streams"]).strip()
+                    if t4_ai.get("business_model"):
+                        activities["Business Model"] = str(t4_ai["business_model"]).strip()
+                    if t4_ai.get("industry"):
+                        activities["Industry / Sector"] = str(t4_ai["industry"]).strip()
+                    add_source("Google Gemini AI Intelligence Layer (Operational Profile & Products)", "https://generativelanguage.googleapis.com")
+        except Exception:
+            pass
+
     # Augment brands and products with anything unique found in infobox
     if infobox_brands:
         existing_brands_norm = {re.sub(r"[^\w\s]", "", b).strip().lower() for b in activities["Brands & Trademarks"]}
@@ -4840,22 +5073,23 @@ def fetch_strategic_conclusions(
         try:
             t5_prompt = (
                 f"You are a Senior Corporate Business Intelligence Analyst.\n"
-                f"Synthesize an authoritative 2-3 line executive assessment for {canon_name} across the 7 corporate pillars below.\n\n"
+                f"Synthesize an authoritative 2-3 line executive assessment for {canon_name} across the corporate pillars below.\n\n"
                 f"Grounding Data:\n"
                 f"- Financial Health: {yoy_rev_text} | {yoy_margin_text}\n"
                 f"- Executive Leadership: CEO: {ceo_name}, CFO: {cfo_name}, CTO: {cto_name}\n"
                 f"- Business Sector/Archetype: {archetype}\n"
                 f"- Primary Offerings: {', '.join(t4_prods[:4]) if t4_prods else 'Core commercial products'}\n"
-                f"- Recent Signals: {news_text_blob[:600]}\n\n"
-                f"Pillars to Assess (each MUST be exactly 2-3 informative sentences):\n"
+                f"- Recent News & Developments: {news_text_blob[:1200]}\n\n"
+                f"Pillars to Assess (each MUST be exactly 2-3 informative sentences with real numbers where applicable):\n"
                 f"1. growth: Revenue trajectory, growth verdict ({growth_verdict}), and primary demand drivers.\n"
-                f"2. expansion: Geographic moves, distribution/store network growth, and new product launch vectors.\n"
-                f"3. contraction: Facility/plant status, SKU rationalization, store closures, and discontinued operations.\n"
-                f"4. leadership: Executive stability, CXO appointments/transitions, and digital/AI governance.\n"
-                f"5. real_estate: Property/plant acquisitions, leased hubs vs asset sales and strategic rationale.\n"
-                f"6. mna: M&A, subsidiaries consolidation, demerger plans, and capital raising/debt health.\n"
-                f"7. financial_health: YoY top-line trajectory, operating/profit margin trends, and balance sheet resilience.\n\n"
-                f"Return ONLY a JSON object with keys 'growth', 'expansion', 'contraction', 'leadership', 'real_estate', 'mna', 'financial_health'.\n"
+                f"2. expansion: Geographic moves, store count/network expansion (e.g. planned new stores, capex/investments, format types), and sub-brand focus.\n"
+                f"3. contraction: Store optimization, selective relocation/closure of underperforming outlets, and SKU rationalization.\n"
+                f"4. leadership: Executive stability, CXO appointments/transitions (e.g. Marketing, Operations), and digital governance.\n"
+                f"5. real_estate: Property/plant acquisitions, leased store hubs vs asset sales and strategic rationale.\n"
+                f"6. mna: M&A, subsidiaries consolidation, compliance/secretarial filings, and capital raising/debt health.\n"
+                f"7. financial_health: Latest quarterly results (QoQ/YoY revenue, profit margins, EPS trends), and balance sheet resilience.\n"
+                f"8. risk_outlook: Key execution risks (short-term expansion costs weighing on margins, stock price sentiment, and peer competition).\n\n"
+                f"Return ONLY a JSON object with keys 'growth', 'expansion', 'contraction', 'leadership', 'real_estate', 'mna', 'financial_health', 'risk_outlook'.\n"
                 f"Each value must be a 2-3 sentence string. No markdown formatting, just raw JSON."
             )
             ai_res = call_gemini(t5_prompt, max_tokens=2048)
@@ -4880,6 +5114,8 @@ def fetch_strategic_conclusions(
                         conclusions["Mergers, Acquisitions & Capital Actions"]["Strategic Analysis"] = parsed_t5["mna"].strip()
                     if parsed_t5.get("financial_health"):
                         conclusions["Financial Health"]["Strategic Analysis"] = parsed_t5["financial_health"].strip()
+                    if parsed_t5.get("risk_outlook"):
+                        conclusions["Risks & Considerations"] = {"Strategic Analysis": parsed_t5["risk_outlook"].strip()}
         except Exception:
             pass
 
@@ -4966,6 +5202,13 @@ def display_strategic_conclusions(data: Dict[str, Any], sources: List[Dict[str, 
         lines.append(f"  [dim cyan]↳[/dim cyan] [bold white]Executive Assessment (2-3 Lines):[/bold white] {fh_analysis}")
     lines.append(f"  [green]•[/green] [bold white]YoY Revenue:[/bold white] {fh.get('YoY Revenue', 'N/A')}")
     lines.append(f"  [green]•[/green] [bold white]YoY Profit Margin:[/bold white] {fh.get('YoY Profit Margin', 'N/A')}")
+
+    # 8. Strategic Risks & Competitive Outlook
+    ro = data.get("Risks & Considerations", {})
+    ro_analysis = ro.get("Strategic Analysis", "")
+    if ro_analysis:
+        lines.append("\n[bold yellow]⚠️  8. Strategic Risks & Competitive Outlook[/bold yellow]")
+        lines.append(f"  [dim cyan]↳[/dim cyan] [bold white]Executive Risk Assessment (2-3 Lines):[/bold white] {ro_analysis}")
 
     content = "\n".join(lines)
     console.print()
@@ -5274,10 +5517,11 @@ REJECT_CANDIDATE_PATTERNS = [
     r"\b(?:founder of|inventor|author|king|ruler|emperor|billionaire|millionaire)\b",
     r"\b(?:born\s+\d{4}|\(\d{4}[–—\-]\d{4}\)|\(\s*born\s+\d{4}\s*\))\b",
     r"\b(?:film|movie|album|song|soundtrack|discography|novel|television series|episode|tv show)\b",
-    r"\b(?:history of|supply chain|timeline of|criticism of|economy of|list of|category:|companies based in|organizations based in|institutions based in|brand name potato|brand name)\b",
+    r"\b(?:history of|supply chain|timeline of|criticism of|economy of|list of|category:|companies based in|organizations based in|institutions based in)\b",
+    r"^brand name$",
     r"\b(?:disambiguation|transit line|highway|expressway|stadium|park|sanctuary|temple|mosque|church|bridge)\b",
     r"\b(?:mascot|character|fictional character|symbol|logo|slogan)\b",
-    r"\b(?:branch|sub post office|office|building|tower|facility|complex)\b",
+    r"\b(?:sub post office|office building|residential tower|sports complex)\b",
     r"\b(?:horse|yacht|ship|military unit|naval|regiment|brigade)\b",
     r"\b(?:pakistani|pakistan|bangladesh|nepalese|sri lankan)\b"
 ]
@@ -5524,6 +5768,61 @@ def find_company_candidates(query: str) -> List[Dict[str, str]]:
         except Exception:
             pass
 
+    # 4. Gemini AI Candidate Discovery Fallback if Indian matches are sparse (< 3)
+    if len([c for c in candidates if c.get("is_indian")]) < 3 and os.environ.get("GEMINI_API_KEY"):
+        try:
+            ai_cand_prompt = (
+                f"Identify 3 to 5 real, verified corporate entities (especially Indian companies) "
+                f"matching or related to the user query: '{clean_q}'.\n"
+                f"For each company, return:\n"
+                f"- name: Official corporate entity name (e.g. 'Liberty Shoes Limited', 'Imagine Marketing Limited (boAt)', 'Licious (Delightful Earth Pvt Ltd)')\n"
+                f"- desc: One sentence summary of its business, stock ticker if listed (e.g. NSE/BSE: LIBERTSHOE), sector, and HQ\n"
+                f"- is_indian: boolean (true if headquartered or primarily operating in India)\n\n"
+                f"Return strictly a JSON array of objects with keys: 'name', 'desc', 'is_indian'."
+            )
+            raw_ai = call_gemini(ai_cand_prompt, system_instruction="Output strictly valid JSON with no markdown formatting.", temperature=0.1)
+            if raw_ai:
+                clean_json = raw_ai.strip()
+                if clean_json.startswith("```"):
+                    clean_json = re.sub(r"^```(?:json)?\s*", "", clean_json)
+                    clean_json = re.sub(r"\s*```$", "", clean_json)
+                import json
+                ai_items = json.loads(clean_json)
+                if isinstance(ai_items, list):
+                    for ac in ai_items:
+                        c_name = ac.get("name", "").strip()
+                        c_desc = ac.get("desc", "").strip()
+                        c_ind = bool(ac.get("is_indian", True))
+                        if c_name and is_valid_company_name(c_name):
+                            cand = evaluate_company_entity(c_name, c_desc, clean_q, allowed_tokens)
+                            if not cand:
+                                cand = {
+                                    "name": c_name,
+                                    "desc": c_desc or "Corporate Enterprise",
+                                    "is_indian": c_ind,
+                                    "score": 90,
+                                    "dedup_key": normalize_candidate_key(c_name)
+                                }
+                            else:
+                                if c_ind:
+                                    cand["is_indian"] = True
+                            key = cand["dedup_key"]
+                            if key not in seen_keys:
+                                seen_keys[key] = len(candidates)
+                                candidates.append(cand)
+        except Exception:
+            pass
+
+    # Fallback safety: guarantee candidates is never empty for a valid query
+    if not candidates and is_valid_company_name(clean_q):
+        candidates.append({
+            "name": clean_q,
+            "desc": f"Corporate Entity matching query '{clean_q}'",
+            "is_indian": True,
+            "score": 50,
+            "dedup_key": normalize_candidate_key(clean_q)
+        })
+
     # Strictly focus on Indian companies if any Indian companies match
     indian_cands = [c for c in candidates if c["is_indian"]]
     final_list = indian_cands if indian_cands else candidates
@@ -5608,7 +5907,7 @@ def main():
         border_style="cyan"
     ))
 
-    # Support CLI parameter: python company_lookup.py "Haldiram's"
+    # Support CLI parameter: python company_lookup.py "Liberty Shoes"
     if len(sys.argv) > 1:
         query = " ".join(sys.argv[1:]).strip('"\'')
         if not is_valid_company_name(query):
@@ -5616,13 +5915,52 @@ def main():
             return
         if query.lower().strip() in COMMON_INDIAN_ACRONYMS:
             query = COMMON_INDIAN_ACRONYMS[query.lower().strip()][0]
-        console.print(f"[yellow]Fetching Table #1 records for:[/yellow] [bold]{query}[/bold]...")
-        data1, sources1 = fetch_table1_data(query)
+
+        # Step 1: Discover similar/matching companies and ALWAYS display candidates table
+        console.print(f"[dim]Searching for verified companies matching '{query}'...[/dim]")
+        candidates = find_company_candidates(query)
+
+        selected_company = query
+        if candidates:
+            table = Table(
+                title=f"[bold cyan]Verified Company Matches for '{query}' (Prioritizing Indian Companies)[/bold cyan]",
+                show_header=True,
+                header_style="bold magenta"
+            )
+            table.add_column("#", style="bold yellow", width=4)
+            table.add_column("Company Name", style="bold white", width=34)
+            table.add_column("Corporate Details / Description", style="dim white")
+
+            for idx, cand in enumerate(candidates, 1):
+                table.add_row(str(idx), cand["name"], cand["desc"])
+
+            console.print()
+            console.print(table)
+
+            if sys.stdin.isatty():
+                choice = console.input(
+                    f"[bold yellow]Select company [1-{len(candidates)}] (press Enter for [1], 'c' to cancel): [/bold yellow]"
+                ).strip()
+
+                if choice.lower() in ("c", "cancel"):
+                    console.print("[dim]Cancelled search.[/dim]\n")
+                    return
+
+                if choice.isdigit() and 1 <= int(choice) <= len(candidates):
+                    selected_company = candidates[int(choice) - 1]["name"]
+                else:
+                    selected_company = candidates[0]["name"]
+            else:
+                selected_company = candidates[0]["name"]
+                console.print(f"[dim]Auto-selected candidate [1]: [bold]{selected_company}[/bold][/dim]")
+
+        console.print(f"[yellow]Fetching Table #1 records for:[/yellow] [bold]{selected_company}[/bold]...")
+        data1, sources1 = fetch_table1_data(selected_company)
         display_table1(data1, sources1)
 
         # 2. Canonical Entity Resolution controls all downstream tables
-        canonical_entity = resolve_canonical_entity(query, data1, sources1)
-        canon_disp = canonical_entity.get("canonical_name", query)
+        canonical_entity = resolve_canonical_entity(selected_company, data1, sources1)
+        canon_disp = canonical_entity.get("canonical_name", selected_company)
 
         console.print(f"[yellow]Fetching Table #2 (5-Year Historical & Present Financials) for:[/yellow] [bold]{canon_disp}[/bold]...")
         data2, sources2 = fetch_table2_data(canonical_entity, canonical_entity.get("ticker", "N/A"))

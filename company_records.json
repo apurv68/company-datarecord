@@ -4090,15 +4090,15 @@
       "Founding Year": "1954",
       "Founder Name(s)": "Dharam Pal Gupta, Purshotam Das Gupta",
       "CEO": "Adesh Kumar Gupta",
-      "CFO": "Satish Saini",
+      "CFO": "Munish Kakra",
       "CTO": "N/A",
       "Headquarter (City)": "Karnal",
       "Office Address": "Karnal, Haryana, India",
       "Business Type (Private Limited/Public Limited)": "Public Limited",
       "Is Listed Company": "Yes",
       "Stock Ticker": "NSE/BSE: LIBERTSHOE",
-      "Current Market Cap (Market Value/Mcap)": "₹ 390 Cr.",
-      "Share Price": "₹ 229",
+      "Current Market Cap (Market Value/Mcap)": "₹ 368 Cr.",
+      "Share Price": "₹ 216",
       "Source Links": [
         {
           "name": "Screener.in (BSE & NSE Corporate Financials)",
@@ -4107,6 +4107,10 @@
         {
           "name": "Wikipedia Corporate Encyclopedia",
           "url": "https://en.wikipedia.org/wiki/Liberty_Shoes"
+        },
+        {
+          "name": "Google Gemini AI Intelligence Layer (Regulatory Filings & Leadership)",
+          "url": "https://generativelanguage.googleapis.com"
         }
       ]
     },
@@ -4154,7 +4158,7 @@
         },
         {
           "Fiscal Period / Year": "Mar 2026",
-          "Market Cap": "₹ 390 Cr.",
+          "Market Cap": "₹ 368 Cr.",
           "Net Revenue/Net Sales": "₹ 740 Cr.",
           "Net Profit": "₹ 11 Cr.",
           "EBITDA": "₹ 64 Cr.",
@@ -4162,7 +4166,7 @@
         },
         {
           "Fiscal Period / Year": "TTM",
-          "Market Cap": "₹ 390 Cr.",
+          "Market Cap": "₹ 368 Cr.",
           "Net Revenue/Net Sales": "₹ 737 Cr.",
           "Net Profit": "₹ 9 Cr.",
           "EBITDA": "₹ 62 Cr.",
@@ -4179,20 +4183,26 @@
     "table3_latest_news": {
       "categories": {
         "2026 Developments & Strategic Milestones": [
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Liberty Shoes Q2 FY27: Date and Outlook (Year: 2026)\n    ↳ Intelligence Brief: Liberty Shoes has scheduled its Q2 FY27 earnings board meeting to review financial performance and set forward-looking growth strategies.\nThe disclosure establishes transparency and guides institutional investors on anticipated quarterly demand trends.",
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Liberty Shoes Standalone June 2026 Net Sales at Rs 169.86 crore, down 1.7% Y-o (Year: 2026)\n    ↳ Intelligence Brief: Liberty Shoes reported standalone net sales of Rs 169.86 crore for June 2026, marking a marginal 1.7% year-on-year decline due to localized demand softening.\nThe slight contraction reflects ongoing consumer spending pressures and competitive intensity in the domestic footwear retail segment.",
-          "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes standalone net profit declines 79.58% in the June 2026 quarter (Year: 2026)\n    ↳ Intelligence Brief: Liberty Shoes posted a steep 79.58% drop in standalone net profit for the June 2026 quarter driven by compressed margins and elevated operating costs.\nThe severe profit compression underscores near-term cost pressures and the urgent need for supply chain and structural expenditure rationalization.",
-          "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes schedules 40th AGM; revenue up 9.55% in FY26 (Year: 2026)\n    ↳ Intelligence Brief: Liberty Shoes convened its 40th Annual General Meeting while highlighting a positive 9.55% annual revenue growth achieved across the preceding fiscal year.\nThe solid top-line expansion demonstrates resilient brand equity and healthy baseline demand despite subsequent quarterly margin headwinds.",
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] DPIIT Extends Footwear Stock Deadline To 2027 Aiding Liberty Shoes’ 12-Month Inventory Liquidations (Year: 2026)\n    ↳ Intelligence Brief: The DPIIT extended the mandatory footwear quality control deadline to 2027, granting Liberty Shoes an essential 12-month extension to exhaust legacy stock.\nThis regulatory relief averts inventory write-offs, protects working capital, and ensures uninterrupted compliance for non-certified product lines.",
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Our strength in North India is real, but we have never treated it as a ceiling: Anupam Bansal, Liberty Shoes (Year: 2026)\n    ↳ Intelligence Brief: Executive Director Anupam Bansal confirmed Liberty Shoes will leverage its strong North India footprint while aggressively expanding into underpenetrated regional markets.\nThe strategic pivot targets geographical diversification to drive incremental volume growth and mitigate heavy reliance on traditional stronghold zones.",
-          "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [REPORTED] LIBERTSHOE Mar 2026 Earnings: EPS at Rs. 3.11, Revenue Holds at Rs. 212.05 Crore Amid Stable Operations (Year: 2026)\n    ↳ Intelligence Brief: Liberty Shoes recorded March 2026 quarterly earnings with an EPS of Rs. 3.11 and stable revenue holding steady at Rs. 212.05 crore amidst operational headwinds.\nThe steady top-line performance indicates stable operational execution and cost containment capable of preserving baseline profitability.",
-          "[LEADERSHIP SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes appoints Priyanka Vishnoi as head of marketing (Year: 2026)\n    ↳ Intelligence Brief: Liberty Shoes appointed Priyanka Vishnoi as the new Head of Marketing to spearhead brand positioning, consumer engagement, and omnichannel retail campaigns.\nThe leadership addition aims to revitalize the brand's digital presence and accelerate customer acquisition across key metropolitan demographics.",
-          "[LEADERSHIP SIGNAL] [Liberty Directly] [REPORTED] Priyanka Vishnoi appointed Head of Marketing at Liberty Shoes (Year: 2026)",
-          "[LEADERSHIP SIGNAL] [Liberty Directly] [REPORTED] afaqs! Pause - Anupam Bansal, Executive Director, Liberty Shoes (Year: 2026)",
-          "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [REPORTED] LIBERTSHOE Mar 2026 Earnings: Revenue Crosses Rs. 212 Crore, EPS at Rs. 3.11 - Fiscal Year Earnings (Year: 2026)",
-          "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes Reports 5.5% Decline in Q4 Profit Despite Higher Revenue (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Liberty Shoes Bull Case vs Bear Case for 2026 (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Liberty Shoes Standalone June 2026 Net Sales at Rs 169.86 crore, down 1.7% Y-o (Year: 2026)",
+          "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes standalone net profit declines 79.58% in the June 2026 quarter (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Liberty Shoes Q2 FY27: Date and Outlook (Year: 2026)",
+          "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes schedules 40th AGM; revenue up 9.55% in FY26 (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] DPIIT Extends Footwear Stock Deadline To 2027 Aiding Liberty Shoes’ 12-Month Inventory Liquidations (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Our strength in North India is real, but we have never treated it as a ceiling: Anupam Bansal, Liberty Shoes (Year: 2026)",
+          "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [REPORTED] LIBERTSHOE Mar 2026 Earnings: EPS at Rs. 3.11, Revenue Holds at Rs. 212.05 Crore Amid Stable Operations (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] The Liberty Shoes Playbook: What it takes for a legacy brand to stay relevant? (Year: 2026)",
           "[EXPANSION SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes on an Expansion Spree, Aims to Open 100 Stores (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Liberty Shoes Doubles Down On Comfort & Consumer Connect For 15% Growth: Anupam Bansal (Year: 2026)"
+          "[LEADERSHIP SIGNAL] [Liberty Directly] [REPORTED] Life in Focus: Anupam Bansal Executive Director, Liberty Shoes (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] How Liberty Shoes Turned 4 Pairs a Day Into 50,000—From Pal Boot House 1954 to Breaking Bata's Monopoly and Exporting to USSR (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Khadim India vs Liberty Shoes: Which Value Footwear Stock (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Liberty Shoes Doubles Down On Comfort & Consumer Connect For 15% Growth: Anupam Bansal (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] School Shoes to Smart Footwear: How Liberty Shoes has Stayed Part of India’s Everyday Life (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Liberty Shoes Ltd. Peer Comparison – Compare with Others (Year: 2026)",
+          "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes Q4 net profit down 5.5% to Rs. 5.29 cr (Year: 2026)",
+          "[LEADERSHIP SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes appoints Priyanka Vishnoi as head of marketing (Year: 2026)",
+          "[LEADERSHIP SIGNAL] [Liberty Directly] [REPORTED] Priyanka Vishnoi appointed Head of Marketing at Liberty Shoes (Year: 2026)",
+          "[LEADERSHIP SIGNAL] [Liberty Directly] [REPORTED] afaqs! Pause - Anupam Bansal, Executive Director, Liberty Shoes (Year: 2026)"
         ],
         "2025 Developments & Strategic Milestones": [
           "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Clear execution needs humility and focus, says Liberty Shoes' Anupam Bansal (Year: 2025)"
@@ -4201,13 +4211,14 @@
           "[LEADERSHIP SIGNAL] [Liberty Directly] [REPORTED] NCLAT junks plea of Liberty Shoes's former CEO seeking ease of norms to sue firm (Year: 2024)"
         ],
         "2023 Developments & Strategic Milestones": [
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Mercs and ‘mic drops’: What’s behind the high drama at Liberty Shoes? (Year: 2023)"
+          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Mercs and ‘mic drops’: What’s behind the high drama at Liberty Shoes? (Year: 2023)",
+          "[LEADERSHIP SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes removes Executive Director Adesh Kr Gupta after NCLT sets aside his plea (Year: 2023)"
         ]
       },
       "Source Links": [
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMihwFBVV95cUxOQ0hXYlRhNjhXaXRxb0RURUxlQk4xYm5QSVNJWnhIeVdrY0drcURqV2xfZXlTOVZUMjNFVDE5NnhtR2RxS2MzZ1ppd3FRV2xCU3N5S1czaVE3dHZ4eVJxNzRUekR3X0dXM0xwZ0JqcS1BMlp6bXhLeEMtUFJrR2RpLTZ3N3o0YjQ?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMifEFVX3lxTFBRUWJ2V0pUbGZlSGt0c2hYUTRkV09DTVhCclJSTFg2ZXZGZlBRckpRS2RJazlGRHRqMjJOZERLVWNkSTNLWE9DcWlIRFQzaUZxMVNDRWlzaTZlUmptcU5FZ2UzMXJXRmYxc3hoMk9oVzU0VWhmcy03MjM3M2M?oc=5"
         },
         {
           "name": "Verified Business Media",
@@ -4216,6 +4227,10 @@
         {
           "name": "Verified Business Media",
           "url": "https://news.google.com/rss/articles/CBMi7gFBVV95cUxQZm5JZWkySzk2WHZoWnFrZnJtWGVnX0xqam5VQmJIYll1ZjBybjliNUoxQXV3QkMtSWhkRXcwSUpEUVhGU3cwN1B4WDdXWllkQ2FIZzhLeUtkdkFjRnhxT2wxbDZEdkVsMzlTeEdodkZ4TkllSTcxZUJKODBMZ25wd203VUZGNVNOSXVpaS1rOHE3N0txTzFvLUdQdG5LOUZVcjJaMGZWM3RWc2w2Z2tEUXhTX2Z1OEE5dEZ0UUNlNTIza0F4RlhUNGhIQl8yOFdvM3J3MkRzNUd6c1ExbnRnNlVZemVxN2YydmhJT2x30gHzAUFVX3lxTE5PV1gzLXFETTNJTklLVTBRbEg5cFlybzJLazZLcmNJOW9NckpKajYwSlRpRk9adlVSTWIxVDEzYmVrUXFqcDA5UWRLTEJhN0V6aTdzZEhfX2I2ekdnVHJDZUhPakFzaWs4U2NJbGZubHF4T0k0Um9Yek50RlhNWElRblZ1d3kwMEh4RVJkcGVTb0JBOEVvR1NPeHllaU9ZUWpUSG1LZmRtZ19jaXRsN0htWFZyY3RGbnZuWEcySE5uMWNqUlJUOWFfdWZ5dnJsbENzMHV6YnUzblhIZ1RFUjZDVDM4a0NrcG5pOFg2SWwxRnRSSQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMihwFBVV95cUxOQ0hXYlRhNjhXaXRxb0RURUxlQk4xYm5QSVNJWnhIeVdrY0drcURqV2xfZXlTOVZUMjNFVDE5NnhtR2RxS2MzZ1ppd3FRV2xCU3N5S1czaVE3dHZ4eVJxNzRUekR3X0dXM0xwZ0JqcS1BMlp6bXhLeEMtUFJrR2RpLTZ3N3o0YjQ?oc=5"
         },
         {
           "name": "Verified Business Media",
@@ -4232,6 +4247,42 @@
         {
           "name": "Verified Business Media",
           "url": "https://news.google.com/rss/articles/CBMizAFBVV95cUxOeTgwVFVLejUwQ1RjbTlfVHJva09PNVJ0NmVmRS1hMmpObUNlbFBBRUJjc0hEbXZTaUZQTlVJNEw2OFZNMGJpLWNrMGx3NmQySERTS1FWUUg3NTkzRzVOdm5oblBVMU9JZ19vbldfWlVGdnZWVEM3SS1iRGNGeEZEb29LTWlqNnpORGJ6NjZQd1VGbE9SRHMtSDlLYnhXUWJVaGZDcWZrcUZBcDZXeTJ0V09vY21GVVNWNDMwTllOaFZKNFVjZHo3Z3dYZUk?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMizgFBVV95cUxOcTBhSkVMNlBIU1psMmRVYVhZS0RrelFCMzlmQ2JTRm01OGliT3N4cGQ0aGx1TTAtbm56MFdjd0xYVWdSalhHVXhtSTFaNzdROFRueFVwVlM3OEdUN2dramdScUZDY3RRQ2phMGJKUEJvNzZDU2RibGRaZWkzLU1BejlBdWNMWHZ1ZzhkdnVFT21fZm9IR1YtRmMzQXJnUnl1Ykl4cExxTnFwM0pQbTNaUTM0cEJmd1JLRU9hOGVpeUhVNHJTeWVRS1BBUEZ4UdIBzgFBVV95cUxOcTBhSkVMNlBIU1psMmRVYVhZS0RrelFCMzlmQ2JTRm01OGliT3N4cGQ0aGx1TTAtbm56MFdjd0xYVWdSalhHVXhtSTFaNzdROFRueFVwVlM3OEdUN2dramdScUZDY3RRQ2phMGJKUEJvNzZDU2RibGRaZWkzLU1BejlBdWNMWHZ1ZzhkdnVFT21fZm9IR1YtRmMzQXJnUnl1Ykl4cExxTnFwM0pQbTNaUTM0cEJmd1JLRU9hOGVpeUhVNHJTeWVRS1BBUEZ4UQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPMjlUUmxOZWNKVTNzY3ozUmZCYkZVQXE1bkhGRnk4Q2s1WVZZcW5IRkpIc0p3SzBTVldZNGhhSmxMU1VsRl9IMjV0MkFSb04tZHpOekpyUWNrbm50c2QzQk42S2trSVcxdlpYX3NRSFd2Q0g3aXo0Z1d6blczY1hGSkZfdEJaMWRTR3hkV25mblRObnVnbS1RTjd2Zw?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxONEhyQWl3YUhfNmtWeXpCR09WZ3lxamNIVUUyMnlRTklROTc1MlV1T1VlZks1RDBYOS1uYTJxODllYmVQcUdiZ092bl8tX2d0Z0FuSVA4SXRXQVhTUjVjd0lVUFF1ZUl1TFltcEU0TlNUMmZzUW9yd18zQ29qU0NKODRTYWhjdDVTLVNnLXVEUEhsRkNqSFllSzJfb1V2ZGhHSkNkRmJJR3N6ZnBGTXRTRA?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiywFBVV95cUxOcHVYaWRhdHZpNEYtamYybXRXRDFrdTN3U0pDS1plNkZwUktnUjJKRExfcE5pLW1BV0RHMVNqVFV1S3dQeklCaV9haWxFQnROaEs0Yk1ldmhpUXQ3dC1Jd0hCdVpMcjZEUVk1cEYtMFFpTjNOckNUSVhRR2VnUU1qVmRSVWNZNGQ5cC0wdVlkX1k2ZDNMUjdiUEtJV1Z1OWJFZVVwOHI5OEVWdlVHTE1jZk1sME1wQlhhLVVlUmhOOXAyVDlXaXItNHgtSQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE5oV0NxcW9zTzY1X0RmaF9qekE3RDhrMWNZckdQWnJsX0xQSHgwZkI4bl9TQ0RmcnlpSG1rcXFQVVRfYnFvZ21sUHlqblZONlZiMmRaV3RoVVlEb2I4NkxZdTVqVkZDYTA5M2FuaWxPZHE2R3c?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxOUURNY0EyQ1NVZU9DS04tb1ZvMlFKb2hTakhROHI4QThUWkZQLXZTaDR5aUFYZUhYakE5cENUNFRuX01pQmRHeVh4SlFLd3Y2UUVFYy1VSzJIaFpEa0tOaFY5OWdJOUZvOHVZYWNkc3k3eU8tenVDbG1TR0ZEaW1ZdWRzUTNQaDBDOWQtTUVQQ01fQTZMQUJ0NnNFU2NtQjRWd19oRnB3V3p0dHpGa05KakhOS1paTHB2ZDJXMHJuVVNLU2R0UjUtLUt3?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMie0FVX3lxTFBYTXVkeEQzNjJkajNKLWFRUkRGLVgtYXJIaXdHSFRXRnhvb3hHY0VuaGVZMHpEWUxWZkNQVkVld1VKemlLc3JuV25tVlkwMFRiSzJPeUtrWXBxcmdCMEZPdFdRZG10a3Q1cW16TUh4d0RrSXJFX2xyQ0tERdIBe0FVX3lxTFBYTXVkeEQzNjJkajNKLWFRUkRGLVgtYXJIaXdHSFRXRnhvb3hHY0VuaGVZMHpEWUxWZkNQVkVld1VKemlLc3JuV25tVlkwMFRiSzJPeUtrWXBxcmdCMEZPdFdRZG10a3Q1cW16TUh4d0RrSXJFX2xyQ0tERQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxNdWQxdi15a05BNTlSQlR5RW0zYUxYa25NTnpIalBhN25TNXFKdXM1dXJQZER4dU1aRnZ4OGR2WHRaSm1tNkpuM0I0TFBWUy02VlVtRWJSYnZRclNiTkRSZXFOaDJkMjdrc2hpVms5R1pUbnNDMFp4YkxISzA5Qi1HZUpxZ1ZHRzZKdjh3?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNOVRLTkN3YUZlU1UyeDlUcWdEUmtxWnN5Q0VfWEdyenZhV1l5U0tLZmxyQ2s4WEl0dS1vVEl2NW5HM3JzRTZjQ1dtSHBHajBhNkR2WlFmSi0zNzRYRnI2NF9FWVNXMHFzWGFTV1RJYnlMUjB2U1BDN3Y5UXJCWDNqX2RZVDljWXdHVHZmZ3BEeU8wN3FDMEpIam1haXhZR3VTR0xKcXhNOER6QVFYQmRHSmh30gG4AUFVX3lxTE42Z2dLeVNZU2pqUlNPc3pHSXMtMVFqbjhEYVFyQnVUdTlxX0FSeFJuWTR2RU1XX0t5eHdIeER1LUkxcmNfVE5EVVVsblRERmUxTWhpaUt6UUlTZWJmWWlHZnFTdTQ0Vm5kb19SWVR1d3hfbW16SWN0TElFQWl3TXA2TUdjRHRBTmZHT3J5eHJOLUVNaGEzZ2M0RGV0VXYwYUZzbGsxTW01akZackpXcDVPWGl1ZjJoN2M?oc=5"
         },
         {
           "name": "Verified Business Media",
@@ -4255,51 +4306,57 @@
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxQYXBGZENVUU1ybjdnMW5HQWpnbmJXU2ZtUDRBdl9EOTB2VHo1TFNReFBqdUw0Q3pjTENKTkhjdGczUE9ndElRMm0wRlhKT20tWjYxMEhrdUtNYW5PMExjVHZ0TU9qenhONzZrYUFFT1FodEJlcVJQZk5mZjVzQUlVWTZtNjFMSEpSUTd5a2RfcWNOWVNidDQ5ak81TUdVc0tRWXY0R1ZIN3FfQjg?oc=5"
-        },
-        {
-          "name": "Verified Business Media",
           "url": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxNSEJiOGt1b2VLeU5IM0JPb2JINEpCZXFUX2pqTmY4V0xDeG9wbXFOQ3ZxZVE2Y2tQTnZHZm1yMk13ZXdZWXBHa29IQmkyVWx0cUlsTnVYUE9hVzhCN0FNcDl5MGlEbmxoYjZHZi1KMl82R1prVkpqcGdvYTZYb2pFUU5qbGF6ZlJpTV84SDBoNDFmeU9KV2V6RkplUy14N3FrTHZ5VnREcG5xc3NYMkV0cTBESlV6SzZFaTRsVGdLYnBfaW9PR3cxNNIBzgFBVV95cUxNbHBfdUtMOUZSajdtQ3ZmWVN4eDI2TTU4RkY2WV9oRnNINlJoQzI3QWh4UV9vdmtxRXduQlRyYkJaZkIyaGh0NkpOU2wxX05rRVJIQjNpZXI4WUJKREVCUi1zUkJ3ald4aVpyZVdfb1hWWDNjRktIQUNYVGFtV1JMQkRKb2R4MlFBNFkyMXhIaTlUekRSWGdpUDlhWEs3OE1UZ01YS09VbWQzVWVXazZqU1MxdWNrUWt5QjFtbnVZaGwxMFBRNE1NdGw4RjhGdw?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxOTmxka2dOUlBrTEI1ck9NUUI3QVlrbFpGN1pxZU1xM0RNbzFwYndnRmlpUHR0OE1GTEwwTTJsWkFDNlktTXd5enJudmlCZFpJelM3VGZDNS1GaXpzX25sWGM4eTlrd2RSQkplSHMtSVJoSUk4RVUtZDJUSGRoMXVHaXp5S051NF8tQlM5WW1yb05EckdZUDM0czhQNzdUbC1ZcFZxWk1VX2JfZ2RhN1hVUkFEQjc5dm5h?oc=5"
-        },
-        {
-          "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPMjlUUmxOZWNKVTNzY3ozUmZCYkZVQXE1bkhGRnk4Q2s1WVZZcW5IRkpIc0p3SzBTVldZNGhhSmxMU1VsRl9IMjV0MkFSb04tZHpOekpyUWNrbm50c2QzQk42S2trSVcxdlpYX3NRSFd2Q0g3aXo0Z1d6blczY1hGSkZfdEJaMWRTR3hkV25mblRObnVnbS1RTjd2Zw?oc=5"
-        },
-        {
-          "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxOUURNY0EyQ1NVZU9DS04tb1ZvMlFKb2hTakhROHI4QThUWkZQLXZTaDR5aUFYZUhYakE5cENUNFRuX01pQmRHeVh4SlFLd3Y2UUVFYy1VSzJIaFpEa0tOaFY5OWdJOUZvOHVZYWNkc3k3eU8tenVDbG1TR0ZEaW1ZdWRzUTNQaDBDOWQtTUVQQ01fQTZMQUJ0NnNFU2NtQjRWd19oRnB3V3p0dHpGa05KakhOS1paTHB2ZDJXMHJuVVNLU2R0UjUtLUt3?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMi_wFBVV95cUxQaVZLNjFEVWR5cWRodVFXVzZuTHJkNjR6MVk0Wk5jZm9fY0RrU1R4bkZJWU05OVp5bU1NQzh6M0tUT05IeEw4LTA2Q19WOXBVY2c1MDRlS2NqbWREb05Ka3BkZWRlLTZTTHZzQm5ZZDRDbWgyTmE5ampmQVRSMWtMR0xpSzAwaS14QnkxZWNRSWgxQzNPbDExRkNaWGxvVHRxVEdlUVdKTFJqTXBuUS1tMTFTc2V1NzV4ajlaWGt6VzRvVU9sc2xoMFhxMklJNUwxcnEyUk9oQm85S2ZFZnZ5bFpkYi1MR25zbTRvWEpEQWd0Y2tiTG96WU1Pd2V2Unc?oc=5"
         }
       ]
     },
     "table4_business_activities": {
       "activities": {
-        "Core Business Profile": "Operating corporate enterprise engaged in commercial operations within the Footwear sector.",
+        "Core Business Profile": "Liberty Shoes Ltd is a prominent Indian footwear manufacturer and retailer renowned for delivering stylish, comfortable, and durable shoes for all age groups. Positioned as a mass-to-mid premium household brand, it maintains a strong market leadership in India backed by decades of heritage and widespread distribution.",
         "Brands & Trademarks": [
-          "Liberty"
+          "Healers",
+          "Leap 7X",
+          "Aha",
+          "Lucy & Luke",
+          "Warrior",
+          "Gliders",
+          "Force 10",
+          "Footfun"
         ],
         "Key Subsidiaries & Verticals": [],
         "Key Products & Offerings": [
-          "Commercial Products & Services"
+          "Formal leather shoes",
+          "Running and sports shoes",
+          "Casual lifestyle sneakers",
+          "Comfort sandals and slippers",
+          "School and kids shoes",
+          "Safety and industrial footwear",
+          "Orthopedic supportive footwear",
+          "Footwear care accessories"
         ],
         "Product Categories": [
-          "Footwear"
+          "Formal Footwear",
+          "Casual Footwear",
+          "Sports & Activewear",
+          "Kids Footwear",
+          "Safety & Protective Footwear"
         ],
-        "Product Type": "Physical Products + Services",
+        "Product Type": "Physical Footwear & Lifestyle Goods",
         "Manufacturing": {
           "active": true,
-          "details": "Active — Operates domestic production and processing facilities"
+          "details": "Liberty Shoes operates advanced manufacturing plants and automated production facilities primarily located in Karnal and Gharaunda, Haryana, with a high daily output capacity."
         },
         "Online Sales / E-Commerce": {
           "active": true,
-          "details": "Active — Digital commerce storefront and online ordering channels"
+          "details": "Products are retailed online via the official D2C webstore as well as major Indian e-commerce marketplaces including Amazon, Flipkart, and Myntra."
         },
         "Physical Retail Stores": {
           "active": true,
-          "details": "Active — Physical retail outlets and commercial branch network"
+          "details": "The company operates an extensive retail footprint consisting of hundreds of exclusive brand outlets (EBOs) across high streets, malls, and transit hubs throughout India."
         },
         "Customer Service / Consumer Channels": {
           "active": false,
@@ -4307,19 +4364,19 @@
         },
         "Franchise Model": {
           "active": true,
-          "details": "Active — Franchise outlet network and partner licensing"
+          "details": "Liberty leverages a robust franchise partner and multi-brand distributor network to rapidly expand its retail footprint into tier-2 and tier-3 cities across India."
         },
         "Import / Export": {
           "active": true,
-          "details": "Active — International trade and global commercial presence"
+          "details": "Beyond its massive domestic market focus, Liberty exports its footwear collections to dozens of countries worldwide, establishing a strong international footprint."
         },
-        "Revenue Streams": "Commercial Product Sales + Service Delivery Agreements",
-        "Business Model": "B2B + B2C",
-        "Industry / Sector": "Footwear",
+        "Revenue Streams": "Retail Store Sales + Wholesale Footwear Distribution + Institutional Warrior Sales + E-Commerce Channels",
+        "Business Model": "B2C + B2B (Integrated Manufacturing, Retail & Franchise Distribution)",
+        "Industry / Sector": "Footwear, Leather & Lifestyle Retail",
         "Entity Integrity": "HIGH (Canonical Verified)",
         "Own Retail Stores": {
           "active": true,
-          "details": "Active — Physical retail outlets and commercial branch network"
+          "details": "The company operates an extensive retail footprint consisting of hundreds of exclusive brand outlets (EBOs) across high streets, malls, and transit hubs throughout India."
         }
       },
       "Source Links": [
@@ -4329,7 +4386,7 @@
         },
         {
           "name": "Corporate Profile Source",
-          "url": "https://www.libertyshoesonline.com/collections/all"
+          "url": "https://www.libertyshoes.com/"
         },
         {
           "name": "Corporate Profile Source",
@@ -4337,23 +4394,15 @@
         },
         {
           "name": "Corporate Profile Source",
-          "url": "https://grokipedia.com/page/Liberty_Shoes"
+          "url": "https://www.libertyshoes.com/our-franchise"
         },
         {
           "name": "Corporate Profile Source",
           "url": "https://www.sonisvision.in/blogs/franchising-model-of-liberty-shoes"
         },
         {
-          "name": "Corporate Profile Source",
-          "url": "https://scale100x.ai/franchise/liberty-shoes"
-        },
-        {
-          "name": "Corporate Profile Source",
-          "url": "https://www.zauba.com/export-LIBERTY+SHOES-hs-code.html"
-        },
-        {
-          "name": "Corporate Profile Source",
-          "url": "https://www.greenhonchos.com/case-studies/liberty"
+          "name": "Google Gemini AI Intelligence Layer (Operational Profile & Products)",
+          "url": "https://generativelanguage.googleapis.com"
         }
       ]
     },
@@ -4361,51 +4410,63 @@
       "conclusions": {
         "Growth Assessment": {
           "Verdict": "Growing (Steady Revenue Expansion)",
-          "Summary & Drivers": "Growing (Steady Revenue Expansion) — Liberty Shoes achieved a 9.6% year-over-year revenue increase to ₹740 Cr. in March 2026, though margins contracted by 60 basis points to 1.5%. The primary growth drivers are sustained steady revenue expansion alongside proactive corporate transparency regarding quarterly demand trends and forward-looking institutional strategies.",
-          "Strategic Analysis": "Liberty Shoes exhibits a steady revenue expansion trajectory, with projected March 2026 sales reaching ₹740 Cr compared to ₹675 Cr in March 2025. This 9.6% year-over-year top-line growth is primarily driven by consistent commercial product demand across domestic markets. Strategic quarterly earnings disclosures continue to provide institutional investors with transparent guidance on demand trends."
+          "Summary & Drivers": "Growing (Steady Revenue Expansion) — Liberty Shoes Ltd demonstrates top-line resilience with projected FY2026 revenue reaching ₹740 Cr, a 9.6% increase year-over-year, despite facing near-term profitability headwinds and a sharp margin contraction to 1.5%. Primary drivers include sustained volume expansion and brand demand across retail channels, though bottom-line growth is currently constrained by rising operational pressures and a sluggish performance in the June 2026 quarter.",
+          "Strategic Analysis": "Liberty Shoes demonstrates steady top-line expansion, with FY2026 revenue scaling to ₹740 Cr. compared to ₹675 Cr. in FY2025, marking a robust 9.6% year-on-year increase. Primary demand is anchored by resilient sales across core categories including formal leather shoes, casual sneakers, and sports footwear. This trajectory underscores stable operational demand despite broader macroeconomic headwinds."
         },
         "Expansion Vectors": {
-          "New Markets": "Expanding institutional enterprise clients and core domestic consumer segments across Footwear.",
+          "New Markets": "Expanding institutional enterprise clients and core domestic consumer segments across Formal Footwear, Casual Footwear.",
           "New Geography (Location)": "Pan-India operational presence with strategic expansion into regional industrial and consumer growth corridors.",
-          "New Product Launch": "Commercial Products & Services.",
-          "New Product Category/Segment": "Footwear.",
+          "New Product Launch": "Formal leather shoes, Running and sports shoes, Casual lifestyle sneakers.",
+          "New Product Category/Segment": "Formal Footwear, Casual Footwear, Sports & Activewear.",
           "Opening New Stores / Facilities": "Expanding regional branch footprint, distribution depots, and operational service facilities.",
-          "Strategic Analysis": "The company is actively scaling its market footprint through enhanced retail distribution networks and targeted commercial product launches. Strategic initiatives like Liberty Directly aim to optimize consumer engagement and capture broader market segments. Forward-looking growth strategies are continuously evaluated during board meetings to sustain this expansion momentum."
+          "Strategic Analysis": "The company continues to leverage its strong regional stronghold in North India while actively eyeing broader geographic penetration under the guidance of leadership like Anupam Bansal. Strategic focus remains on diversifying its footwear portfolio across running shoes, comfort sandals, and lifestyle sneakers to capture wider demographic segments. Network investments are aligned with strengthening omnichannel reach to support this wider market access."
         },
         "Contraction & Shutdown Signals": {
           "Manufacturing / Line Discontinuation": "No shutdown of primary manufacturing lines; operational capacity dynamically aligned with market demand.",
           "Plant / Facility Shutdown": "No active permanent plant shutdowns or regulatory environmental closures identified across primary operating facilities.",
           "Closing Stores / Branches": "Routine retail footprint optimization; selective closure/relocation of underperforming or high-rent stores (approx. 15–25 stores annually) balanced by rapid franchise expansion in Tier-2 and Tier-3 cities.",
           "Stop Selling Product / Manufacturing": "Core commercial products and service offerings active; no cessation of primary operations.",
-          "Strategic Analysis": "Current operational updates indicate a slight standalone net sales contraction of 1.7% year-over-year reported in June 2026. The firm maintains disciplined oversight of its commercial product lines to mitigate localized volume drops. No major facility closures, plant shutdowns, or large-scale SKU rationalizations have been formally disclosed."
+          "Strategic Analysis": "Margin compression pressures have forced the company to critically evaluate its retail footprint and undertake strategic SKU rationalization. Operations are being streamlined to curb inefficiencies, though formal closure announcements remain tied to overall margin recovery plans. Inventory management has gained temporary relief via the DPIIT footwear stock deadline extension to 2027, aiding orderly liquidations."
         },
         "Leadership Dynamics": {
-          "CEO / CXO Hiring or Exit": "Executive Leadership: CEO: Adesh Kumar Gupta, CFO: Satish Saini. Stable executive governance core.",
+          "CEO / CXO Hiring or Exit": "Executive Leadership: CEO: Adesh Kumar Gupta, CFO: Munish Kakra. Stable executive governance core.",
           "AI / Digital Transformation Leader": "Digital transformation and enterprise AI initiatives driven through central Chief Technology / Information leadership and specialized engineering teams.",
           "CEO Transition / Stepping Down": "No current CEO exit or stepping-down proceedings reported; executive tenure confirmed active.",
           "Growth & Marketing Leader": "Marketing, brand equity, and commercial growth directed by corporate marketing leadership and business unit heads.",
           "Chief AI Officer": "AI initiatives governed centrally under Chief Technology / Digital Officer and engineering units; standalone Chief AI Officer role not mandated.",
-          "Strategic Analysis": "Executive leadership remains stable under CEO Adesh Kumar Gupta and CFO Satish Saini, guiding strategic and financial operations. While a dedicated CTO position is currently unlisted, leadership maintains a focus on corporate governance and transparency. Management routinely engages stakeholders through structured financial performance reviews and earnings disclosures."
+          "Strategic Analysis": "The executive helm is steered by CEO Adesh Kumar Gupta and CFO Munish Kakra, ensuring continuous financial oversight and governance stability. While a dedicated CTO position is currently unlisted, executive commentary emphasizes expanding beyond traditional regional ceilings. Leadership focus remains centered on navigating near-term profit headwinds and executing structural operational efficiencies."
         },
         "Real Estate & Property Movements": {
           "Acquired New Property": "Acquiring operational land, facility infrastructure, and commercial sites to support operational scaling. ↳ Strategic Implication: Capacity expansion and long-term capital investment.",
           "Sold Property": "No distress real estate sales or major property liquidations reported. ↳ Strategic Implication: Core asset retention and balance sheet stability.",
-          "Strategic Analysis": "Property and plant logistics are strategically aligned to support the company's manufacturing and distribution footprint across core markets. The firm balances leased operational hubs with optimized asset utilization to manage overhead costs efficiently. No major speculative real estate acquisitions or large-scale asset sell-offs have been recently reported."
+          "Strategic Analysis": "Real estate strategies prioritize optimized leased store hubs across core urban and semi-urban markets to maximize retail visibility without excessive capital lock-in. Store network planning aligns with regional demand densities, particularly cementing its dominance in North India. Asset management remains disciplined, balancing physical storefront utility with emerging digital sales channels."
         },
         "Mergers, Acquisitions & Capital Actions": {
           "Buying Company / Startup": "Strategic acquisition of complementary operating businesses and specialized project vehicles.",
           "Merged with Company": "Internal consolidation of wholly-owned operating subsidiaries under the listed entity; no distressed corporate mergers.",
           "Demerger": "No current demerger planned; corporate structure operating as single integrated listed entity.",
           "New Funding / IPO Launch": "Accesses domestic and global debt capital markets, bonds, and institutional credit facilities.",
-          "Strategic Analysis": "Capital structure management focuses on maintaining debt health and supporting ongoing working capital requirements without aggressive M&A activity. There are no immediate plans for subsidiary consolidation, major demergers, or dilutive capital raising initiatives. Financial strategies remain centered on organic growth funded by core commercial operations."
+          "Strategic Analysis": "No major mergers, acquisitions, or subsidiary consolidations have been formally reported during this cycle, with the company focusing entirely on standalone operations. Secretarial compliance remains steady, highlighted by the scheduling of its 40th Annual General Meeting alongside routine financial reporting. Capital management relies on internal accruals and operational cash flows to maintain balance sheet stability."
         },
         "Financial Health": {
           "YoY Revenue": "Mar 2026: ₹ 740 Cr. vs Mar 2025: ₹ 675 Cr. (+9.6% YoY)",
           "YoY Profit Margin": "Mar 2026: 1.5% vs Mar 2025: 2.1% (Contracting, -0.6% bps)",
-          "Strategic Analysis": "Top-line revenue demonstrates positive momentum with a projected 9.6% year-over-year increase to ₹740 Cr by March 2026. However, operating and profit margins reflect ongoing compression, dropping by 0.6 percentage points to 1.5% in March 2026. This margin contraction underscores the need for tighter cost controls amidst scaling revenue performance."
+          "Strategic Analysis": "Despite a positive 9.6% annual revenue climb to ₹740 Cr., profitability has encountered severe strain, evidenced by standalone June 2026 net profits declining sharply by 79.58% alongside a minor 1.7% dip in net sales. Profit margins have contracted concurrently from 2.1% to 1.5% (-0.6% bps), though stable operational quarters yielded an EPS of ₹3.11. Balance sheet resilience is currently tested by rising input and operational costs weighing heavily on the bottom line."
+        },
+        "Risks & Considerations": {
+          "Strategic Analysis": "Primary execution risks stem from sharp margin contractions, rising operational expenses, and severe quarterly profit drops that weigh heavily on investor sentiment. Intense competition within the footwear sector and short-term cost pressures present persistent hurdles to near-term earnings recovery. Navigating these margin headwinds while maintaining competitive pricing remains the critical challenge for sustained profitability."
         }
       },
-      "Source Links": []
+      "Source Links": [
+        {
+          "name": "Strategic Intelligence (Shutdowns)",
+          "url": "https://www.icicidirect.com/stocks/liberty-shoes-ltd-share-price"
+        },
+        {
+          "name": "Strategic Intelligence (Shutdowns)",
+          "url": "https://www.motilaloswal.com/share-market/liberty-shoes-ltd"
+        }
+      ]
     }
   }
 ]
