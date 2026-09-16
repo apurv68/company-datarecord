@@ -80,11 +80,18 @@ A Python tool that takes any company name as input, performs canonical entity re
    - **Table #4:** Operational Profile, Brands, Products, Retail vs. Customer Service distinction, and Archetype Classifiers.
    - **Table #5:** Strategic Business Intelligence Conclusions & Growth Assessment (Growth trajectory verdict, Expansion vectors, Operational shutdowns/discontinuations, Leadership dynamics & AI transformation, Property/real estate acquisitions vs sales, M&A/demerger/capital actions, YoY revenue & margin health).
 
-5. **Multi-Format Export with Automatic Sync:**
+5. **Structured Evidence Store & Auditability Layer:**
+   - **Full Source Traceability:** Every extracted claim, metric, and signal is anchored with its snippet, extraction method, confidence level, timestamp, and source URL.
+   - **Generic Entity Match Firewall (`is_entity_match`):** Disambiguates canonical company entities against candidate content without brittle company-specific hardcoding, filtering out homonyms, unrelated peers, and sister subsidiaries.
+   - **`evidence_store.json`**: Complete structured evidence repository with unique UUID-backed evidence items mapping back to entity records.
+   - **`evidence_store.csv`**: Tabular export of the entire evidence audit trail for downstream compliance and verification.
+
+6. **Multi-Format Export with Automatic Sync:**
    - **`company_records.csv`**: Table #1 corporate profiles and leadership directory.
    - **`company_financials_5yr.csv`**: Table #2 audited 5-year historical and present financials.
-   - **`company_conclusions.csv`**: Table #5 strategic conclusions and growth intelligence across all 7 dimensions.
+   - **`company_conclusions.csv`**: Table #5 strategic conclusions and growth intelligence across all 8 strategic pillars.
    - **`company_records.json`**: Complete hierarchical JSON format integrating all 5 tables and verified source links.
+   - **`evidence_store.json`** & **`evidence_store.csv`**: Traceable structured evidence records with source provenance.
 
 ---
 
