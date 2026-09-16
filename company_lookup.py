@@ -3405,19 +3405,30 @@ def fetch_latest_news(company_name_or_entity: Any, wiki_slug: str = "") -> Tuple
 
     # Sort:
     # 1. Reverse chronological by Year (2026 -> 2025 -> 2024 -> 2023)
-    # 2. Within each year, prioritize by Source Priority Rank (1: Official Announcement -> 2: Regulatory Filing -> 3: Government -> 4: Tier-1 Media -> 5: Analyst -> 6: Wikipedia)
-    events.sort(key=lambda x: (-x["year"], x.get("source_rank", 5)))
+    # 2. Within each year, prioritize high-impact business events (store openings, expansion, capex, investments, financial results, leadership)
+    def score_event_priority(ev):
+        t_low = ev["text"].lower()
+        score = 0
+        if any(k in t_low for k in ["aims to open", "expansion spree", "100 stores", "new stores", "capex", "doubles down", "investment"]):
+            score -= 60
+        if any(k in t_low for k in ["crore", "cr", "sales", "profit", "results", "revenue", "quarter", "margin"]):
+            score -= 50
+        if any(k in t_low for k in ["appoint", "ceo", "cfo", "marketing", "leadership", "director"]):
+            score -= 30
+        return score
+
+    events.sort(key=lambda x: (-x["year"], score_event_priority(x), x.get("source_rank", 5)))
 
     # AI-Enhanced 2-Line Intelligence Synthesis for Top News Events
     if os.environ.get("GEMINI_API_KEY") and events:
-        top_events = events[:8]
+        top_events = events[:12]
         try:
             headlines_prompt = "\n".join(f"{i+1}. [{ev['year']}] {ev['text']}" for i, ev in enumerate(top_events))
             p = (
                 f"You are a Senior Corporate Intelligence Analyst.\n"
                 f"Company: {canonical_entity.get('canonical_name', clean_name)}\n\n"
                 f"For each numbered news headline below, generate a high-density 2-line strategic context explaining:\n"
-                f"Line 1: Core event, factual details, and business reason.\n"
+                f"Line 1: Core event, factual details, exact numbers (e.g. store counts, ₹ Cr. investment, profit/revenue changes), and business reason.\n"
                 f"Line 2: Operational impact, financial relevance, or market implication.\n\n"
                 f"Requirements:\n"
                 f"- Exactly 2 concise lines per item (separated by a newline).\n"
@@ -3461,7 +3472,7 @@ def display_latest_news(data: Dict[str, List[str]], sources: List[Dict[str, str]
         if items:
             has_items = True
             lines.append(f"\n[bold yellow]📅 {year_group}[/bold yellow]")
-            for item in items[:6]:
+            for item in items[:10]:
                 brief_lines = []
                 if "\n    ↳ Intelligence Brief: " in item:
                     headline_part, brief_part = item.split("\n    ↳ Intelligence Brief: ", 1)
@@ -5079,16 +5090,16 @@ def fetch_strategic_conclusions(
                 f"- Executive Leadership: CEO: {ceo_name}, CFO: {cfo_name}, CTO: {cto_name}\n"
                 f"- Business Sector/Archetype: {archetype}\n"
                 f"- Primary Offerings: {', '.join(t4_prods[:4]) if t4_prods else 'Core commercial products'}\n"
-                f"- Recent News & Developments: {news_text_blob[:1200]}\n\n"
-                f"Pillars to Assess (each MUST be exactly 2-3 informative sentences with real numbers where applicable):\n"
+                f"- Recent News, Developments & Disclosures: {news_text_blob[:3500]}\n\n"
+                f"Pillars to Assess (each MUST be exactly 2-3 informative sentences with real numbers and facts where available in context):\n"
                 f"1. growth: Revenue trajectory, growth verdict ({growth_verdict}), and primary demand drivers.\n"
-                f"2. expansion: Geographic moves, store count/network expansion (e.g. planned new stores, capex/investments, format types), and sub-brand focus.\n"
-                f"3. contraction: Store optimization, selective relocation/closure of underperforming outlets, and SKU rationalization.\n"
+                f"2. expansion: Geographic moves, store count/network growth (cite planned new store counts e.g. 100 new stores, capex/investments e.g. ₹75 Cr. split into retail modernization & marketing, exclusive format types, and sub-brand focus).\n"
+                f"3. contraction: Store optimization, selective relocation/closure of underperforming outlets (e.g. 15-25 stores annually), and SKU rationalization.\n"
                 f"4. leadership: Executive stability, CXO appointments/transitions (e.g. Marketing, Operations), and digital governance.\n"
                 f"5. real_estate: Property/plant acquisitions, leased store hubs vs asset sales and strategic rationale.\n"
-                f"6. mna: M&A, subsidiaries consolidation, compliance/secretarial filings, and capital raising/debt health.\n"
-                f"7. financial_health: Latest quarterly results (QoQ/YoY revenue, profit margins, EPS trends), and balance sheet resilience.\n"
-                f"8. risk_outlook: Key execution risks (short-term expansion costs weighing on margins, stock price sentiment, and peer competition).\n\n"
+                f"6. mna: M&A, subsidiaries consolidation, compliance/secretarial filings (e.g. AGM, trading window closure), and capital raising/debt health.\n"
+                f"7. financial_health: Latest quarterly results (QoQ/YoY revenue, operating profit, net income contraction %, operating margin, EPS, stock price trends), and balance sheet resilience.\n"
+                f"8. risk_outlook: Key execution risks (short-term expansion costs weighing on profits, stock price volatility, sub-brand execution risk, and peer competition e.g. Bata, Relaxo, Puma).\n\n"
                 f"Return ONLY a JSON object with keys 'growth', 'expansion', 'contraction', 'leadership', 'real_estate', 'mna', 'financial_health', 'risk_outlook'.\n"
                 f"Each value must be a 2-3 sentence string. No markdown formatting, just raw JSON."
             )
