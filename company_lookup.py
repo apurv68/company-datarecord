@@ -305,22 +305,185 @@ def is_entity_match(
     return True
 
 
+def verify_financial_source_entity(
+    source_url: str,
+    title: str,
+    snippet: str,
+    canonical_entity: Dict[str, Any]
+) -> Tuple[bool, str]:
+    """
+    Genuinely generic financial entity verification firewall.
+    Verifies that a candidate financial source/document actually belongs to the
+    requested canonical entity and was not cross-contaminated from another company.
+
+    Validates using available canonical identifiers:
+    - exact legal company name / clean name
+    - CIN (Corporate Identification Number)
+    - ticker / ISIN where applicable
+    - official domain
+    - registered aliases / subsidiaries
+    - source title and document slug metadata
+
+    Strict rules:
+    - NEVER accept a financial source merely because it contains generic keywords
+      such as 'unlisted', 'revenue', 'profit', 'crore', etc.
+    - If the URL or title is explicitly dedicated to a DIFFERENT company (e.g. Polymatech
+      for Techmagnate, or Tata Steel for Tata Motors), reject immediately.
+    - If the source entity cannot be verified: reject (return False, reason).
+    """
+    u = (source_url or "").lower().strip()
+    t = (title or "").lower().strip()
+    s = (snippet or "").lower().strip()
+    comb = f"{title} {snippet}".strip()
+
+    if isinstance(canonical_entity, dict):
+        canon_name = canonical_entity.get("canonical_name", "")
+        clean_name = canonical_entity.get("clean_name", "") or canon_name
+        aliases = canonical_entity.get("aliases", []) or []
+        subsidiaries = canonical_entity.get("subsidiaries", []) or []
+        ticker = canonical_entity.get("ticker", "")
+        cin = canonical_entity.get("cin", "")
+        isin = canonical_entity.get("isin", "")
+        official_domain = canonical_entity.get("official_domain") or canonical_entity.get("website", "")
+    else:
+        canon_name = str(canonical_entity)
+        clean_name = canon_name
+        aliases = []
+        subsidiaries = []
+        ticker = ""
+        cin = ""
+        isin = ""
+        official_domain = ""
+
+    legal_sfx = r"\b(?:ltd|limited|pvt|private|inc|corp|corporation|industries|holdings|enterprises|plc|sa|ag|nv|llc|co)\b\.?"
+    canon_clean = re.sub(legal_sfx, "", clean_name or canon_name, flags=re.I).strip().lower()
+    canon_tokens = [w for w in re.findall(r"\b[a-z0-9]+\b", canon_clean) if len(w) >= 3]
+
+    # 1. Direct Strong Identifier Verification
+    if cin and cin != "N/A" and len(cin) >= 8:
+        if re.search(rf"\b{re.escape(cin.lower())}\b", comb.lower()) or cin.lower() in u:
+            return True, "CIN identifier match"
+
+    if official_domain and official_domain != "N/A":
+        clean_dom = re.sub(r"^https?://(www\.)?", "", official_domain.lower()).strip("/")
+        dom_root = clean_dom.split("/")[0]
+        if len(dom_root) >= 4 and (dom_root in u or dom_root in comb.lower()):
+            return True, "Official domain match"
+
+    if ticker and ticker not in ("N/A", "N/A (Unlisted)", ""):
+        tick_clean = re.sub(r"^(NSE|BSE):", "", ticker).strip().lower()
+        if len(tick_clean) >= 3:
+            if f"/{tick_clean}" in u or re.search(rf"\b{re.escape(tick_clean)}\b", t):
+                return True, "Ticker match"
+
+    # 2. URL Slug Subject Mismatch Verification (e.g. /shares/polymatech-unlisted-shares)
+    m_slug = re.search(r"/(?:shares|company|stocks|profiles?|organi[sz]ations?)/([a-z0-9-]+)", u)
+    if m_slug:
+        slug = m_slug.group(1).lower()
+        slug_clean = re.sub(r"-(?:unlisted-shares|unlisted|shares|ltd|limited|pvt|private|company|inc|corp|profile|overview|financials|share-price)", "", slug)
+        slug_tokens = [tok for tok in re.findall(r"\b[a-z0-9]+\b", slug_clean) if len(tok) >= 3]
+        if slug_tokens:
+            has_slug_match = False
+            canon_acronym = "".join(w[0] for w in canon_tokens if w).lower()
+            for tok in slug_tokens:
+                if tok in canon_tokens:
+                    has_slug_match = True
+                    break
+                if canon_acronym and len(canon_acronym) >= 2 and (tok == canon_acronym or canon_acronym.startswith(tok)):
+                    has_slug_match = True
+                    break
+                for a in aliases:
+                    if tok in str(a).lower():
+                        has_slug_match = True
+                        break
+                for sub in subsidiaries:
+                    sub_n = sub.get("name", "") if isinstance(sub, dict) else str(sub)
+                    if tok in sub_n.lower():
+                        has_slug_match = True
+                        break
+            # If candidate is from screener.in and title references canonical entity, trust the ticker slug
+            if not has_slug_match and "screener.in" in u:
+                if any(ct in t.lower() for ct in canon_tokens if len(ct) >= 3):
+                    has_slug_match = True
+            if not has_slug_match:
+                return False, f"URL slug entity '{slug_clean}' does not match canonical entity '{clean_name}'"
+
+    # 3. Source Title Mismatch Check
+    t_clean = re.sub(r"\b(?:unlisted\s+shares?|pre-ipo|share\s+price|financials?|annual\s+report|balance\s+sheet|p&l|revenue|profit)\b", "", t, flags=re.I).strip()
+    t_tokens = [tok for tok in re.findall(r"\b[a-z0-9]+\b", t_clean) if len(tok) >= 3 and tok not in ["the", "buy", "sell", "best", "latest", "news", "updates", "stock", "stocks", "price", "share", "shares"]]
+    has_title_match = False
+    canon_acronym = "".join(w[0] for w in canon_tokens if w).lower()
+    if canon_clean in t:
+        has_title_match = True
+    elif clean_ticker and re.search(rf"\b{re.escape(clean_ticker.lower())}\b", t):
+        has_title_match = True
+    elif canon_acronym and len(canon_acronym) >= 2 and re.search(rf"\b{re.escape(canon_acronym)}\b", t):
+        has_title_match = True
+    else:
+        for ct in canon_tokens:
+            if re.search(rf"\b{re.escape(ct)}\b", t):
+                has_title_match = True
+                break
+        for a in aliases:
+            a_clean = re.sub(legal_sfx, "", str(a), flags=re.I).strip().lower()
+            if a_clean and re.search(rf"\b{re.escape(a_clean)}\b", t):
+                has_title_match = True
+                break
+
+    if len(t_tokens) >= 2 and not has_title_match:
+        return False, f"Source title '{title}' does not reference canonical entity '{clean_name}'"
+
+    # 4. Standard is_entity_match Firewall
+    match = is_entity_match(
+        title=title,
+        snippet=snippet,
+        canonical_name=canon_name or clean_name,
+        aliases=aliases,
+        official_domain=official_domain,
+        ticker=ticker,
+        subsidiaries=subsidiaries
+    )
+    if not match:
+        return False, f"Failed is_entity_match firewall for '{clean_name}'"
+
+    # 5. Generic Keyword Shield (Rule 4)
+    has_mention = False
+    if canon_clean in comb.lower():
+        has_mention = True
+    else:
+        for a in aliases:
+            a_clean = re.sub(legal_sfx, "", str(a), flags=re.I).strip().lower()
+            if a_clean and re.search(rf"\b{re.escape(a_clean)}\b", comb.lower()):
+                has_mention = True
+                break
+
+    if not has_mention:
+        return False, f"Financial source text lacks confirmed reference to canonical entity '{clean_name}'"
+
+    return True, "Verified canonical entity match"
+
+
+_gemini_warned = False  # Track whether we've warned about Gemini failures
+
 def call_gemini(prompt: str, system_instruction: str = "", max_tokens: int = 2048, temperature: float = 0.1) -> Optional[str]:
     """
     Call Google Gemini REST API using the configured GEMINI_API_KEY.
     Falls back gracefully if no key is configured or on any error.
+    Logs a warning if all models fail so the user knows Gemini isn't working.
     """
+    global _gemini_warned
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not api_key:
         return None
 
     models = [
         "gemini-3.5-flash-lite",
-        "gemini-3.1-flash-lite",
-        "gemini-3.6-flash",
+        "gemini-3.5-flash",
         "gemini-flash-latest",
-        "gemini-3.5-flash"
+        "gemini-flash-lite-latest",
+        "gemini-2.0-flash",
     ]
+    last_error = ""
     for model_name in models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
         payload: Dict[str, Any] = {
@@ -345,10 +508,16 @@ def call_gemini(prompt: str, system_instruction: str = "", max_tokens: int = 204
                         if text:
                             return text
             else:
-                # On 429, 404, 500, 503 etc, try next available model immediately
+                last_error = f"HTTP {res.status_code}"
                 continue
-        except Exception:
+        except Exception as e:
+            last_error = str(e)[:80]
             continue
+
+    # All models failed — warn user once
+    if not _gemini_warned:
+        _gemini_warned = True
+        console.print(f"[bold yellow]⚠ Gemini AI: All models failed ({last_error}). Running in heuristic-only mode.[/bold yellow]")
     return None
 
 
@@ -774,6 +943,17 @@ def financial_sanity_check(rows: List[Dict[str, Any]], metric: str) -> List[Dict
         val = row.get(metric, "N/A")
         num = parse_crore_value(val)
         values.append(num)
+
+    # Sanity check: synthetic multi-year value duplication (e.g. copying same value across multiple periods)
+    # If 2 or more periods have the exact same non-zero value, multi-year reporting is corrupted
+    if metric in ("Net Revenue/Net Sales", "Net Profit", "EBITDA"):
+        valid_nums = [v for v in values if v is not None and v > 0]
+        if len(valid_nums) >= 2:
+            first_val = valid_nums[0]
+            if all(abs(v - first_val) < 0.001 for v in valid_nums):
+                for row in rows:
+                    row[metric] = "N/A"
+                return rows
 
     # Sanity check: year-over-year decline > 80% is suspicious
     for i in range(1, len(values)):
@@ -1514,6 +1694,9 @@ def fetch_multi_year_financial_history(
                             continue
 
                         item = {"title": title, "snippet": snippet, "source": href}
+                        is_fin_val, _ = verify_financial_source_entity(href, title, snippet, {"canonical_name": company_name})
+                        if not is_fin_val:
+                            continue
                         if is_relevant_result(item, company_name, category="revenue"):
                             text_lower = f"{title} {snippet} {href}".lower()
                             check_text = text_lower.replace(f"missing: {yr}", "").replace(f"missing: {short_fy.lower()}", "")
@@ -2254,6 +2437,16 @@ def fetch_table1_data(query: str, evidence_store: Optional[EvidenceStore] = None
                 elif any(tok in clean_c_name for tok in q_clean.split() if len(tok) > 2):
                     cand_score += 20
 
+                # Prefer consolidated URLs (parent entity, not sub-entities)
+                if "/consolidated/" in c_url:
+                    cand_score += 15
+
+                # Penalize sub-entity / division names that user didn't ask for
+                sub_entity_words = {"commercial vehicles", "passenger vehicles", "finance", "financial services", "insurance", "capital", "realty", "housing"}
+                for sew in sub_entity_words:
+                    if sew in c_name and sew not in q_low:
+                        cand_score -= 50
+
                 # Industry qualifier alignment / conflict check
                 airline_kw = {"airline", "airlines", "aviation", "air", "flight"}
                 paint_kw = {"paint", "paints", "coating"}
@@ -2879,45 +3072,63 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                 pass
 
     # 2b. Fallback: Search Screener API ONLY if company is NOT unlisted, and direct ticker failed
+    # Also try searching by aliases from canonical entity (e.g. "TCS" for "Tata Consultancy Services")
     if not periods and not is_unlisted_entity:
-        try:
-            s_res = requests.get(f"https://www.screener.in/api/company/search/?q={requests.utils.quote(clean_name)}", headers={'User-Agent': 'Mozilla/5.0'}, timeout=5)
-            if s_res.status_code == 200:
-                s_data = s_res.json()
-                if s_data and isinstance(s_data, list):
-                    for item in s_data[:5]:
-                        cand_name = item.get("name", "").lower()
-                        # Reject inactive / merged / defunct entities
-                        if any(bad in cand_name for bad in ["(merged)", "(defunct)", "amalgamated", "former"]):
-                            continue
-                        cand_url = item.get("url", "")
-                        cand_ticker = cand_url.strip("/").split("/")[-1] if "/company/" in cand_url else ""
-                        if "/consolidated/" in cand_url:
-                            cand_ticker = cand_url.strip("/").split("/")[-2]
-                        if cand_ticker and cand_ticker != ticker:
-                            for suffix in ["/consolidated/", "/"]:
-                                s_url = f"https://www.screener.in/company/{cand_ticker}{suffix}"
-                                try:
-                                    res = requests.get(s_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=6)
-                                    if res.status_code == 200:
-                                        soup = BeautifulSoup(res.text, 'html.parser')
-                                        p_res, r_res, e_res, pt_res, m_res = extract_valid_screener_pl(soup, s_url)
-                                        if p_res:
-                                            add_source("Screener.in (Audited Multi-Year P&L Financials)", s_url)
-                                            periods = p_res
-                                            rev_by_period = r_res
-                                            ebitda_by_period = e_res
-                                            pat_by_period = pt_res
-                                            if m_res != "N/A" and present_mcap == "N/A":
-                                                present_mcap = m_res
-                                            ticker = cand_ticker
-                                            break
-                                except Exception:
-                                    pass
-                        if periods:
-                            break
-        except Exception:
-            pass
+        search_terms = [clean_name]
+        if isinstance(company_name_or_entity, dict):
+            for alias in (company_name_or_entity.get("aliases") or []):
+                a = str(alias).strip()
+                if a and len(a) >= 2 and a.lower() not in [t.lower() for t in search_terms]:
+                    search_terms.append(a)
+        for search_q in search_terms:
+            if periods:
+                break
+            try:
+                s_res = requests.get(f"https://www.screener.in/api/company/search/?q={requests.utils.quote(search_q)}", headers={'User-Agent': 'Mozilla/5.0'}, timeout=5)
+                if s_res.status_code == 200:
+                    s_data = s_res.json()
+                    if s_data and isinstance(s_data, list):
+                        for item in s_data[:5]:
+                            cand_name = item.get("name", "").lower()
+                            # Reject inactive / merged / defunct entities
+                            if any(bad in cand_name for bad in ["(merged)", "(defunct)", "amalgamated", "former"]):
+                                continue
+                            cand_url = item.get("url", "")
+                            is_cand_val, _ = verify_financial_source_entity(
+                                f"https://www.screener.in{cand_url}",
+                                cand_name,
+                                "",
+                                canonical_entity if isinstance(company_name_or_entity, dict) else {"canonical_name": company_name}
+                            )
+                            if not is_cand_val:
+                                continue
+                            cand_ticker = cand_url.strip("/").split("/")[-1] if "/company/" in cand_url else ""
+                            if "/consolidated/" in cand_url:
+                                cand_ticker = cand_url.strip("/").split("/")[-2]
+                            if cand_ticker and cand_ticker != ticker:
+                                for suffix in ["/consolidated/", "/"]:
+                                    s_url = f"https://www.screener.in/company/{cand_ticker}{suffix}"
+                                    try:
+                                        res = requests.get(s_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=6)
+                                        if res.status_code == 200:
+                                            soup = BeautifulSoup(res.text, 'html.parser')
+                                            p_res, r_res, e_res, pt_res, m_res = extract_valid_screener_pl(soup, s_url)
+                                            if p_res:
+                                                add_source("Screener.in (Audited Multi-Year P&L Financials)", s_url)
+                                                periods = p_res
+                                                rev_by_period = r_res
+                                                ebitda_by_period = e_res
+                                                pat_by_period = pt_res
+                                                if m_res != "N/A" and present_mcap == "N/A":
+                                                    present_mcap = m_res
+                                                ticker = cand_ticker
+                                                break
+                                    except Exception:
+                                        pass
+                            if periods:
+                                break
+            except Exception:
+                pass
 
     # 3. Canonical 5-Year Timeline Guarantee
     # If unlisted or no recent Screener data, strictly establish default 6 recent fiscal periods (FY21 to FY26)
@@ -2989,7 +3200,6 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
     if is_private:
         try:
             with DDGS(timeout=8) as ddgs:
-                # First run a consolidated multi-year query to capture multi-year articles in 1 request
                 overview_queries = [
                     f'"{clean_name}" (revenue OR turnover OR "net sales" OR "net profit") 5 years crore',
                     f'"{clean_name}" revenue crore FY23 FY24 FY22',
@@ -2997,27 +3207,61 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                 for oq in overview_queries:
                     try:
                         for r in ddgs.text(oq, max_results=4):
-                            txt = f"{r.get('title','')} | {r.get('body','')}"
+                            href = r.get("href", "")
+                            title = r.get("title", "")
+                            body = r.get("body", "")
+                            # Entity contamination firewall on financial candidates
+                            is_val, reason = verify_financial_source_entity(
+                                href,
+                                title,
+                                body,
+                                canonical_entity if isinstance(company_name_or_entity, dict) else {"canonical_name": company_name}
+                            )
+                            if not is_val:
+                                continue
+
+                            txt = f"{title} | {body}"
                             for p in periods:
                                 yr_m = re.search(r'\d{4}', p)
                                 yr_val = yr_m.group(0) if yr_m else ""
                                 if not yr_val:
                                     continue
                                 short_fy = f"FY{yr_val[2:]}"
-                                if yr_val in txt or short_fy.lower() in txt.lower():
-                                    if rev_by_period.get(p, "N/A") == "N/A":
-                                        m_rev = re.search(r'(?:revenue|turnover|sales)\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)', txt, re.I)
+
+                                # Period-anchored extraction: ONLY extract metrics explicitly associated with THIS period
+                                p_rev_pats = [
+                                    rf"(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))[^.\n]{{0,50}}?(?:revenue|sales|turnover)\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)",
+                                    rf"(?:revenue|sales|turnover)[^.\n]{{0,50}}?(?:in|for|during)?\s*(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)"
+                                ]
+                                if rev_by_period.get(p, "N/A") == "N/A":
+                                    for pat in p_rev_pats:
+                                        m_rev = re.search(pat, txt, re.I)
                                         if m_rev:
                                             rev_by_period[p] = f"₹ {m_rev.group(1)} Cr."
-                                            add_source(f"Audited ROC / Media Disclosures ({yr_val})", r.get("href"))
-                                    if pat_by_period.get(p, "N/A") == "N/A":
-                                        m_pat = re.search(r'(?:net profit|profit after tax|pat)\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)', txt, re.I)
+                                            add_source(f"Audited ROC / Media Disclosures ({yr_val})", href)
+                                            break
+
+                                p_pat_pats = [
+                                    rf"(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))[^.\n]{{0,50}}?(?:net profit|profit after tax|pat)\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)",
+                                    rf"(?:net profit|profit after tax|pat)[^.\n]{{0,50}}?(?:in|for|during)?\s*(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)"
+                                ]
+                                if pat_by_period.get(p, "N/A") == "N/A":
+                                    for pat in p_pat_pats:
+                                        m_pat = re.search(pat, txt, re.I)
                                         if m_pat:
                                             pat_by_period[p] = f"₹ {m_pat.group(1)} Cr."
-                                    if ebitda_by_period.get(p, "N/A") == "N/A":
-                                        m_eb = re.search(r'ebitda\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)', txt, re.I)
+                                            break
+
+                                p_eb_pats = [
+                                    rf"(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))[^.\n]{{0,50}}?ebitda\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)",
+                                    rf"ebitda[^.\n]{{0,50}}?(?:in|for|during)?\s*(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)"
+                                ]
+                                if ebitda_by_period.get(p, "N/A") == "N/A":
+                                    for pat in p_eb_pats:
+                                        m_eb = re.search(pat, txt, re.I)
                                         if m_eb:
                                             ebitda_by_period[p] = f"₹ {m_eb.group(1)} Cr."
+                                            break
                     except Exception:
                         pass
         except Exception:
@@ -3054,6 +3298,10 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                     f"- net_profit: (in ₹ Crores, e.g. '₹ 25 Cr.' or '-₹ 12 Cr.', or 'N/A')\n"
                     f"- ebitda: (in ₹ Crores, e.g. '₹ 80 Cr.', or 'N/A')\n"
                     f"- employees: (total permanent workforce count, e.g. '3,200', '15,000', or 'N/A')\n\n"
+                    f"STRICT ACCURACY RULES:\n"
+                    f"1. If '{company_name}' is privately held or unlisted and has not publicly disclosed annual financial numbers, return 'N/A' for revenue, net_profit, and ebitda. Do NOT guess or hallucinate.\n"
+                    f"2. Never repeat the exact same revenue or profit number across different fiscal years.\n"
+                    f"3. Never attribute numbers from another company or peer.\n\n"
                     f"Return strictly a JSON array of objects with keys: 'period', 'revenue', 'net_profit', 'ebitda', 'employees'."
                 )
                 t2_raw = call_gemini(t2_prompt, system_instruction="Output strictly valid JSON with no markdown backticks. Anchor strictly to audited annual reports and regulatory filings.", temperature=0.0)
@@ -3079,18 +3327,23 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                                             break
                             if matching_ai:
                                 # For revenue / profit / ebitda, ONLY fill if currently N/A (never overwrite Screener audited data)
+                                # Gemini-sourced values get [AI Est.] marker to distinguish from audited Screener data
                                 if row["Net Revenue/Net Sales"] == "N/A" and matching_ai.get("revenue") and str(matching_ai["revenue"]).strip() != "N/A":
-                                    row["Net Revenue/Net Sales"] = str(matching_ai["revenue"]).strip()
+                                    ai_val = str(matching_ai["revenue"]).strip()
+                                    row["Net Revenue/Net Sales"] = f"{ai_val} [AI Est.]" if "[AI" not in ai_val else ai_val
                                     filled_any = True
                                 if row["Net Profit"] == "N/A" and matching_ai.get("net_profit") and str(matching_ai["net_profit"]).strip() != "N/A":
-                                    row["Net Profit"] = str(matching_ai["net_profit"]).strip()
+                                    ai_val = str(matching_ai["net_profit"]).strip()
+                                    row["Net Profit"] = f"{ai_val} [AI Est.]" if "[AI" not in ai_val else ai_val
                                     filled_any = True
                                 if row["EBITDA"] == "N/A" and matching_ai.get("ebitda") and str(matching_ai["ebitda"]).strip() != "N/A":
-                                    row["EBITDA"] = str(matching_ai["ebitda"]).strip()
+                                    ai_val = str(matching_ai["ebitda"]).strip()
+                                    row["EBITDA"] = f"{ai_val} [AI Est.]" if "[AI" not in ai_val else ai_val
                                     filled_any = True
                                 # For employee headcount, fill if currently N/A
                                 if row["Employee Headcount"] == "N/A" and matching_ai.get("employees") and str(matching_ai["employees"]).strip() != "N/A":
-                                    row["Employee Headcount"] = str(matching_ai["employees"]).strip()
+                                    ai_val = str(matching_ai["employees"]).strip()
+                                    row["Employee Headcount"] = f"{ai_val} [AI Est.]" if "[AI" not in ai_val else ai_val
                                     filled_any = True
                         if filled_any:
                             add_source("Google Gemini AI Intelligence Layer (Financial Disclosures & Headcount)", "https://generativelanguage.googleapis.com")
@@ -3104,9 +3357,10 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
         for fld in ["Net Revenue/Net Sales", "Net Profit", "EBITDA"]:
             raw_val = row.get(fld, "N/A")
             if raw_val != "N/A" and "privately held" not in raw_val.lower():
+                is_ai_est = "[AI" in raw_val
                 normalized = extract_financial_value(raw_val, metric_type=fld.lower().replace("/", "_"))
                 if normalized:
-                    row[fld] = normalized
+                    row[fld] = f"{normalized} [AI Est.]" if is_ai_est and "[AI" not in normalized else normalized
 
     # Apply financial sanity checks
     table2_rows = financial_sanity_check(table2_rows, "Net Revenue/Net Sales")
@@ -3140,17 +3394,18 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
             ]:
                 val = row.get(fld, "N/A")
                 if val and val != "N/A" and "privately held" not in str(val).lower():
+                    is_ai = "[AI" in str(val)
                     evidence_store.add_evidence(
                         table="Table #2",
                         category=cat,
                         metric_or_event=fld,
                         fact=str(val),
                         period=p,
-                        period_type=p_type,
-                        source_name=src_name,
-                        source_url=src_url,
-                        confidence="High" if p_type in ("Audited Annual", "Unaudited Interim", "TTM") else "Medium",
-                        verified=(p_type in ("Audited Annual", "Unaudited Interim", "TTM"))
+                        period_type="AI Estimate" if is_ai else p_type,
+                        source_name="Google Gemini AI Intelligence Layer" if is_ai else src_name,
+                        source_url="https://generativelanguage.googleapis.com" if is_ai else src_url,
+                        confidence="Low" if is_ai else ("High" if p_type in ("Audited Annual", "Unaudited Interim", "TTM") else "Medium"),
+                        verified=False if is_ai else (p_type in ("Audited Annual", "Unaudited Interim", "TTM"))
                     )
 
     return {
@@ -3355,6 +3610,39 @@ def resolve_canonical_entity(
     elif any(k in combined_low for k in ["pharma", "biotech", "drug", "healthcare"]):
         archetype = "pharma"
         primary_industry = "Pharmaceuticals & Healthcare"
+
+    # Gemini AI Fallback for Unknown Companies
+    if archetype == "general" and os.environ.get("GEMINI_API_KEY"):
+        try:
+            res_prompt = (
+                f"Identify the corporate entity details for the Indian company: '{raw_name}' (search query: '{query}').\n"
+                f"Classify into one of these archetypes: auto, power_energy, it_tech, food_fmcg, bank_fin, pharma, airline_aviation, telecom, retail, general.\n"
+                f"Return strictly JSON with keys:\n"
+                f"- archetype: (one of the archetypes above)\n"
+                f"- industry: (concise primary industry description)\n"
+                f"- aliases: (array of 2-5 common aliases, brand names, or abbreviations)\n"
+                f"- domain: (official corporate website domain, e.g. 'company.com', or '')"
+            )
+            raw_res = call_gemini(res_prompt, system_instruction="Output strictly valid JSON with no markdown formatting.", temperature=0.0)
+            if raw_res:
+                clean_res = re.sub(r"^```(?:json)?\s*", "", raw_res.strip())
+                clean_res = re.sub(r"\s*```$", "", clean_res).strip()
+                import json
+                parsed_res = json.loads(clean_res)
+                if isinstance(parsed_res, dict):
+                    valid_archetypes = {"auto", "power_energy", "it_tech", "food_fmcg", "bank_fin", "pharma", "airline_aviation", "telecom", "retail"}
+                    if parsed_res.get("archetype") and parsed_res["archetype"].lower() in valid_archetypes:
+                        archetype = parsed_res["archetype"].lower()
+                    if parsed_res.get("industry") and not primary_industry:
+                        primary_industry = str(parsed_res["industry"]).strip()
+                    if parsed_res.get("aliases") and isinstance(parsed_res["aliases"], list):
+                        for a in parsed_res["aliases"]:
+                            if a and len(str(a).strip()) >= 2:
+                                aliases.add(str(a).strip().lower())
+                    if parsed_res.get("domain") and not official_domain:
+                        official_domain = str(parsed_res["domain"]).strip().lower()
+        except Exception:
+            pass
 
     return {
         "canonical_name": raw_name,
@@ -3789,9 +4077,8 @@ def fetch_latest_news(company_name_or_entity: Any, wiki_slug: str = "", evidence
                 f"You are a regulatory corporate news analyst for Indian companies.\n"
                 f"Identify 3 to 5 real, verified recent business developments and official corporate announcements "
                 f"for '{canon_name_str}' (2025-2026).\n"
-                f"Cover real events such as: retail store expansion (number of new stores/outlets planned, capex/investment), "
-                f"sub-brand consolidation or launches, quarterly financial results (revenue/profit/margin movements), "
-                f"and leadership appointments.\n\n"
+                f"Cover real events such as: major contracts or orders, product/service launches, capacity or market expansion, "
+                f"quarterly financial results (revenue/profit/margin movements), strategic partnerships, and leadership appointments.\n\n"
                 f"For each development, return:\n"
                 f"- year: (e.g. 2026 or 2025)\n"
                 f"- headline: (factual concise business event headline, 12-25 words)\n"
@@ -3827,13 +4114,35 @@ def fetch_latest_news(company_name_or_entity: Any, wiki_slug: str = "", evidence
         except Exception:
             pass
 
+    # Deduplicate near-identical news events (>65% word overlap in title)
+    def dedup_events(events_list):
+        seen_word_sets = []
+        result = []
+        for ev in events_list:
+            words = set(re.findall(r'\b\w{4,}\b', ev.get("text", "").lower()))
+            if not words:
+                result.append(ev)
+                continue
+            is_dup = False
+            for prev_words in seen_word_sets:
+                overlap = len(words & prev_words) / max(len(words | prev_words), 1)
+                if overlap > 0.65:
+                    is_dup = True
+                    break
+            if not is_dup:
+                seen_word_sets.append(words)
+                result.append(ev)
+        return result
+
+    events = dedup_events(events)
+
     # Sort:
     # 1. Reverse chronological by Year (2026 -> 2025 -> 2024 -> 2023)
-    # 2. Within each year, prioritize high-impact business events (store openings, expansion, capex, investments, financial results, leadership)
+    # 2. Within each year, prioritize high-impact business events (expansion, capex, investments, financial results, leadership)
     def score_event_priority(ev):
         t_low = ev["text"].lower()
         score = 0
-        if any(k in t_low for k in ["aims to open", "expansion spree", "100 stores", "new stores", "capex", "doubles down", "investment"]):
+        if any(k in t_low for k in ["expansion", "new plant", "new facility", "order", "contract", "capex", "investment", "launch"]):
             score -= 60
         if any(k in t_low for k in ["crore", "cr", "sales", "profit", "results", "revenue", "quarter", "margin"]):
             score -= 50
@@ -4805,18 +5114,18 @@ def fetch_business_activities(company_name_or_entity: Any, wiki_slug: str = "", 
                 f"(Brand Name: '{clean_name}', Sector Context: '{activities.get('Industry / Sector') or infobox_industry or 'Indian Enterprise'}').\n\n"
                 f"Return strictly a JSON object with these exact keys:\n"
                 f"- core_profile: (2 informative sentences detailing the company's core business, brand positioning, and market leadership in India)\n"
-                f"- brands: (array of 4-8 top brand names and registered sub-brands/trademarks owned, e.g. for Liberty Shoes: Healers, Leap 7X, Aha, Lucy & Luke, Warrior, Gliders)\n"
-                f"- products: (array of 6-10 specific key products, models, or service lines produced/sold)\n"
-                f"- categories: (array of 4-6 broad product/service categories)\n"
-                f"- product_type: (e.g. 'Physical Footwear & Lifestyle Goods', 'Consumer Packaged Goods (CPG)', etc.)\n"
-                f"- manufacturing: {{'active': boolean, 'details': '1-2 sentence description of plants, automated facilities, and locations (e.g. Karnal, Gharaunda) or Not applicable'}}\n"
-                f"- online_sales: {{'active': boolean, 'details': '1-2 sentence description of official D2C webstore, mobile app, and marketplace channels (Amazon, Flipkart, etc.)'}}\n"
-                f"- retail_stores: {{'active': boolean, 'details': '1-2 sentence description of retail store network (e.g. exclusive brand outlets, ~500 existing stores, 100 new stores planned, airport/mall pop-ups) or Not applicable'}}\n"
-                f"- franchise_model: {{'active': boolean, 'details': '1-2 sentence description of franchise partner network, dealer distributors, or Not applicable'}}\n"
+                f"- brands: (array of 3-8 real registered brand names, sub-brands, or trademarks owned by '{target_corp_name}')\n"
+                f"- products: (array of 4-8 specific key commercial products, software platforms, or service lines produced/sold)\n"
+                f"- categories: (array of 3-6 broad product/service categories)\n"
+                f"- product_type: (e.g. 'Physical Manufactured Goods', 'Software & Digital Services', 'Financial Services', 'Infrastructure & Utilities')\n"
+                f"- manufacturing: {{'active': boolean, 'details': '1-2 sentence description of plants, automated facilities, and locations or Not applicable'}}\n"
+                f"- online_sales: {{'active': boolean, 'details': '1-2 sentence description of digital commerce storefront, web portal, or digital service delivery channels'}}\n"
+                f"- retail_stores: {{'active': boolean, 'details': '1-2 sentence description of retail store or branch network or Not applicable'}}\n"
+                f"- franchise_model: {{'active': boolean, 'details': '1-2 sentence description of franchise partner network, distributors, or Not applicable'}}\n"
                 f"- import_export: {{'active': boolean, 'details': '1-2 sentence description of international exports, foreign markets served, or domestic focus'}}\n"
-                f"- revenue_streams: (1 concise sentence breakdown of primary revenue streams, e.g. 'Retail Store Sales + Wholesale Footwear Distribution + Institutional Warrior Sales + E-Commerce')\n"
-                f"- business_model: (e.g. 'B2C + B2B (Integrated Manufacturing, Retail & Franchise Distribution)')\n"
-                f"- industry: (e.g. 'Footwear, Leather & Lifestyle Retail')"
+                f"- revenue_streams: (1 concise sentence breakdown of primary revenue streams)\n"
+                f"- business_model: (e.g. 'B2B', 'B2C', or 'B2B + B2C')\n"
+                f"- industry: (concise primary industry category)"
             )
             t4_raw = call_gemini(t4_prompt, system_instruction="Output strictly valid JSON with no markdown formatting.", temperature=0.0)
             if t4_raw:
@@ -4826,33 +5135,74 @@ def fetch_business_activities(company_name_or_entity: Any, wiki_slug: str = "", 
                 import json
                 t4_ai = json.loads(t4_clean)
                 if isinstance(t4_ai, dict):
-                    if t4_ai.get("core_profile"):
-                        activities["Core Business Profile"] = str(t4_ai["core_profile"]).strip()
-                    if t4_ai.get("brands") and isinstance(t4_ai["brands"], list) and len(t4_ai["brands"]) > 0:
-                        activities["Brands & Trademarks"] = t4_ai["brands"]
-                    if t4_ai.get("products") and isinstance(t4_ai["products"], list) and len(t4_ai["products"]) > 0:
-                        activities["Key Products & Offerings"] = t4_ai["products"]
-                    if t4_ai.get("categories") and isinstance(t4_ai["categories"], list) and len(t4_ai["categories"]) > 0:
-                        activities["Product Categories"] = t4_ai["categories"]
-                    if t4_ai.get("product_type"):
+                    # Only fill Core Business Profile if it was generic or empty
+                    curr_prof = activities.get("Core Business Profile", "")
+                    if t4_ai.get("core_profile") and (not curr_prof or any(m in curr_prof.lower() for m in ["operating corporate enterprise", "commercial operations within"])):
+                        activities["Core Business Profile"] = f"{str(t4_ai['core_profile']).strip()} [AI]"
+
+                    # Merge brands rather than overwrite
+                    if t4_ai.get("brands") and isinstance(t4_ai["brands"], list):
+                        existing_brands = activities.get("Brands & Trademarks", [])
+                        existing_set = {re.sub(r"[^\w\s]", "", str(b)).strip().lower() for b in existing_brands}
+                        for b in t4_ai["brands"]:
+                            b_str = str(b).strip()
+                            b_norm = re.sub(r"[^\w\s]", "", b_str).lower()
+                            if b_norm and b_norm not in existing_set and len(b_str) < 40:
+                                existing_brands.append(b_str)
+                                existing_set.add(b_norm)
+                        activities["Brands & Trademarks"] = existing_brands
+
+                    # Merge products rather than overwrite
+                    if t4_ai.get("products") and isinstance(t4_ai["products"], list):
+                        existing_prods = activities.get("Key Products & Offerings", [])
+                        if existing_prods == ["Commercial Products & Services"] or not existing_prods:
+                            activities["Key Products & Offerings"] = [str(p).strip() for p in t4_ai["products"] if str(p).strip()]
+                        else:
+                            existing_set = {re.sub(r"[^\w\s]", "", str(p)).strip().lower() for p in existing_prods}
+                            for p in t4_ai["products"]:
+                                p_str = str(p).strip()
+                                p_norm = re.sub(r"[^\w\s]", "", p_str).lower()
+                                if p_norm and p_norm not in existing_set and len(p_str) < 60:
+                                    existing_prods.append(p_str)
+                                    existing_set.add(p_norm)
+                            activities["Key Products & Offerings"] = existing_prods
+
+                    # Categories: only fill if empty or generic
+                    curr_cats = activities.get("Product Categories", [])
+                    if t4_ai.get("categories") and isinstance(t4_ai["categories"], list):
+                        if not curr_cats or curr_cats == ["Commercial Operations", "Product & Service Delivery"]:
+                            activities["Product Categories"] = [str(c).strip() for c in t4_ai["categories"] if str(c).strip()]
+
+                    # Product Type: only fill if generic
+                    curr_pt = activities.get("Product Type", "")
+                    if t4_ai.get("product_type") and (not curr_pt or "commercial & professional" in curr_pt.lower()):
                         activities["Product Type"] = str(t4_ai["product_type"]).strip()
-                    if isinstance(t4_ai.get("manufacturing"), dict):
-                        activities["Manufacturing"] = t4_ai["manufacturing"]
-                    if isinstance(t4_ai.get("online_sales"), dict):
-                        activities["Online Sales / E-Commerce"] = t4_ai["online_sales"]
-                    if isinstance(t4_ai.get("retail_stores"), dict):
-                        activities["Physical Retail Stores"] = t4_ai["retail_stores"]
-                        activities["Own Retail Stores"] = t4_ai["retail_stores"]
-                    if isinstance(t4_ai.get("franchise_model"), dict):
-                        activities["Franchise Model"] = t4_ai["franchise_model"]
-                    if isinstance(t4_ai.get("import_export"), dict):
-                        activities["Import / Export"] = t4_ai["import_export"]
-                    if t4_ai.get("revenue_streams"):
+
+                    # Operational dicts: only update if currently "Not detected" / inactive
+                    for op_key, ai_key in [
+                        ("Manufacturing", "manufacturing"),
+                        ("Online Sales / E-Commerce", "online_sales"),
+                        ("Physical Retail Stores", "retail_stores"),
+                        ("Franchise Model", "franchise_model"),
+                        ("Import / Export", "import_export")
+                    ]:
+                        curr_op = activities.get(op_key, {})
+                        ai_op = t4_ai.get(ai_key)
+                        if isinstance(ai_op, dict) and ai_op.get("details"):
+                            is_undetected = not curr_op.get("active", False) or "not detected" in str(curr_op.get("details", "")).lower()
+                            if is_undetected:
+                                activities[op_key] = ai_op
+                                if op_key == "Physical Retail Stores":
+                                    activities["Own Retail Stores"] = ai_op
+
+                    # Revenue streams & business model: only fill if generic
+                    if t4_ai.get("revenue_streams") and "commercial product sales + service" in activities.get("Revenue Streams", "").lower():
                         activities["Revenue Streams"] = str(t4_ai["revenue_streams"]).strip()
-                    if t4_ai.get("business_model"):
+                    if t4_ai.get("business_model") and activities.get("Business Model") == "B2B (Business to Business)":
                         activities["Business Model"] = str(t4_ai["business_model"]).strip()
-                    if t4_ai.get("industry"):
+                    if t4_ai.get("industry") and (not activities.get("Industry / Sector") or activities.get("Industry / Sector") == "Commercial Enterprise"):
                         activities["Industry / Sector"] = str(t4_ai["industry"]).strip()
+
                     add_source("Google Gemini AI Intelligence Layer (Operational Profile & Products)", "https://generativelanguage.googleapis.com")
         except Exception:
             pass
@@ -5196,18 +5546,17 @@ def fetch_strategic_conclusions(
     if contract_signals or expansion_signals:
         growth_drivers.append(f"Active commercial pipeline with {len(contract_signals)} major contract/deal signals and {len(expansion_signals)} expansion announcements")
 
-    if archetype == "auto":
-        growth_drivers.append("Robust passenger SUV volumes, rapid EV market-share gains, and commercial vehicle fleet recovery")
-    elif archetype == "power_energy":
-        growth_drivers.append("Sustained transmission line commissioning, growing smart-metering order book, and renewable evacuation demand")
-    elif archetype == "it_tech":
-        growth_drivers.append("Steady enterprise digital transformation deals, cloud migration orders, and generative AI platform adoption")
-    elif archetype == "food_fmcg":
-        growth_drivers.append("Expanding retail distribution reach, quick-commerce volume growth, and premium product portfolio scaling")
-    else:
-        growth_drivers.append("Sustained operational execution and capital deployment across core business divisions")
+    # Dynamic demand drivers grounded in real company signals and Table 4 data
+    if contract_signals:
+        top_contract = clean_insight_text(contract_signals[0], 90)
+        growth_drivers.append(f"Commercial traction: {top_contract}")
+    if expansion_signals:
+        top_exp = clean_insight_text(expansion_signals[0], 90)
+        growth_drivers.append(f"Capacity expansion: {top_exp}")
+    if not growth_drivers:
+        growth_drivers.append("Operational execution across primary business divisions")
 
-    growth_summary = f"{growth_verdict} — " + ("; ".join(growth_drivers) if growth_drivers else "Sustained operational expansion and infrastructure deployment across active business units.")
+    growth_summary = f"{growth_verdict} — " + ("; ".join(growth_drivers) if growth_drivers else "Sustained operational expansion across active business units.")
 
     # Optional Gemini AI refinement for Table #5 executive synthesis
     if os.environ.get("GEMINI_API_KEY"):
@@ -5228,91 +5577,86 @@ def fetch_strategic_conclusions(
         except Exception:
             pass
 
-    # B. Expansion Vectors
+    # B. Expansion Vectors — grounded strictly in verified signals & Table 4 offerings
     t4_cats = d4.get("Product Categories", [])
     t4_prods = d4.get("Key Products & Offerings", [])
-    t4_retail = d4.get("Physical Retail Stores", {})
+    t4_retail = d4.get("Physical Retail Stores") or d4.get("Own Retail Stores") or {}
     t4_franchise = d4.get("Franchise Model", {})
     t4_trade = d4.get("Import / Export", {})
 
-    if archetype == "auto":
-        new_markets = "Expanding commercial fleet electrification, corporate ESG mobility transitions, and high-demand tier-2/tier-3 passenger SUV markets."
-        new_geography = "Pan-India dealership and service footprint expansion, national highway EV charging corridors, and international export channels across Europe, Middle East, Africa, and APAC."
-        new_products = "Next-gen EV passenger variants (Curvv.ev, Nexon.ev, Punch.ev), Harrier/Safari facelifts, and smart commercial trucks (Tata Prima, Signa, Ultra)."
-        new_categories = "Dedicated Electric Passenger Vehicles (TPEM), Hydrogen Fuel Cell & LNG commercial haulage, and Connected Fleet Telematics (Fleet Edge)."
-        new_stores_facilities = "Opening dedicated EV-exclusive retail showrooms, authorized 3S dealership facilities, and expanding Sanand manufacturing facility."
-    elif archetype == "power_energy":
-        new_markets = "Expanding presence across regulated and parallel consumer distribution, utility-scale interstate transmission corridors, and smart-metering concession areas."
-        new_geography = "National interstate green energy evacuation corridors (Gujarat/Khavda, Rajasthan, Maharashtra) and urban distribution circles (Mumbai, Mundra)."
-        new_products = "Advanced Metering Infrastructure (AMI smart meters), high-voltage direct current (HVDC) transmission links, and green energy evacuation infrastructure."
-        new_categories = "Smart Metering (AMI), High-Voltage Transmission Infrastructure, and Parallel Electricity Distribution."
-        new_stores_facilities = "Not applicable for direct retail; expanding operational grid substations, transmission maintenance centers, and regional customer service/billing centers."
-    elif archetype == "it_tech":
-        new_markets = "Global enterprise digital transformation, cloud migrations, generative AI enterprise integrations, and cybersecurity modernization."
-        new_geography = "Expanding delivery hubs across North America, Europe, Latin America, and emerging tier-2 digital delivery centres in India."
-        new_products = "Enterprise generative AI platforms, sovereign cloud migration accelerators, and proprietary digital consulting suites."
-        new_categories = "Generative AI Consulting, Sovereign Cloud Solutions, and Enterprise Cybersecurity Advisory."
-        new_stores_facilities = "Not applicable for consumer retail; opening next-gen digital delivery hubs, AI centers of excellence, and corporate development campuses."
-    elif archetype == "food_fmcg":
-        new_markets = "Modern trade, quick-commerce delivery platforms, institutional food service, and overseas Indian diaspora export distribution."
-        new_geography = "Pan-India penetration into tier-3/tier-4 rural retail nodes, along with established export footprint in US, UK, and GCC markets."
-        new_products = "Value-added dairy/confectionery variants, packaged organic foods, and ready-to-eat snack lines."
-        new_categories = "High-protein dairy items, healthy snacking segments, and specialized beverage lines."
-        new_stores_facilities = "Opening exclusive brand outlets (EBOs), franchised quick-service kiosks, and automated production/fulfillment hubs."
-    else:
-        new_markets = f"Expanding institutional enterprise clients and core domestic consumer segments across {', '.join(t4_cats[:2]) if t4_cats else 'core business segments'}."
-        new_geography = "Pan-India operational presence with strategic expansion into regional industrial and consumer growth corridors."
-        new_products = f"{', '.join(t4_prods[:3]) if t4_prods else 'Next-generation product variants and upgraded commercial offerings'}."
-        new_categories = f"{', '.join(t4_cats[:3]) if t4_cats else 'Core product categories and complementary business verticals'}."
-        new_stores_facilities = "Expanding regional branch footprint, distribution depots, and operational service facilities."
+    exp_sigs = [clean_insight_text(s["text"], 100) for s in all_signals if "EXPANSION" in s["cat"]]
+    prod_sigs = [clean_insight_text(s["text"], 100) for s in all_signals if any(k in s["cat"] for k in ["PRODUCT", "LAUNCH"])]
 
-    # C. Contraction & Shutdown Signals
+    if exp_sigs:
+        new_markets = f"Verified commercial expansion: {'; '.join(exp_sigs[:2])}"
+    elif t4_cats and t4_cats != ["Commercial Operations", "Product & Service Delivery"]:
+        new_markets = f"Expanding operations across core divisions: {', '.join(t4_cats[:2])}."
+    else:
+        new_markets = "N/A — no verified market expansion evidence identified in public filings."
+
+    geo_matches = [s for s in exp_sigs if any(w in s.lower() for w in ["pan-india", "global", "export", "tier", "region", "international", "city", "state", "europe", "us", "uk", "middle east", "asia"])]
+    if geo_matches:
+        new_geography = f"Geographic expansion: {geo_matches[0]}"
+    elif t4_trade.get("active"):
+        new_geography = f"Active domestic and international footprint: {t4_trade.get('details', 'Commercial presence in India')}"
+    else:
+        new_geography = "Domestic operational focus with regional commercial channels."
+
+    if prod_sigs:
+        new_products = f"Recent product/service additions: {'; '.join(prod_sigs[:2])}"
+    elif t4_prods and t4_prods != ["Commercial Products & Services"]:
+        new_products = f"Active core offerings: {', '.join(t4_prods[:3])}."
+    else:
+        new_products = "N/A — no specific new product launches verified in recent announcements."
+
+    if t4_cats and t4_cats != ["Commercial Operations", "Product & Service Delivery"]:
+        new_categories = f"Core operational categories: {', '.join(t4_cats[:3])}."
+    else:
+        new_categories = "N/A — operating within primary established sector lines."
+
+    facility_sigs = [s for s in exp_sigs if any(w in s.lower() for w in ["plant", "factory", "facility", "store", "showroom", "center", "hub", "branch", "campus", "depot"])]
+    if facility_sigs:
+        new_stores_facilities = f"Facility/network expansion: {'; '.join(facility_sigs[:2])}"
+    elif t4_retail.get("active") and t4_retail.get("details") and "not detected" not in str(t4_retail.get("details", "")).lower():
+        new_stores_facilities = f"Active physical network: {t4_retail.get('details')}"
+    else:
+        new_stores_facilities = "N/A — no major new facility or retail store additions reported in public disclosures."
+
+    # C. Contraction & Shutdown Signals — evidence-only
     shutdown_findings = web_findings.get("shutdowns", [])
     combined_shut_text = " ".join([f["title"] + " " + f["body"] for f in shutdown_findings])
 
-    if archetype == "auto":
-        bs_line = "Phased out legacy BS-IV models and older vehicle lines (e.g., Nano, Bolt, Indica); manufacturing modernized for BS-VI Phase 2, EV, and smart commercial platforms."
-    elif archetype == "power_energy":
-        bs_line = "Not applicable (company operates power transmission and distribution infrastructure, not vehicle or industrial assembly lines)."
-    elif archetype == "it_tech":
-        bs_line = "Not applicable (technology services provider; phasing out deprecated legacy on-premise application maintenance for cloud-native architectures)."
-    elif archetype == "food_fmcg":
-        bs_line = "Routine SKU rationalization of slower-moving product variants; primary automated production lines active."
-    else:
-        bs_line = "No shutdown of primary manufacturing lines; operational capacity dynamically aligned with market demand."
+    bs_line = "N/A — no verified manufacturing line or production discontinuation identified."
+    if re.search(r"\b(?:discontinued|phased out|halted production|stopped manufacturing)\b", combined_shut_text, re.I):
+        m = re.search(r"([^.\n]*?(?:discontinued|phased out|halted production)[^.\n]*)", combined_shut_text, re.I)
+        if m:
+            clean_disc = clean_insight_text(m.group(1).strip(), 120)
+            if clean_disc:
+                bs_line = f"Reported Discontinuation: {clean_disc}"
 
-    plant_shutdown = "No active permanent plant shutdowns or regulatory environmental closures identified across primary operating facilities."
+    plant_shutdown = "N/A — no active permanent plant shutdowns or regulatory environmental closures identified."
     if re.search(r"\b(?:plant shut|factory shut|operations suspended|nclt closure|pollution control closure)\b", combined_shut_text, re.I):
         m = re.search(r"([^.\n]*?(?:shut|closed|suspended)[^.\n]*)", combined_shut_text, re.I)
         if m:
-            clean_shut = clean_insight_text(m.group(1).strip())
+            clean_shut = clean_insight_text(m.group(1).strip(), 120)
             if clean_shut:
                 plant_shutdown = f"Reported Event: {clean_shut}"
 
-    t4_retail = d4.get("Physical Retail Stores") or d4.get("Own Retail Stores") or {}
-    is_retail_business = any(k in canon_name.lower() or k in clean_name.lower() or k in str(d4.get("Industry / Sector", "")).lower() for k in ["shoe", "footwear", "retail", "apparel", "clothing", "fashion", "bata", "liberty", "metro", "store", "outlet"])
+    closing_stores = "N/A — no mass store or branch closures reported in verified evidence."
+    if re.search(r"\b(?:store closure|closed stores|closing branches|shut down outlets|retail rationalization)\b", combined_shut_text, re.I):
+        m = re.search(r"([^.\n]*?(?:store closure|closed \d+|shut down \d+|closing branches)[^.\n]*)", combined_shut_text, re.I)
+        if m:
+            clean_c = clean_insight_text(m.group(1).strip(), 120)
+            if clean_c:
+                closing_stores = f"Reported Optimization: {clean_c}"
 
-    if (archetype in ("power_energy", "it_tech")) and not is_retail_business:
-        closing_stores = "Not applicable — physical retail stores not operated; consumer customer-service hubs and digital touchpoints remain active."
-    elif is_retail_business or (isinstance(t4_retail, dict) and t4_retail.get("active")):
-        closing_stores = "Routine retail footprint optimization; selective closure/relocation of underperforming or high-rent stores (approx. 15–25 stores annually) balanced by rapid franchise expansion in Tier-2 and Tier-3 cities."
-    elif archetype == "auto":
-        closing_stores = "Dealership and service network dynamically optimized; no mass dealer or showroom closures reported."
-    elif archetype == "food_fmcg":
-        closing_stores = "Routine retail footprint optimization based on store profitability; no mass retail closures reported."
-    else:
-        closing_stores = "No mass store or branch closures reported; physical distribution network remains stable."
-
-    if archetype == "auto":
-        stop_product = "Retired legacy nameplates (e.g., Safari Storme, Zest, Manza); core passenger SUV and commercial fleet portfolios fully active."
-    elif archetype == "power_energy":
-        stop_product = "No discontinuation of core transmission or electricity distribution utility operations."
-    elif archetype == "it_tech":
-        stop_product = "Sunsetting deprecated legacy IT architectures while migrating enterprise clients to modern cloud platforms."
-    elif archetype == "food_fmcg":
-        stop_product = "Discontinuation of seasonal or underperforming packaged SKUs; core brand portfolios active."
-    else:
-        stop_product = "Core commercial products and service offerings active; no cessation of primary operations."
+    stop_product = "N/A — no verified cessation of primary product offerings identified."
+    if re.search(r"\b(?:recalled|withdrawn from market|banned|cease sales)\b", combined_shut_text, re.I):
+        m = re.search(r"([^.\n]*?(?:recalled|withdrawn|cease sales)[^.\n]*)", combined_shut_text, re.I)
+        if m:
+            clean_sp = clean_insight_text(m.group(1).strip(), 120)
+            if clean_sp:
+                stop_product = f"Reported Product Action: {clean_sp}"
 
     # D. Leadership & Governance Dynamics
     ceo_name = data1.get("CEO", "N/A")
@@ -5323,7 +5667,6 @@ def fetch_strategic_conclusions(
     lead_web = web_findings.get("leadership", [])
     lead_web_text = " ".join([f["title"] + " " + f["body"] for f in lead_web])
 
-    # Dynamic, truthful CXO status without "(N/A)" placeholders
     def is_valid_leader_name(val: Any) -> bool:
         if not val:
             return False
@@ -5332,26 +5675,18 @@ def fetch_strategic_conclusions(
             return False
         return True
 
-    if any(k in canon_name.lower() for k in ["tata motors", "motors"]) or (archetype == "auto" and "tata" in clean_name.lower()):
-        cxo_status = "Divisional executive leadership: Shailesh Chandra (MD, Passenger Vehicles & TPEM), Girish Wagh (Executive Director, Commercial Vehicles), PB Balaji (Group CFO), N. Chandrasekaran (Chairman). Stable executive core."
-    elif any(k in canon_name.lower() for k in ["godlike", "godlike esports"]):
-        cxo_status = "Executive Leadership: Founded and directed by Chetan 'Kronten' Chandgude alongside dedicated esports operations and team management leads. Stable executive core."
-    elif any(re.search(rf"\b{re.escape(kw)}\b", canon_name.lower()) for kw in ["esports", "gaming"]):
-        cxo_status = "Managed by founding directors, team operations directors, and professional gaming roster managers. Stable executive core."
+    exec_parts = []
+    if is_valid_leader_name(ceo_name):
+        exec_parts.append(f"CEO: {ceo_name}")
+    if is_valid_leader_name(cfo_name):
+        exec_parts.append(f"CFO: {cfo_name}")
+    if is_valid_leader_name(cto_name):
+        exec_parts.append(f"CTO: {cto_name}")
+
+    if exec_parts:
+        cxo_status = f"Executive Leadership: {', '.join(exec_parts)}. Stable executive governance core."
     else:
-        exec_parts = []
-        if is_valid_leader_name(ceo_name):
-            exec_parts.append(f"CEO: {ceo_name}")
-        if is_valid_leader_name(cfo_name):
-            exec_parts.append(f"CFO: {cfo_name}")
-        if is_valid_leader_name(cto_name):
-            exec_parts.append(f"CTO: {cto_name}")
-
-        if exec_parts:
-            cxo_status = f"Executive Leadership: {', '.join(exec_parts)}. Stable executive governance core."
-        else:
-            cxo_status = "Managed by Board of Directors, Managing Director(s), and Key Managerial Personnel (KMP); stable executive governance core."
-
+        cxo_status = "Managed by Board of Directors, Managing Director(s), and Key Managerial Personnel (KMP); stable executive governance core."
 
     if leadership_signals:
         clean_lead_sig = clean_insight_text(leadership_signals[0], 110)
@@ -5359,7 +5694,7 @@ def fetch_strategic_conclusions(
             cxo_status += f" Recent Movement: {clean_lead_sig}"
 
     # AI / Digital Transformation Leader
-    ai_digital_leader = "Digital transformation and enterprise AI initiatives driven through central Chief Technology / Information leadership and specialized engineering teams."
+    ai_digital_leader = "Digital transformation and enterprise IT initiatives driven through central technology and engineering leadership."
     if re.search(r"\b(?:appointed|named|hired|joins as|takes over as)\b.*?\b(?:digital|ai|technology|chief)\b", lead_web_text, re.I):
         m = re.search(r"([^.\n]*?(?:appointed|named|hired|joins as)[^.\n]*?(?:digital|ai|technology|cdo|cto)[^.\n]*)", lead_web_text, re.I)
         if m:
@@ -5383,17 +5718,7 @@ def fetch_strategic_conclusions(
                 ceo_transition = f"Succession / Transition: {clean_trans}"
 
     # Growth & Marketing Leader
-    if archetype == "auto":
-        growth_leader = "Brand marketing, consumer campaigns, and dealer growth managed through divisional CMOs and passenger/commercial vehicle business heads."
-    elif archetype == "power_energy":
-        growth_leader = "Commercial growth and business development driven through institutional bidding, key account managers, and regulatory affairs leadership."
-    elif archetype == "it_tech":
-        growth_leader = "Global marketing, strategic alliances, and enterprise growth steered by Chief Marketing Officer and regional market leaders."
-    elif archetype == "food_fmcg":
-        growth_leader = "National brand marketing, consumer advertising, and channel distribution steered by Chief Marketing Officer and regional sales heads."
-    else:
-        growth_leader = "Marketing, brand equity, and commercial growth directed by corporate marketing leadership and business unit heads."
-
+    growth_leader = "Marketing and commercial growth directed by corporate marketing leadership and business unit heads."
     if re.search(r"\b(?:appointed|named|hired)\b.*?\b(?:cmo|chief marketing officer|head of marketing)\b", lead_web_text, re.I):
         m = re.search(r"([^.\n]*?(?:appointed|named|hired)[^.\n]*?(?:cmo|marketing)[^.\n]*)", lead_web_text, re.I)
         if m:
@@ -5402,7 +5727,7 @@ def fetch_strategic_conclusions(
                 growth_leader = f"Marketing Leadership: {clean_cmo}"
 
     # Chief AI Officer
-    caio_status = "AI initiatives governed centrally under Chief Technology / Digital Officer and engineering units; standalone Chief AI Officer role not mandated."
+    caio_status = "AI initiatives governed centrally under technology leadership; standalone Chief AI Officer role not mandated."
     if re.search(r"\b(?:appointed|named|hired)\b.*?\b(?:chief ai officer|caio)\b", lead_web_text, re.I):
         m = re.search(r"([^.\n]*?(?:appointed|named|hired)[^.\n]*?(?:chief ai officer|caio)[^.\n]*)", lead_web_text, re.I)
         if m:
@@ -5410,89 +5735,66 @@ def fetch_strategic_conclusions(
             if clean_caio:
                 caio_status = f"Dedicated Role Appointed: {clean_caio}"
 
-    # E. Real Estate & Property Movements
+    # E. Real Estate & Property Movements — evidence-only
     re_web = web_findings.get("real_estate", [])
     re_web_text = " ".join([f["title"] + " " + f["body"] for f in re_web])
 
-    if archetype == "auto" or any(k in canon_name.lower() for k in ["tata motors", "motors"]):
-        acquired_property = "Acquired Ford India's Sanand manufacturing facility in Gujarat (via subsidiary TPEM) to unlock ~300,000 units/year EV manufacturing capacity. ↳ Strategic Implication: Direct manufacturing capacity expansion for electric and passenger vehicles."
-        sold_property = "Historic Singur land arbitration settlement awarded in company's favor; non-core real estate monetization pursued to optimize capital efficiency. ↳ Strategic Implication: Balance-sheet de-leveraging and non-core asset rationalization."
-    elif archetype == "power_energy" or any(k in canon_name.lower() for k in ["adani energy", "aesl"]):
-        acquired_property = "Acquisition of strategic substation land parcels and transmission line right-of-way (RoW) corridors for inter-state green energy corridors. ↳ Strategic Implication: Long-term regulated asset base (RAB) capital deployment."
-        sold_property = "No divestment of core transmission corridors or utility land holdings. ↳ Strategic Implication: Core utility asset retention with zero distress asset sales."
-    elif archetype == "it_tech" or any(k in canon_name.lower() for k in ["tcs", "consultancy services"]):
-        acquired_property = "Acquiring Special Economic Zone (SEZ) land parcels, corporate campus spaces, and regional delivery centers. ↳ Strategic Implication: Software engineering and delivery infrastructure expansion."
-        sold_property = "Rationalizing non-strategic leased office spaces in post-hybrid work environment. ↳ Strategic Implication: Operating cost optimization."
-    elif archetype == "food_fmcg":
-        acquired_property = "Acquiring industrial land for automated food processing plants, cold chain storage hubs, and central distribution warehouses. ↳ Strategic Implication: Supply chain vertical integration and processing scale."
-        sold_property = "No major real estate or production facility divestments reported; holding and expanding manufacturing base. ↳ Strategic Implication: Asset retention for long-term growth."
-    else:
-        acquired_property = "Acquiring operational land, facility infrastructure, and commercial sites to support operational scaling. ↳ Strategic Implication: Capacity expansion and long-term capital investment."
-        sold_property = "No distress real estate sales or major property liquidations reported. ↳ Strategic Implication: Core asset retention and balance sheet stability."
+    acquired_property = "N/A — no major real estate or property acquisitions identified in public filings."
+    sold_property = "N/A — no major real estate or property divestments reported."
 
-    # Check if web findings reveal a specific transaction
-    if re.search(r"\b(?:acquired|purchased|bought)\b.*?\b(?:land|property|campus|acre)\b", re_web_text, re.I):
-        m = re.search(r"([^.\n]*?(?:acquired|purchased|bought)[^.\n]*?(?:land|property|campus|acre)[^.\n]*)", re_web_text, re.I)
+    if re.search(r"\b(?:acquired|purchased|bought)\b.*?\b(?:land|property|campus|acre|plant|facility)\b", re_web_text, re.I):
+        m = re.search(r"([^.\n]*?(?:acquired|purchased|bought)[^.\n]*?(?:land|property|campus|acre|plant|facility)[^.\n]*)", re_web_text, re.I)
         if m:
             clean_re = clean_insight_text(m.group(1).strip(), 130)
             if clean_re:
-                acquired_property = f"Acquisition Recorded: {clean_re} — (Signals capacity expansion & long-term capital investment)"
+                acquired_property = f"Acquisition Recorded: {clean_re} — (Capacity expansion & capital investment)"
 
-    # F. Mergers, Acquisitions & Capital Actions (M&A)
+    if re.search(r"\b(?:sold|monetized|divested|leased out)\b.*?\b(?:land|property|office|facility)\b", re_web_text, re.I):
+        m = re.search(r"([^.\n]*?(?:sold|monetized|divested)[^.\n]*?(?:land|property|office|facility)[^.\n]*)", re_web_text, re.I)
+        if m:
+            clean_re_sold = clean_insight_text(m.group(1).strip(), 130)
+            if clean_re_sold:
+                sold_property = f"Divestment Recorded: {clean_re_sold}"
+
+    # F. Mergers, Acquisitions & Capital Actions (M&A) — evidence-only
     mna_signals = [s["text"] for s in all_signals if "FINANCIAL & M&A" in s["cat"]]
     mna_web = web_findings.get("mna_demerger", [])
     mna_web_text = " ".join([f["title"] + " " + f["body"] for f in mna_web])
 
+    buying_company = "N/A — no active corporate acquisition or buyout identified in recent filings."
     if mna_signals:
         clean_mna_sig = clean_insight_text(mna_signals[0], 120)
         buying_company = f"Active Acquisition: {clean_mna_sig}"
-    elif archetype == "auto" or any(k in canon_name.lower() for k in ["tata motors", "motors"]):
-        buying_company = "Acquisition of Ford India's Sanand manufacturing plant (assets & land); historic buyout of Jaguar Land Rover (JLR); strategic technology partnerships."
-    elif archetype == "power_energy" or any(k in canon_name.lower() for k in ["adani energy", "aesl"]):
-        buying_company = "Acquisition of operating transmission assets (e.g. Essar Mahan-Sipat), project SPVs, and smart metering concession companies."
-    elif archetype == "it_tech":
-        buying_company = "Strategic acquisitions of boutique digital engineering firms, cloud consulting practices, and enterprise platform integrators."
-    elif archetype == "food_fmcg":
-        buying_company = "Acquisitions of regional food/snack brands, direct-to-consumer (D2C) brands, and contract packaging facilities."
-    else:
-        buying_company = "Strategic acquisition of complementary operating businesses and specialized project vehicles."
+    elif re.search(r"\b(?:acquired|acquires|acquisition of|buys|bought)\b", mna_web_text, re.I):
+        m = re.search(r"([^.\n]*?(?:acquired|acquires|acquisition of|buys|bought)[^.\n]*)", mna_web_text, re.I)
+        if m:
+            clean_acq = clean_insight_text(m.group(1).strip(), 120)
+            if clean_acq:
+                buying_company = f"Acquisition Recorded: {clean_acq}"
 
-    if any(k in canon_name.lower() for k in ["tata motors", "motors"]):
-        merged_company = "Statutory amalgamation of operating subsidiaries (e.g., Tata Motors Finance merger into Tata Capital; passenger vehicle restructuring under TMPVL)."
-    elif any(k in canon_name.lower() for k in ["adani energy", "aesl"]):
-        merged_company = "Consolidation and amalgamation of acquired project transmission SPVs under the parent utility corporate umbrella."
-    else:
-        merged_company = "Internal consolidation of wholly-owned operating subsidiaries under the listed entity; no distressed corporate mergers."
+    merged_company = "N/A — no distressed or statutory corporate mergers reported; operating under integrated corporate structure."
+    if re.search(r"\b(?:merger|merged with|amalgamation|amalgamated)\b", mna_web_text, re.I):
+        m = re.search(r"([^.\n]*?(?:merger|merged with|amalgamation)[^.\n]*)", mna_web_text, re.I)
+        if m:
+            clean_merg = clean_insight_text(m.group(1).strip(), 120)
+            if clean_merg:
+                merged_company = f"Merger Activity: {clean_merg}"
 
-    if any(k in canon_name.lower() for k in ["tata motors", "motors"]):
-        demerger_status = "Demerger Approved: Board approved split into two independent listed corporate entities — Commercial Vehicles (CV) business and Passenger Vehicles (PV, EV, JLR) business to maximize operational focus and shareholder value."
-    elif any(k in canon_name.lower() for k in ["jio financial", "jfs"]):
-        demerger_status = "Demerger Completed: Successfully demerged from Reliance Industries Limited (RIL) to trade as an independent listed financial services powerhouse."
-    elif any(k in canon_name.lower() for k in ["vedanta"]):
-        demerger_status = "Demerger Proposed: Plan to demerge into 6 pure-play sector-focused listed companies (Aluminium, Oil & Gas, Power, Steel, Base Metals, and Vedanta Ltd)."
-    elif re.search(r"\b(?:demerger|demerged|spin off|spinoff)\b", mna_web_text, re.I):
-        m = re.search(r"([^.\n]*?(?:demerger|demerged|spin off)[^.\n]*)", mna_web_text, re.I)
+    demerger_status = "N/A — no demerger planned; corporate structure operating as single integrated entity."
+    if re.search(r"\b(?:demerger|demerged|spin off|spinoff)\b", mna_web_text + " " + news_text_blob, re.I):
+        m = re.search(r"([^.\n]*?(?:demerger|demerged|spin off)[^.\n]*)", mna_web_text + " " + news_text_blob, re.I)
         if m:
             clean_dem = clean_insight_text(m.group(1).strip(), 120)
-            demerger_status = f"Demerger Activity: {clean_dem}" if clean_dem else "Demerger under strategic consideration."
-    else:
-        demerger_status = "No current demerger planned; corporate structure operating as single integrated listed entity."
+            if clean_dem:
+                demerger_status = f"Demerger Activity: {clean_dem}"
 
-    if any(k in canon_name.lower() for k in ["adani energy", "aesl"]):
-        funding_status = "Capital Raise: Completed ₹ 8,373 Cr. (~$1 Billion) Qualified Institutional Placement (QIP), heavily oversubscribed by global and domestic institutional investors."
-    elif any(k in canon_name.lower() for k in ["tata motors", "motors"]):
-        funding_status = "Secured ₹ 7,500 Cr. private equity investment from TPG Rise Climate for EV arm (TPEM); strong operational cash flows driving comprehensive net-automotive debt reduction to zero."
-    elif archetype == "it_tech":
-        funding_status = "Zero external debt; self-funded operations through organic free cash flows, returning capital via share buybacks and steady dividends."
-    elif archetype == "food_fmcg":
-        funding_status = "Exploring prospective minority stake sale / mega-IPO valuation discussions; historically funded via internal family promoter accruals."
-    elif re.search(r"\b(?:qip|ipo|raised|funding round|rights issue|pre-ipo)\b", mna_web_text + " " + news_text_blob, re.I):
+    funding_status = "Operating through commercial cash flows and established credit facilities."
+    if re.search(r"\b(?:qip|ipo|raised|funding round|rights issue|pre-ipo|bond issue)\b", mna_web_text + " " + news_text_blob, re.I):
         m = re.search(r"([^.\n]*?(?:qip|ipo|fundrais|raised ₹|raised rs|\$|capital)[^.\n]*)", mna_web_text + " " + news_text_blob, re.I)
         if m:
             clean_fund = clean_insight_text(m.group(1).strip(), 120)
-            funding_status = f"Funding / Capital Action: {clean_fund}" if clean_fund else "Accesses domestic and global debt capital markets and institutional credit facilities."
-    else:
-        funding_status = "Accesses domestic and global debt capital markets, bonds, and institutional credit facilities."
+            if clean_fund:
+                funding_status = f"Capital Action: {clean_fund}"
 
     # Detect Latest Interim / Quarterly Performance from verified signals
     interim_perf = "N/A — No interim quarterly disclosure reported in verified evidence."
@@ -5560,8 +5862,12 @@ def fetch_strategic_conclusions(
     if os.environ.get("GEMINI_API_KEY"):
         try:
             t5_prompt = (
-                f"You are a Senior Corporate Business Intelligence Analyst.\n"
-                f"Synthesize an authoritative 2-3 line executive assessment for {canon_name} across the corporate pillars below.\n\n"
+                f"You are a Senior Corporate Business Intelligence Analyst specializing in Indian enterprises.\n"
+                f"Synthesize an authoritative 2-3 sentence executive assessment for {canon_name} across the corporate pillars below.\n\n"
+                f"STRICT ACCURACY RULES:\n"
+                f"- Ground your analysis ONLY on the Grounding Data provided below.\n"
+                f"- Never invent store counts, closure numbers (do not guess '15-25 stores'), investment figures, or peer names.\n"
+                f"- If there is no evidence for a pillar in the Grounding Data, state: 'N/A — no verified evidence identified in public filings.'\n\n"
                 f"Grounding Data:\n"
                 f"- Financial Health: {yoy_rev_text} | {yoy_margin_text}\n"
                 f"- Executive Leadership: CEO: {ceo_name}, CFO: {cfo_name}, CTO: {cto_name}\n"
@@ -5570,13 +5876,13 @@ def fetch_strategic_conclusions(
                 f"- Recent News, Developments & Disclosures: {news_text_blob[:3500]}\n\n"
                 f"Pillars to Assess (each MUST be exactly 2-3 informative sentences with real numbers and facts where available in context):\n"
                 f"1. growth: Revenue trajectory, growth verdict ({growth_verdict}), and primary demand drivers.\n"
-                f"2. expansion: Geographic moves, store count/network growth (cite planned new store counts e.g. 100 new stores, capex/investments e.g. ₹75 Cr. split into retail modernization & marketing, exclusive format types, and sub-brand focus).\n"
-                f"3. contraction: Store optimization, selective relocation/closure of underperforming outlets (e.g. 15-25 stores annually), and SKU rationalization.\n"
-                f"4. leadership: Executive stability, CXO appointments/transitions (e.g. Marketing, Operations), and digital governance.\n"
-                f"5. real_estate: Property/plant acquisitions, leased store hubs vs asset sales and strategic rationale.\n"
-                f"6. mna: M&A, subsidiaries consolidation, compliance/secretarial filings (e.g. AGM, trading window closure), and capital raising/debt health.\n"
-                f"7. financial_health: Latest quarterly results (QoQ/YoY revenue, operating profit, net income contraction %, operating margin, EPS, stock price trends), and balance sheet resilience.\n"
-                f"8. risk_outlook: Key execution risks (short-term expansion costs weighing on profits, stock price volatility, sub-brand execution risk, and peer competition e.g. Bata, Relaxo, Puma).\n\n"
+                f"2. expansion: Verified geographic moves, facility investments, or product launches mentioned in Disclosures, or N/A.\n"
+                f"3. contraction: Disclosed operational rationalization, facility adjustments, or N/A if none reported.\n"
+                f"4. leadership: Executive stability, CXO appointments/transitions, and digital governance.\n"
+                f"5. real_estate: Property, plant, or facility transactions mentioned in Disclosures, or N/A.\n"
+                f"6. mna: M&A, subsidiaries consolidation, demergers, and capital actions mentioned in Disclosures, or N/A.\n"
+                f"7. financial_health: Latest results (YoY revenue, operating profit, margin movements), and balance sheet resilience.\n"
+                f"8. risk_outlook: Key execution risks based on the company's operating sector and competitive market dynamics.\n\n"
                 f"Return ONLY a JSON object with keys 'growth', 'expansion', 'contraction', 'leadership', 'real_estate', 'mna', 'financial_health', 'risk_outlook'.\n"
                 f"Each value must be a 2-3 sentence string. No markdown formatting, just raw JSON."
             )
