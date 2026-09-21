@@ -1088,14 +1088,18 @@
       "Founder Name(s)": "J. R. D. Tata",
       "CEO": "K. Krithivasan",
       "CFO": "Samir Seksaria",
-      "CTO": "N/A",
+      "CTO": "K Ananth Krishnan",
       "Headquarter (City)": "Mumbai",
       "Office Address": "Mumbai, Maharashtra, India",
       "Business Type (Private Limited/Public Limited)": "Public Limited",
       "Is Listed Company": "Yes",
       "Stock Ticker": "NSE/BSE: TCS",
-      "Current Market Cap (Market Value/Mcap)": "₹ 7,96,269 Cr.",
-      "Share Price": "₹ 2,201",
+      "Current Market Cap (Market Value/Mcap)": "₹ 7,92,651 Cr.",
+      "Share Price": "₹ 2,191",
+      "CIN": "L22210MH1995PLC084781",
+      "Legal Name": "TATA CONSULTANCY SERVICES LIMITED",
+      "RoC": "RoC-Mumbai",
+      "Incorporation Date": "19-01-1995",
       "Source Links": [
         {
           "name": "Screener.in (BSE & NSE Corporate Financials)",
@@ -1104,69 +1108,77 @@
         {
           "name": "Wikipedia Corporate Encyclopedia",
           "url": "https://en.wikipedia.org/wiki/Tata_Consultancy_Services"
+        },
+        {
+          "name": "Google Gemini AI Intelligence Layer (Regulatory Filings & Leadership)",
+          "url": "https://generativelanguage.googleapis.com"
         }
       ]
     },
     "table2": {
       "periods": [
-        "FY21 (2020-21)",
-        "FY22 (2021-22)",
-        "FY23 (2022-23)",
-        "FY24 (2023-24)",
-        "FY25 (2024-25)",
-        "FY26 / Present"
+        "Mar 2022",
+        "Mar 2023",
+        "Mar 2024",
+        "Mar 2025",
+        "Mar 2026",
+        "TTM"
       ],
       "rows": [
         {
-          "Fiscal Period / Year": "FY21 (2020-21)",
-          "Market Cap": "$146.88 B",
-          "Net Revenue/Net Sales": "N/A",
-          "Net Profit": "N/A",
-          "EBITDA": "N/A",
-          "Employee Headcount": "N/A"
-        },
-        {
-          "Fiscal Period / Year": "FY22 (2021-22)",
-          "Market Cap": "$185.78 B",
-          "Net Revenue/Net Sales": "N/A",
-          "Net Profit": "N/A",
-          "EBITDA": "N/A",
-          "Employee Headcount": "N/A"
-        },
-        {
-          "Fiscal Period / Year": "FY23 (2022-23)",
+          "Fiscal Period / Year": "Mar 2022",
           "Market Cap": "$144.02 B",
-          "Net Revenue/Net Sales": "N/A",
-          "Net Profit": "N/A",
-          "EBITDA": "N/A",
-          "Employee Headcount": "N/A"
+          "Net Revenue/Net Sales": "₹ 191,754 Cr.",
+          "Net Profit": "₹ 38,449 Cr.",
+          "EBITDA": "₹ 53,057 Cr.",
+          "Employee Headcount": "592,195 [AI Est.]"
         },
         {
-          "Fiscal Period / Year": "FY24 (2023-24)",
+          "Fiscal Period / Year": "Mar 2023",
           "Market Cap": "$165.02 B",
-          "Net Revenue/Net Sales": "N/A",
-          "Net Profit": "N/A",
-          "EBITDA": "N/A",
-          "Employee Headcount": "N/A"
+          "Net Revenue/Net Sales": "₹ 225,458 Cr.",
+          "Net Profit": "₹ 42,303 Cr.",
+          "EBITDA": "₹ 59,259 Cr.",
+          "Employee Headcount": "614,795 [AI Est.]"
         },
         {
-          "Fiscal Period / Year": "FY25 (2024-25)",
+          "Fiscal Period / Year": "Mar 2024",
           "Market Cap": "$176.46 B",
-          "Net Revenue/Net Sales": "N/A",
-          "Net Profit": "N/A",
-          "EBITDA": "N/A",
+          "Net Revenue/Net Sales": "₹ 240,893 Cr.",
+          "Net Profit": "₹ 46,099 Cr.",
+          "EBITDA": "₹ 64,296 Cr.",
+          "Employee Headcount": "601,546 [AI Est.]"
+        },
+        {
+          "Fiscal Period / Year": "Mar 2025",
+          "Market Cap": "$132.10 B",
+          "Net Revenue/Net Sales": "₹ 255,324 Cr.",
+          "Net Profit": "₹ 48,797 Cr.",
+          "EBITDA": "₹ 67,407 Cr.",
           "Employee Headcount": "N/A"
         },
         {
-          "Fiscal Period / Year": "FY26 / Present",
-          "Market Cap": "$83.97 B",
-          "Net Revenue/Net Sales": "N/A",
-          "Net Profit": "N/A",
-          "EBITDA": "N/A",
+          "Fiscal Period / Year": "Mar 2026",
+          "Market Cap": "$81.88 B",
+          "Net Revenue/Net Sales": "₹ 267,021 Cr.",
+          "Net Profit": "₹ 49,454 Cr.",
+          "EBITDA": "₹ 72,398 Cr.",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "TTM",
+          "Market Cap": "₹ 7,92,651 Cr.",
+          "Net Revenue/Net Sales": "₹ 275,859 Cr.",
+          "Net Profit": "₹ 50,055 Cr.",
+          "EBITDA": "₹ 74,079 Cr.",
           "Employee Headcount": "584,519"
         }
       ],
       "Source Links": [
+        {
+          "name": "Screener.in (Audited Multi-Year P&L Financials)",
+          "url": "https://www.screener.in/company/TCS/consolidated/"
+        },
         {
           "name": "CompaniesMarketCap (Historical Market Valuation)",
           "url": "https://companiesmarketcap.com/tata-consultancy-services/marketcap/"
@@ -1174,47 +1186,59 @@
         {
           "name": "Wikipedia Corporate Disclosures (Workforce Count)",
           "url": "https://en.wikipedia.org/wiki/Tata_Consultancy_Services"
+        },
+        {
+          "name": "Google Gemini AI Intelligence Layer (Financial Disclosures & Headcount)",
+          "url": "https://generativelanguage.googleapis.com"
         }
       ]
     },
     "table3_latest_news": {
       "categories": {
         "2026 Developments & Strategic Milestones": [
-          "[PRODUCT & FLEET SIGNAL] [CONFIRMED] In June 2026, TCS partnered with Anthropic to train 50,000 TCS employees on Anthropic's Claude AI models and jointly develop enterprise AI solutions for regulated industries. (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [CONFIRMED] In early 2026, multiple employees at the Tata Consultancy Services (TCS) Business Process Outsourcing (BPO) campus in Nashik, Maharashtra, filed First Information Reports (FIRs) alleging sustained sexual harassment and religious coercion by several team leaders. (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [CONFIRMED] In June 2026, the United States Supreme Court declined to hear TCS's appeal, following which, TCS announced an additional $70 million provision for the settlement, bringing its total provision to $220 million. (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [REPORTED] TCS Named a Leader in the 2026 Gartner® Magic Quadrant™ for Worldwide Cloud ERP Services (Year: 2026)",
-          "[EXPANSION SIGNAL] [REPORTED] TCS launches India’s first lights-out factory lab to advance AI-first manufacturing (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [REPORTED] Porsche sells MHP to Tata Consultancy Services (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [REPORTED] India's TCS unit to invest up to $7.4 billion in AI data center campus (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [REPORTED] TCS names Soumen Roy to head new GCC business as enterprise AI investments surge - People Matters (Year: 2026)",
-          "[PRODUCT & FLEET SIGNAL] [REPORTED] TCS Leadership Exchange: From Software-Defined to AI-Defined Mobility (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [REPORTED] Can TCS Survive Chandra's Exit? (Year: 2026)",
-          "[STRATEGIC ALLIANCE SIGNAL] [REPORTED] TCS acquires MHP Management amid Porsche partnership (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [REPORTED] TCS Overhauls Leadership, Creates 5 New Business Units Amid AI Disruption (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [REPORTED] TCS acquires Porsche’s IT consulting arm MHP Management for €320 million (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [REPORTED] N. Chandrasekaran’s end of tenure puts TCS leadership in the spotlight (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [REPORTED] TCS Wins Contract for Odisha’s OSWAS 3.0 (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [REPORTED] TCS begins FY27 with continued growth; wins multiple AI transformation deals (Year: 2026)",
-          "[PRODUCT & FLEET SIGNAL] [REPORTED] Tata Consultancy Services wins Rs 122.6 crore work order from Government of Odisha for OSWAS 3.0 (Year: 2026)",
-          "[FINANCIAL & M&A SIGNAL] [REPORTED] India's TCS tops revenue estimates on weak rupee, banking boost (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [REPORTED] Tata Consultancy Services Stock Tops This Dividend Income Screen For Reliable Payouts (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [REPORTED] Tata Consultancy Services shares decline 2.04%, trading at Rs 2,312.80 (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [REPORTED] TCS closes FY26 with Improving Sequential Growth Momentum and Strong Deal Wins (Year: 2026)"
+          "[CONTRACT & PROJECTS SIGNAL] [TCS Directly] [REPORTED] Tata Consultancy Services wins Rs 122.6 crore work order from Government of Odisha for OSWAS 3.0 (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [REPORTED] India's TCS rejigs leadership team, creates new business units (Year: 2026)",
+          "[PRODUCT & SERVICE SIGNAL] [TCS Directly] [REPORTED] TCS launches next-gen system-on-chip design services for automotive and semiconductor companies (Year: 2026)",
+          "[PRODUCT & SERVICE SIGNAL] [TCS Directly] [REPORTED] TCS launches Gemini Experience Center in Kolkata with Google Cloud (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [REPORTED] TCS names Soumen Roy to head new GCC business as enterprise AI investments surge - People Matters (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [REPORTED] Tata Group stocks: Tata Chemicals, Tata Investment, TCS, Tata Tech rise up to 20%; here's why (Year: 2026)",
+          "[CONTRACT & PROJECTS SIGNAL] [TCS Directly] [REPORTED] TCS Wins Contract for Odisha’s OSWAS 3.0 (Year: 2026)",
+          "[FINANCIAL & M&A SIGNAL] [TCS Directly] [REPORTED] India's TCS up as AI momentum fuels revenue beat; sector recovery gradual, analysts say (Year: 2026)",
+          "[FINANCIAL & M&A SIGNAL] [TCS Directly] [REPORTED] TCS Q1 FY27 results: Tata Consultancy Services reports 5% y-o-y increase in net profit to Rs 13,349 crore (Year: 2026)",
+          "[LEADERSHIP SIGNAL] [TCS Directly] [REPORTED] AI disruption will be deeper and broader than previous technology disruptions: K Krithivasan, CEO, Tata Consultancy Services (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [REPORTED] TCS at Champions of Manufacturing 2026, Munich (Year: 2026)",
+          "[MARKET & ANALYST SIGNAL] [TCS Directly] [ANALYST/COMMENTARY] Tata Consultancy Services signs deal with DGCX to upgrade derivatives infrastructure (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [REPORTED] Tata Consultancy Services signs AI transformation deal with Aareal Bank (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [REPORTED] TCS to Accelerate AI-Led Technology Transformation for Germany’s Aareal Bank (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [REPORTED] TCS ranked No. 1 in Everest Group’s Top 50™ Store Services Providers 2026 report (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [REPORTED] Perceptive Retail: The TCS Global Retail Outlook (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [REPORTED] TCS Global Retail Outlook Key Findings Report – Quick Service Restaurants (Year: 2026)",
+          "[STRATEGIC ALLIANCE SIGNAL] [TCS Directly] [REPORTED] TCS and Rezolve Ai forge first-of-its-kind partnership to scale Agentic Commerce globally (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [REPORTED] TCS begins FY27 with continued growth; wins multiple AI transformation deals (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [REPORTED] TCS cuts variable pay for mid and senior employees, junior staff retain 100% payout - People Matters (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [REPORTED] Tata Consultancy Services shares rise 2.35% in today's session (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [REPORTED] TCS closes FY26 with Improving Sequential Growth Momentum and Strong Deal Wins (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [REPORTED] Porsche sells MHP to Tata Consultancy Services (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [REPORTED] Can TCS Survive Chandra's Exit? (Year: 2026)",
+          "[FINANCIAL & M&A SIGNAL] [TCS Directly] [REPORTED] India's Tata Consultancy Services plans up to 8,900 AI deployment engineers, seeks AI acquisitions (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [REPORTED] Porsche inks $1.5 billion deal for AI deployment with India’s largest IT services firm Tata Consultancy (Year: 2026)",
+          "[PRODUCT & SERVICE SIGNAL] [TCS Directly] [CONFIRMED] In June 2026, TCS partnered with Anthropic to train 50,000 TCS employees on Anthropic's Claude AI models and jointly develop enterprise AI solutions for regulated industries. (Year: 2026)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [CONFIRMED] In early 2026, multiple employees at the Tata Consultancy Services (TCS) Business Process Outsourcing (BPO) campus in Nashik, Maharashtra, filed First Information Reports (FIRs) alleging sustained sexual harassment and religious coercion by several team leaders. (Year: 2026)",
+          "[REGULATORY & LEGAL SIGNAL] [TCS Directly] [CONFIRMED] In June 2026, the United States Supreme Court declined to hear TCS's appeal, following which, TCS announced an additional $70 million provision for the settlement, bringing its total provision to $220 million. (Year: 2026)"
         ],
         "2025 Developments & Strategic Milestones": [
-          "[STRATEGIC DEVELOPMENT] [CONFIRMED] In July 2025, TCS announced that it would downsize its global workforce by 2%, or about 12,000 employees, primarily from middle- and senior-level positions, citing a \"skill mismatch\". (Year: 2025)",
-          "[STRATEGIC DEVELOPMENT] [CONFIRMED] In October 2025, TCS set up a subsidiary called HyperVault for a 1 GW data centre in India, announcing a capex of up to $7 billion over 5 to 7 years. (Year: 2025)",
-          "[FINANCIAL & M&A SIGNAL] [CONFIRMED] In November 2025, private equity firm TPG agreed to invest $1 billion in HyperVault for a 49% stake, with TCS continuing to hold the remaining 51%. (Year: 2025)"
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [CONFIRMED] In October 2025, TCS set up a subsidiary called HyperVault for a 1 GW data centre in India, announcing a capex of up to $7 billion over 5 to 7 years. (Year: 2025)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [CONFIRMED] In July 2025, TCS announced that it would downsize its global workforce by 2%, or about 12,000 employees, primarily from middle- and senior-level positions, citing a \"skill mismatch\". (Year: 2025)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [CONFIRMED] In November 2025, private equity firm TPG agreed to invest $1 billion in HyperVault for a 49% stake, with TCS continuing to hold the remaining 51%. (Year: 2025)"
         ],
         "2024 Developments & Strategic Milestones": [
-          "[STRATEGIC DEVELOPMENT] [CONFIRMED] As of 2024, Tata Sons owned 71.74% of TCS, and close to 80% of Tata Sons' dividend income came from TCS. (Year: 2024)",
-          "[STRATEGIC DEVELOPMENT] [CONFIRMED] TCS ranked seventh on the Fortune India 500 list for 2024. (Year: 2024)",
-          "[STRATEGIC DEVELOPMENT] [CONFIRMED] In 2024, TCS became the subject of multiple putative class-action lawsuits and a formal probe by the US Equal Employment Opportunity Commission (EEOC) regarding discriminatory hiring and firing practices. (Year: 2024)"
+          "[EXPANSION SIGNAL] [TCS Directly] [CONFIRMED] In 2024, TCS became the subject of multiple putative class-action lawsuits and a formal probe by the US Equal Employment Opportunity Commission (EEOC) regarding discriminatory hiring and firing practices. (Year: 2024)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [CONFIRMED] As of 2024, Tata Sons owned 71.74% of TCS, and close to 80% of Tata Sons' dividend income came from TCS. (Year: 2024)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [CONFIRMED] TCS ranked seventh on the Fortune India 500 list for 2024. (Year: 2024)"
         ],
         "2023 Developments & Strategic Milestones": [
-          "[FINANCIAL & M&A SIGNAL] [CONFIRMED] The TCS BPS division provides business process management services. It had an estimated revenue of $3.5 billion in financial year 2023–24, as per an Everest Group report. (Year: 2023)",
-          "[STRATEGIC DEVELOPMENT] [CONFIRMED] The case concluded in November 2023, with TCS agreeing to pay US$125 million. (Year: 2023)"
+          "[FINANCIAL & M&A SIGNAL] [TCS Directly] [CONFIRMED] The TCS BPS division provides business process management services. It had an estimated revenue of $3.5 billion in financial year 2023–24, as per an Everest Group report. (Year: 2023)",
+          "[STRATEGIC DEVELOPMENT] [TCS Directly] [CONFIRMED] The case concluded in November 2023, with TCS agreeing to pay US$125 million. (Year: 2023)"
         ]
       },
       "Source Links": [
@@ -1224,51 +1248,43 @@
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxOOWVkRGxJY0hCcWhaR3dVRUVkSHNEQ3lvXy1oQjRiOXJ3Y3VjcnFMT0pMSlM0M1YyZlA2UUdKREpnNmN1cnRuSXpoSnMtQXhwYlVnak81NjFIa2R5ZTJTM19mZWNRcW9wWnY3al9VeXl6aWJxRDhLYU81OWRqUGhTcndZcXhpamZndFRxQkNSRnN3dm9Rbk1TSGptZmtVVXdINXJJMXRvUnYxTkFsSkZxRk96bDRwZ0tYcHU2X2o4ekdGWVo3V1NyRw?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxONFVGbVRvdTB2SlRKTHE5cFU0cXR2d1dmQmhWWHBSa1dHMW4yTjJ3cU9JUUhacGh6TlVycUZCNVl4eVVuZE5Oblh2TW9WMmNISWRUMmlsQUtuR2ZLUnAzUjhZdVhtbGo2eWJ1N3U4c0RSenV6NWxaY19ORkQ3bW5sMkEwRlV1OVhKTndFNjR0elluV292aE1NcU1aeWpFUVNMamY3WDk3VWd2cUt5cjZSUWowSkZKNXFJdWZfN0VtWm1XM0NTdlh6bnlMUHFoMUF3bkNBYQ?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMizgFBVV95cUxQNXZ2UTdjb1d0QTVvWmMwZGVFX3ptZWR2UnBXOWtOckVCTU80R2c3Tm0xX0JDc2lCaWRaZlhSQWZIMXJES29uZ0h4OTI0NXRwMHFZeFU2OEZKWkJacTJLTlZWMnhaSVNwWTB0RTdmWnNlem91M3VOSlJPRC0wclN6bloxQnFpSlhMRmlROHpuMFk3bkRpWFY3eWJGcmV1NzJIV2djTW9hakkyOVBoSW1lZzA2eUlOQThfUWNOVF9tLXdLcG9UaFZnQjV3VW1LZw?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxOQjFXXzN3UUJPeDdod3BSTkxZb3V5MVNGMENJYWtwbUVpYzRib19qLXNrRzE2cDNoUDJtT2xQSlJnRlNDdmd4eFltLUE4R1cyMkdMWWJKOXJNNHZ1V2lBNGNGZnVobmVjaDRBWS1FUTlYV2ZUMGloaXZSdzc0TXpWakZlc200R2h5eUhj?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxQeHFwVEE1MVllNXIzQ1ZoWnBrRzJEUElXbGtkbGZ4X1JxdFdNdGtncDZZaWlxdC1mTHJlNVhidHVTTnB3VnI4ZXh3TmpMckhQa1E2U19hemZnVkZCYm85NzdYOGc5VExvb1JLYTlVTGxVdWx4QzFkdDFCSVpGX3hQbnJZQU9JWGVCc0lQY2pXOUNaU1ZDbWc5TUUxVl95X1U?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMiugFBVV95cUxNdzcyX05hajlCR01SOXozOXl3UWVCdGhfQWFnWG5RN2Mxa3dGZXpXbFBQYjJUN2RocVlYZ1pQcUdBNXZCN2xoRVNIQXUwWUdkQ3BweGpXSlpKU1F1cDFQUWJoM0czX0xRd1BueUJ2MmRHbzlvZjd4Y0xDVGZYSHdLWVYwakNXVHptZ3M0VjdGaDY1TDR5Vmhad3ZUS2xZNlpVQ2tYeUJYTngwNFdyeXZENDFXQ1dDU2IzY3c?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxPMUtHcGEzeDRCRGZiVEZVT0M4cUM4SktyLWxnY3ZsY3ZHVEFoelhtU1IzUlo5Qm9DRzAweWQxQmZCU01kQXVBMkFsb0JqWkNKS2w2ZFpRSnAxMnFKU2NNeFpfMmpOYVd3ejJZeWZNbW8tWC11RlRGSXEyY29KTUpnbkc4UTV1emlla0VLWm5vRGRLY0Vka3I0QlpJZkZjLVI0YXZBdnp4ZVRHQQ?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxNcF90RENtN21RUXlzYXgxbW9UZVR1X2ZfRVVlZ0VsalZkZnJ2VHNPMHlSUlRGbXRLMi10U2Y3UUw4RWh1SjFIQzlEYUQycnJhRjFuTEZlbUFtc1pOVVQxRzFRZTl2aG1sU3hYRGlJYldqbU05amlibmNZaWFhSnhpSnRBbFRQNi1DUFA3a01aem16NFhaT09zb0VaVWpNNzV5SUx1eHU1ODV6aXJHLV9iZXU0Qy10VFl6eGxMOUFLQlk?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiywFBVV95cUxOR3F0OE9fbm5PNlhRcFFWeG8tRm9tOWJyZFE4MUJiMTBYUWp4LXBSdG5yb2x6S0dfVzRhdWFMVEhybm40M0ZaSlp3X2ltOUJHTXJYR0F4aldWQVdfd21iTWRZQkpodF9ZOFlZQzNiOGFSeWttOS1mYWJ6MmlkRzlWVTZFcjlZUFhQaktuQmxkRWRkVHE2aWNqV0dUVVJRODFFd0l1cDV6V3ppSm83UkRPUG9OX1RtN3F6SmpPVnZPY0wzZjJzVzZPeUZNWQ?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMivgFBVV95cUxPZ3VxLUJReS1NbmxaMy1PYnlHcTE1ZVpDQjctT1hyRUE1eUF1QVB0aHV2dGVOSmNXUnJGdjQwS2RYMUVMVWRaazVaamh6d2l1ZzZYU3NvT01vUVQxNnBnWFNXaGFYbnEwMzllblZ0bk9KVjktNHlVUzRhYXd1ZWFGaHh3OWpQWEFYRjNnZEZKRWtVTUdMd1pNeVVTZzk2cURwZWJIOHNldkJhbVRIVFBIZDF0djhyTTdLVG9VaUdn?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxOcjlaQ3RvZGJhS01ZUFhUXzJGR0x2alF1cGFUVm96cDlXRzZ4WVNodDhLa3UzVnVQa0hJR0ZZc19lc01uVng3R25uOFpWaU1YOVVEQ0tlTk01bjRHcFQ2S0wtNl9WNVRvSmw0NWhBREkyOGx3NGJERHpCNEdZcmNvWG1fTGVzdzRIN1N6ZDNNMjc1TGdJbnpwag?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMigwJBVV95cUxORTdfV21iOEljQVNNd1BSel92OTNYUjl6N0hZc0t2RHNiY1ZXZmQ3aERNM0dmRGl0R3hicUhsRDh6QXhYS2lDUWhQaW14bkdtQ3RKMDNYaUpIUG5jbWFXbkNuLXBlVEVTd0YtSWFYX0h3WG5IUmV5Z056TUNhY29ISnZOX1Yxa3dsdllJZk81YnZURWN2YWNkVEZHTUpCM3ptN3RkYl9JU1JfNWVxdTFJc0h3dlJUMHhtVEhCNWNxM0tGcnlyVkpFejl3dk1VUkpvOFJLMDVvdXdod1RwWTJPVFVQY19weEZtRmx6VlhWNU5pM1hIeVN1UmE1SzZwc0ZtSGIw?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxOTi1BSVVLMUpncnhQcFNnUnNJZFM4MHF1d0U5Wmt5aDJjRmREbGs5TGN3VmtqanIwQ29RYkkteWk2cVJUaHU5RUpLU3lHRmY1V205elVRcXpZOEFJaXJUejYxSDlXVnNVN2ZidnM1MTRLVEdJaU04c3VURG9hWFJpS3pFdVFGY2ww0gGLAUFVX3lxTE85b2ZDU29lSjdubXlVTkVWajFMY3BWeHo2MkxzX2hucklpSllQeDJvTEVlS1ZuaVctQmxxUks3bUVubElYS1QxRG9iM1ducW5wb1dDOUoxZHF4eUtxcFpMY2xlN2VBX1A5V0lQQ1hXV0cwWW5URHZ5LVpmSldLMXg5TThtcmlvbVI4VjQ?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxQUktwZE1RbGZCajgzVnA2SlUtbndlbHJhQWlSb3JubWtqU3M5Z1lwbUJNWjRkOGtFVGI3X29tWjBDbl9DbFdvN1hGSWNqcEJGMWNRNHNQNTIxN2tVQ2tkeFFldXJzdjA4cjFzTnh5WVM2NVNzQWowbWxrMktuQ0VpdVI5cmZpenJHYkozLXk1SV9uVl9LSWpLNzJsdXhpWVV6a2ZqVlNnOEFCSXpH?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxNLUxzbE44WElLSVhhalJlUlpDNDUxNGYxa241Nl9YMEVZTWlFYWR5QlF2WkF3M3hUTjc1eEo3U1B2aVljcWVCSC1zdzBRSjdPLU9LaW9QWEw1QXZETjB3WnJGOEFaUU00d2JVUzZWUURMdFFFZEhaUjFJUjY3eVdwRjZtV2lPTHJaREkwbXNyNUZuMnFk0gGaAUFVX3lxTE01YkR5UTFwVWREUzRkdUozd01ObTlYV1hwSlVaaDFvLXF0ZFdaX1dfVEJBbXhZamVmWWZXM2dDWGVqSGp2Zzd5bE5XMWRxNjJ4WTV3MjRhWHZHc2ZfaHl2ZlV0WGQ3THlGc2NZTVUycWJYNUp0Y09UU05DY1NoTXIweHJudUV2Z0dpaEVjTEZNVTlKck1RdjdLMlE?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMif0FVX3lxTE1xYXB6OU11OEdZME10eVk1b2QyS2Q3X3gyZWJEZ2h0VVRmSGFTRFRnd3NTVEZSQ0FnMWVTNXJadnVuZFYwTWM2aG1nSXU5YWxjNDkwVWFRM0N6c3BuRTJSVDBleEU2YzNQdy1scDVONUFUSFNTaU52WjJaeElZSEk?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMitwFBVV95cUxPLVlxYW9BVjB1SlZqa0JUS2xham9JaUhTN0ZMV21qajk5UW1WNUp0eG5LU1NoWGhBMnhBSFF4RWlpeWpoWFlUdUhlUkUtaW84bThHMkFOUU43TENWNlN3cGJKRnlrSGFxMHdEYzVUWlVIcDN1U21CMV9fTGdRb2NNaE5yUDlacVRfYVNnVDFrZGIweS1hdDl1TTlSTDIycXZRVzl6d1FqSjRLWkpqN0dZVk1NOWVDcnfSAb8BQVVfeXFMTW1WMEdBWWI3MkxLSTFsM1l4SEVmVm04NU13OXJHNjBlcGp6eUZZYkRaQkxxUEo2U2t2YW55d1ZYbWEyNWdPLXRqaVNMOEtRTXBQT0dtaldfYUN4dXV1MzZ0di16UWp0aTZ2akNDZGhRMzdadEFpRU02T0ZoMmZnYmtsMnNRSjRpcVFMd0Q3SVp2UmkzRmNpMDIwMHpjZFB0aEFnUkpKS0V4SU1EZ3ZMRS0xLXg5VG10SGptZ09iVnc?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMiswFBVV95cUxOeXlwRTI4SVlOREF3LTJ2RVIyTmJDWEpPeXdXYmMzckRZaW0ydndMY09xbGJuVVlNV3d3cDgwUjdMVzJ6dEJPVlpKMmxNRkNseGNDUG9oZWd4aXh3ODBlUU1LSU5UeWVQZU9QWUJhTGl1amlXTDBxS25KOUppTnFFU0FTeEVVV1JxWEFTb29QWEJTcTc2TVRRUDBPei0xbThDRi1uUHpKTzd6cXZsZkwzNG96VQ?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMi5gFBVV95cUxNY3FiUDJZRjE1REppd05RdlBOdmtocXRkbXFKUFNheDFySFpQUldjdUw4UUkxbThWRk51ZGtvMjJpSGVjSFNDOF9sRzBOcjR1bHdiMy1aOVVZcnI4aDRxcnd2RHlqcG9nMDlRdDdmcGtRSHJLVTlVVzhnOHRnMDlkZ1gwYkhYdXQySjRqTHR0M0E5XzJvTjRpakliUnVoQU9qYmhRd09leV9XM1RoRzVTSWt5QS1rYzEzLXh1LVhyLVJUUUlLOTdzanhhRDc2blVpeWJmeWd1cTdZMEZBaXVXM0pQX3kwQdIB6wFBVV95cUxNaWJkSGVJelp2NGFFa05lZUtaNUF3dmp5NExKN1ZTTHprRnBfUFRjd01IUmlpMkFWMF9qeWZhVnAwQkU3MkVLeVB1WVZKQUdxaTVYMllsRUtHbmZJMjNFUEtlcWxZNmFWbEh3Q0RDUG11ZWx3RE96X0p2ckExV1J2VGxZSXVTNk5mWDRTbTRsTnMtT2gyYkVTVEZ3cDZoY0RRUjNXUWdzTUQxVlotOEROTmdadHlva3VGQmJYMFUxc2Zpbkx5WjllSEFTNHVqUWRfMEJJU2pDaE83Wm1lR1hKdDZpbEw4NEc3TGQw?oc=5"
-        },
-        {
-          "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiugFBVV95cUxNRE56emdudzgta2ZFUF9SdXZnN2prOUR1YVppbVAwZUh4eU9NZlZ3SjF3R2l6Q3pySTVYcTltQW92YzZMYTFFbzU0a1BzRVFLMmRrU0loOXJacWJuM3NBYThLUk5BdjJXWGhVdFJDV2RnZW56YnZNSlMwQXkwbUZtMm9QX1ZoUEEwVzV5RGpVRVhsWWU4SlFjMTI3TE9maV83cnRSTGgwX1dlcUozOFNtTTJEUEFFT01KLUHSAccBQVVfeXFMUF8yYmJuRlRPS0RZMWZQNXBHNUtuY0x2UE8yMHVLR1pudWdOMlBJLXdsYk1OXzl3SEhuUEEzRVdOWVI0WHY0aS1ablR1VzVjMUNwVEY2M2pGYUFUWk9DLWFISE02NnlEakRJamhLYzY1U3BPUGRFTUFTdHVNczZYbjROamwyeTJQQVlrYmNQWDhjb2dCMkk1ZkphTkFOZWgyZXJiX2xaekRPYXBmY3B3VnZRR2NpS3VoekNQa3g3Q0xUeDVQb0otbw?oc=5"
-        },
-        {
-          "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE05Y2ExdUt0ZEVodWw1MDRyZWZmcFRBMWJoVFpYZVV2YTduZmhqOXl6RzlDcTNyNnA0enlBM1V3ZVI2ek9oRjFNM1lFWDRpOVRDM0dxYnQ2c3dCeC1ZeEJJSVZnS1ltSXJ0WHl0VmExWks?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxQbVBjYk5GTEVuSWYxVVNUX2ZrcFM5dG03WW14MDFHMG5ibmFqTU5BODR4MTJYZl9Ray02UkNLVFVqemdhNWZKRWN5b1BGUXR0VG9DT0c5dmEwT1RKdjhZWVJtS0xheVJfZ2Q2QWZhSnZqbkJCSkhpUkVlRFFCR01VT2txd0tPOWlEOThYVUFCb1BqVWx4U1RhWEFaZENzcGdaZlEtZWR1NjVlamNQdlRyMWZCU2JZQnh1VGljanI0RHIzU2twSTFkc3ZB?oc=5"
         },
         {
           "name": "Verified Business Media",
@@ -1276,23 +1292,63 @@
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxPd2lOTWI3bWFGU0htSDhSa2JqdmF5Z213OUt1VHRabXlLRE5WbjBVdHpVZW1oVWMzSEk3TDVHV1BxeUdHOUJrdTZ0VlhaUzBKdjdrZ1JrMkd3emRhOS1aR3EyR2t1Ql96bTdfWmhKMk9ZZ2RMdlBGdGJONFJ0V2lfcXBlWnBVRGxMV0wzYnIxU0pjTW9RdGtrd3IxY21MSHZncDV5cTM3eUtKcVVFWlM4eTRKOXpZNkZjYjJWMFZOYjdhdw?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxNeUZaR2lrcnhON0JXRlZORmFxRlpwa29IZjRMNUk4S0NES19tR0piMndDTkRGMVRnT2hTUjFTMEJrcUEyaDVFODRPX2dDdU5fRHFMcV9CQ3hZNUQ5b09mSG1QRGxiMXl4LWVIOWNXT2lFb3ZZRnJaajR4OW4wbUQ1TGo0cXZKVnIzbXA2Y3VLOGRxdWw2ZVRjeA?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMilgFBVV95cUxPc1ZiYmJFaFJTVUx3dU1lUmpiRGdzSFMyV2o1NHZ3WEpUQ2dnR295MkIxeld2anF2dVVqMGRnY2JtVUNNbzJOWmpuMUpqdk15bHVxVjAzX2JkTVFTY2dQaE9yRHU3U2pNRlhqMFBVM0VVODlBV1I0UERWX2xqLWIyLXdSWmdJWDdBVUc5ZDNBRXQ5SFhoTmc?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMimgJBVV95cUxNSU9rU1R0VTdfTFhleGIzNFNSQnRjb3RQYnVkZWVMUE1jRzZEdFdOTUhHN0ZKUFo4UGgxeHl0VFZkOUt2QTN1QWRwVGg4a0Q1b3R0RGRnVEVybjRtQVN5cmpZUFdqTGswbXZ0VGwta1kxa3pVU05ScGFYMlg1bS1PUFVoTkhydG9jWVV4ZEdTeHBsNWtnOWdudjZzdTBQY3Y0M1hYanA2YTlaQlJfek8wN3o1bS1FNDlLU1BvR084VkJRVEpxLWItS3VsVGIwLUtGcmtxZWI4Mkpyb2k0bVQ3YmpkSUpQeGVFX0xkN0d4QkxscGZaYmxjYjhDamc0bkJfc01YOVdnM2FkQm5MWVV5UnNZMG5pR2lKaFHSAZ8CQVVfeXFMUEp3SktQZXZDMkVUeDJ6WjBYNVZpNEhqRG9pZklSR1JGOUtHZHFWdXEzSFY2VC1BTkotSHNRWGVUWE96Q01FZHhoUmkwSklETHVOb05iekxVY3piRVJVM0tUNVM5bjR4aEd6T2liUzZWZ2tqNFhnLTByeU5UQjNnRjlMMm9vRlFBZDkzcl9mRkYxNTdLMXhJS3NFOFlQV3JyN09WdUFZbjNOWUJGdGl5dmlOVHE4YkNWdmE0UXEwZUhHQ29TLXRyMFNWTWNOMHBXSnB1a0EzZmExNHlpVnNzakhJeG1QNHhCcnlDTXZNSVd0V1FMQm5iTUF1dTByVDB3MHhQbHhvOWZIbzdOd2o0SXBGN2owalZHSVNaV21KYzQ?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMi3AFBVV95cUxQa3RaT3pwY2ZwR3NoZ0swTVVNd2hYNEU1MjBIOEdEUTlHa1dRSlNOLTRyajZDaHc3Rk04UVg3LU9nX1NkblREZDU4SlNUY09iN1RxRW5LUTY0UDRjeTh0THFtVFBZU1k3LVRIQ1k0dUFzeG9tbHgxVDlfakRpa21LNVdSVEVLcGxweHBTUlVleWlvc3c5VGJNRy13bUl4QkszYW5Bd2MwVFZjeDctRDU5eURBcFVkRU1aYW9sek9SVm4ycGwwSW1TTWZaOFp0ZFhQMHpoMl80d0ZtNzJV0gHiAUFVX3lxTE1JWHlzZVZLRmF1Rm5YVUZXUmRCM2tPeXRBc3p3V3dTOXBKc2FsdmgxTjBHQlpuNl9qbTItZG1nWWdObjJCU2x1anltaVc5VFZmVW8ycDBLSEM1MHlfUHNKRXlpR21Pb3ZQdHRocjJhOVNYZC1NblpXNURvZTRQZ2Z5elRfdmcxdW9qRlcxbmJPd3B5MzdJdnROYUlERmZBcEU0ZlZWQ0NFb2FMUkNXVExzczRNb2EtZXZMbWJBcndoRy1fWW9UX0xCU0tFT1VtQ1ZsTjNGOHM1YzBBX1RxeVNiakE?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMi8gFBVV95cUxOS0piQ25WLTdMTzZFM2VWSzVhcndHVVRodHhQTHpqZHZWT2FuLUpUaldxWng5NzRabUZMc1E3TWtwU3E1Vjhjc0lQTnJUWkpYSkVaYjhFZ0FyeF9sZWtvbVhGS0dNcTViZE9CRXRNNlpLYmpjVEFTMzY0d1Rhak1nM1VUbWRtUWxUeVpHb2kyOHd0cEgzck5oLWVicVB6RXo3andUSGM3SEI1SG1NYWpRZV9IdEZfOHo2MnhZaTh3T2hPRnhsR09TYmlaY3ZDT0ExTXE1WWNfc0xZWERacHpscXppNWxzUVVRUkltZWZsMWJ2Zw?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxPd2hfZTk1UjJyamhVWUhDQjJYclZqTGRXZF9ZY1Y3UWVYOXBIOHRDLWF0NWtjRjhMZXhsc1lxUWJBU3ZIMS1fRGs4TjV6VlBfamVFWFJ2RnFCLW1jNW96N0Npb3hZalZFYm5pWEM3S0VoNy0wRDNTQ1BuZDZ5di0xNjZhOUlwTU1YMndiSVloVnFVTWFvVl9weHFiOGE0WU5pekIydDZrcVZJUFBsVU5hdl9LR2ZLSnp1NGQ5M1hBZGJkSEEwaVZENnBHRjFJczBKQjNMVlZhRktuTHBybl9B0gHkAUFVX3lxTE92c0dQWlMxbmxBZ2gteXNETkxnOE9neXdNenN1NlhiQWZaOGtDNFZGbUhWbXNRS0lmdGh1MXc1b0YzZ0ZjWkZtUncybnk3NmxyTllXOWN1MEUwWWNnWldic0FWUUhNcEY3S3psbVFvOW1iWUdNU0FXNGNvQWI0MnI0MUstZ0ctckhGR2lqTTBHYVpGTVN0WTV3dmhld05IVFJlUTI0cUswQUxJNVRSdzRVYlRJYlFFM2ppbnhvbDVIWmtpZ2pjS0pFa0IydUY5Q3dDdkFNM0lVTjNQUlZta2pLX2tXUA?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxNb3ZPS0RZNDFwRGhCLUpRZS1ZMi14T0pta3h5dkYwYUphWjlwM0NoS1hvSDQxdld1MWVMNXFnSlZTQU1VZUwwQjBTR3JIMHM3Vnl6TGJ5ZXZsTDk3enAtVk90UFdUTHhKRFVXVDZ0aTVXYXZLZEw5ZzkydXlIY0YwZXl4al9PWVVzRXo0eTUwMzRJMnp2VmpmdkRNZk5WZ3lEWWJfLXl4NTlvVThxdmFRenpYNnE4OFdtbWx0UXJQX1B5SmFtX3NCdFJZUFUxaE9aMWJOM0Jn0gHbAUFVX3lxTE9Na2xqVzJ5REtHTVFpeENEZW05bHN6bGROd3VBRmI4WWxhU2JJRElUVW92c19iQmlQd2JlMFRibk83WERMNnFsZ193MnRaYWQ1WGNyVUFsUkhaSlBMYm41OEhFMzB2SEF5ZGVQOFV6eU9mLTdvdTdHLVI3a3ppaUYyWTNpRUZHMTJZUmxyWGpMTHVuOGQyeGVCY2FEZHJMaDNWV2lvRGd0MzVUMUFDZnI0T2xxSW1YZ3Z1VVpCZ0Y0amcyQUF1NHItb09ybC15ekpsMFJSenlZZzItSQ?oc=5"
         },
         {
           "name": "Verified Business Media",
           "url": "https://news.google.com/rss/articles/CBMijwFBVV95cUxPemt6Rlp3Z1VGQ191MzRHMUwwYWVmOVZMSjdfQWp6M3otVGp1SWtsY1NmYjljVVZUaVB1TjRlenJrN3JvVVZ6S3VyNy1ueDdwQkJOcDhCek1GTkcwNENEX01GaTRtMVFFc2NkOVJsZ3dXVGtzMElkTzY3OGdrNWE4aTlhc2N0VjZKLUpLQXhzcw?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxPd2lOTWI3bWFGU0htSDhSa2JqdmF5Z213OUt1VHRabXlLRE5WbjBVdHpVZW1oVWMzSEk3TDVHV1BxeUdHOUJrdTZ0VlhaUzBKdjdrZ1JrMkd3emRhOS1aR3EyR2t1Ql96bTdfWmhKMk9ZZ2RMdlBGdGJONFJ0V2lfcXBlWnBVRGxMV0wzYnIxU0pjTW9RdGtrd3IxY21MSHZncDV5cTM3eUtKcVVFWlM4eTRKOXpZNkZjYjJWMFZOYjdhdw?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiywFBVV95cUxOR3F0OE9fbm5PNlhRcFFWeG8tRm9tOWJyZFE4MUJiMTBYUWp4LXBSdG5yb2x6S0dfVzRhdWFMVEhybm40M0ZaSlp3X2ltOUJHTXJYR0F4aldWQVdfd21iTWRZQkpodF9ZOFlZQzNiOGFSeWttOS1mYWJ6MmlkRzlWVTZFcjlZUFhQaktuQmxkRWRkVHE2aWNqV0dUVVJRODFFd0l1cDV6V3ppSm83UkRPUG9OX1RtN3F6SmpPVnZPY0wzZjJzVzZPeUZNWQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxQeHFwVEE1MVllNXIzQ1ZoWnBrRzJEUElXbGtkbGZ4X1JxdFdNdGtncDZZaWlxdC1mTHJlNVhidHVTTnB3VnI4ZXh3TmpMckhQa1E2U19hemZnVkZCYm85NzdYOGc5VExvb1JLYTlVTGxVdWx4QzFkdDFCSVpGX3hQbnJZQU9JWGVCc0lQY2pXOUNaU1ZDbWc5TUUxVl95X1U?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxOTi1BSVVLMUpncnhQcFNnUnNJZFM4MHF1d0U5Wmt5aDJjRmREbGs5TGN3VmtqanIwQ29RYkkteWk2cVJUaHU5RUpLU3lHRmY1V205elVRcXpZOEFJaXJUejYxSDlXVnNVN2ZidnM1MTRLVEdJaU04c3VURG9hWFJpS3pFdVFGY2ww0gGLAUFVX3lxTE85b2ZDU29lSjdubXlVTkVWajFMY3BWeHo2MkxzX2hucklpSllQeDJvTEVlS1ZuaVctQmxxUks3bUVubElYS1QxRG9iM1ducW5wb1dDOUoxZHF4eUtxcFpMY2xlN2VBX1A5V0lQQ1hXV0cwWW5URHZ5LVpmSldLMXg5TThtcmlvbVI4VjQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxPQnNjZ1I4d0x1SkFfamt1X2kweGlCTnozcmxXdFZkYUlUUkRJYThzU3lLcGJvaktCaF9DbE1FaDVCemZjTFpTLU1Edk5hQlZhTzhFazIyYzFCRWx3VkpvdVE0bjNXY2RvNTBqS3NSOEYycTl4UlhPSXdrNzk3ZkpPUGdlN2lIeEl4SC1HbEhBd0puTDlraXczSVllRkxocExZcU1tNjctWlNkeWJBOHBIbWgtT096b1o4cDFFOVM4NGxZaGZ5bmx3bTVkTWk5bEZ5cG1zMUQwcEk4UdIB3wFBVV95cUxPTlBBcEhubV9vQUFHN0E1dklmMWxHeVcxUGwzbjFQbmVFRVdiT3hXY1h4TUtBLVZEMG1NQktlelo0X3FleVZtTWNNeDNDRk1BcjBzVVN0MFVYbURrWjdoREN2UWtXRGh4d05UaFItMEMtWmlCeDc3RlU2YWR1VnhfYXZLdlVPUTdETW9JQkVIeUJybUtWdDFRMWhxcG1kSTBLdXQ4VWYyM0x6RC1GdFluR2RPalExT2NpSVR1cmVBeHpfUGFHX1FmdXJpNmhvcW9zNl9IcTdVd0J4SlRFVzY0?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMilwJBVV95cUxOZGVfWUQ3bGlkNkk1dmtqcmVvZ1dpV0s1MHRkaEtmY0ZEMko3MVlVWjZpSzJjemhFTjFzempxZHc3T0tnc19tWDJ2SmVuQVh0ejRCSUlHakp4ekdDbVpiV01fbEJkam9Lc3g5c2wyemRrb3RDREJfYXVFOVd2YWgtcnFWSEVqNGN4SlVBclhtZDRFQV95SHZ1V3RPYU9WVnE1eFRtTG9BUGxhSlJkZWQzZk1zaXR2NWc5dzFodUttRzdHTHFKT3B4OWJLWm9ObTFQVVF3SnBmT2xRMmM5YXJCbFFVbi0zanVOcXNVQmJlX0d0WHctUmx3WVN3cXJWLUZUMlFQdDJxZzJiS19wcHVmeUFvQVMtUXPSAZ4CQVVfeXFMTXhKUk5Ia0JaZE9yaFBEakxnTEp5QTc5RmROZ1NCazU5MkhrS3BCbHQteGJJRUlmOTZ0N3NvWG03U1d1UmpwUVY3LWYzNWhWVUhIQlF3ZG91aEtsVnQzOFhodkNLVERXa3NMbXVmMTQyb3JTQU1DcVIyb0Vsa2Zmam9wa3pIcmJQUjNTenBEbWw2VHFzWmRNWk5jbm1QdmcwdVJEOUNQdEU3TDYyWGFBUDJWNUlURTAyRmFXVTd0bXoxRnV3MThLcFIxRU9aaFl3cTFwbVp0XzI2LXVtVVJCRUo3Yk5aOUtNanNweEx0RXZuYW9hQ2ZEUkZvdzlYbnotV0t4YmhJYUI3SmQtT2lyUE1wNE9PQ0wxVTNuMmx3UQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxPZHVWMTZfdlZoNHBPbVhNSTktYk5yTzBaN3BOTWc2NjNhczhUWVJVTktLZld3WC0zeGEyREFDZk1kWkFjNzBFaXV0M3JSMC1mNFlPQU9DYy1palFFbTRoUFYxR1JZVDNRVmhCQzREYnMxOGd1cEFhNE9aeTFOVzhDTjF6UVY3b0RzUm5ReWIyQkQ2ZjF2OC1kNG40clpPNzhkTTJZOWJUckc0SUlaWVhaa1VFOVpkVXA3am9aY1I2bWlqODM3N2c?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxOWlhoM1hsTlFFU1Y1blFjS25lYnNKemdoWjMzSGM1NGRrdC05bHRHa3hiTnVwOW9fSU4wTUhCNkhlWHc2b014ZkdCVkZoNHhjY2ctMTZJUExiOXR5dnRlNzQ2NVBFYXdJeWVGWTZHMzd5Y2MxWXJjMHliUXMyR2l3OHhxWEjSAYoBQVVfeXFMTkY5eHZ1ZzlZUEl3Skt3SHJnTHBuV045QTR3aUJQWGJDMHQzRGstSklJYnU1Qmk3YXdkU29RcENjcERrSlVPMHhXWXhHVFJhMW43dUE1UW52Vk1pYlN6NVN2RUMzRUVGUnVCMnFiOEkzM2JocGFVNjN0YUdORWtURUVDMHFDRGhza25R?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxOSnNXR2FEdlV4SG1NSUZiMnl2ZEhwXzF2ZWRmZFBQZlhjRzR0a1VVZjBiVDhFblBtZl9saHI1azNOcHcxWFdvS0QwR0VNSnBUdXZNeGItdEx4aGhlaXBuZkdEcDZNQ1o4QklRYzJNLWFtOWg2bjdGU3pyYUNvcjBFTGtEaUk3UzNfRk0tSjhIYlNydFA1Q01fOW9LeTd0WEhLWjJPUkIyMVlTaE53YnRncFlOaU5lTEZCaXpPZDdCRnFSQjdwVV9keDhLT0ctNnI1WWhHZXZZbjZEWWJtMm8tM0lKZzdxa1dn0gHuAUFVX3lxTE1CMFh3OU9KNzl1c1ZJRUsyNXFUQUtZckZocDJLRjVGaGtZaThrd0tpU3hUWGJpQlhKSVdVa3ZINEo5R2FPQ1FLc1RhLVlhU0pKVmZEMmtZMU9pRUIxekJvNHhacGliMnl2NTdITjJiVkhBVng2dkZrMGZOaEZpcTAtVzZMU0sxME9LelE0YUpldF9sd1pxZ251TURVWHBRM24wLXpWdkRfcVo1SW9OX2ozSldjSzl5Nzlrc2xnYlY4N0F0cW5HLWZ0b0NXMEpLSy12WTRtaW1oUG1UV3VkRDVHVmNUc1F5SldPWVR4Snc?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE05Y2ExdUt0ZEVodWw1MDRyZWZmcFRBMWJoVFpYZVV2YTduZmhqOXl6RzlDcTNyNnA0enlBM1V3ZVI2ek9oRjFNM1lFWDRpOVRDM0dxYnQ2c3dCeC1ZeEJJSVZnS1ltSXJ0WHl0VmExWks?oc=5"
         }
       ]
     },
@@ -1309,6 +1365,7 @@
           "TCS OmniStore",
           "TRDDC"
         ],
+        "Key Subsidiaries & Verticals": [],
         "Key Products & Offerings": [
           "TCS BaNCS Banking, Capital Markets & Insurance Financial Suite",
           "Enterprise Cloud Migration & Hybrid Cloud Architecture",
@@ -1333,9 +1390,13 @@
           "active": false,
           "details": "Not applicable — Enterprise B2B contract engagement model; no consumer retail e-commerce"
         },
-        "Own Retail Stores": {
+        "Physical Retail Stores": {
           "active": false,
-          "details": "Not applicable — Corporate technology campuses and client briefing centers worldwide"
+          "details": "Not applicable"
+        },
+        "Customer Service / Consumer Channels": {
+          "active": false,
+          "details": "N/A"
         },
         "Franchise Model": {
           "active": false,
@@ -1348,12 +1409,429 @@
         "Revenue Streams": "Application Development & Maintenance Contracts + Cloud Migration & Management + Enterprise Software Licensing + Consulting & Advisory Fees",
         "Business Model": "B2B (Enterprise Technology Services & Systems Integration)",
         "Industry / Sector": "Information technology, Consulting, Outsourcing",
-        "Entity Integrity": "HIGH (Canonical Verified)"
+        "Entity Integrity": "HIGH (Canonical Verified)",
+        "Own Retail Stores": {
+          "active": false,
+          "details": "Not applicable — Corporate technology campuses and client briefing centers worldwide"
+        }
       },
       "Source Links": [
         {
           "name": "Wikipedia Corporate Encyclopedia",
           "url": "https://en.wikipedia.org/wiki/Tata_Consultancy_Services"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.stocklyzer.com/company/tata-consultancy-services"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://enlyft.com/tech/company/tcs.com"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.tata.com/business/technology"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.tata.com/business/tcs"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://vizologi.com/business-strategy-canvas/tata-group-business-model-canvas/"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://economictimes.indiatimes.com/tech/information-tech/tcs-sets-sights-on-b2b-ecommerce-d2c-for-retail-clients/articleshow/86964166.cms"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.tcs.com/what-we-do/industries/energy-resources-utilities/case-study/dynamic-pricing-model-tata-steel-digital-sales"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.volza.com/companies/tata-consultancy-services-183749.aspx"
+        }
+      ]
+    },
+    "table5_strategic_conclusions": {
+      "conclusions": {
+        "Growth Assessment": {
+          "Verdict": "Growing (Steady Revenue Expansion) [DERIVED]",
+          "Summary & Drivers": "Growing (Steady Revenue Expansion) [DERIVED] — Tata Consultancy Services Ltd reported audited annual revenue of ₹ 267,021 Cr. for March 2026, marking a 4.6% YoY increase from ₹ 255,324 Cr. in March 2025, alongside a net profit margin of 18.5%. This steady top-line growth is accompanied by strategic operational developments, including leadership restructuring, the launch of next-gen system-on-chip design services, and securing a ₹",
+          "Strategic Analysis": "Tata Consultancy Services demonstrated a positive revenue trajectory, recording a 4.6% year-over-year increase in audited annual revenue to ₹ 267,021 Cr. for the period ending March 2026 compared to ₹ 255,324 Cr. in March 2025. Growth was supported by strong deal wins, artificial intelligence momentum, and new enterprise contracts including an agreement with Aareal Bank and a work order from the Government of Odisha for OSWAS 3.0."
+        },
+        "Expansion Vectors": {
+          "New Markets": "N/A — No verified new market expansion evidence found.",
+          "New Geography (Location)": "N/A — No verified new geographic expansion evidence found.",
+          "New Product Launch": "Recent product/service additions: [PRODUCT & SERVICE SIGNAL] [TCS Directly] [REPORTED] TCS launches next-gen system-on-chip design services for...; [PRODUCT & SERVICE SIGNAL] [TCS Directly] [REPORTED] TCS launches Gemini Experience Center in Kolkata with...",
+          "New Product Category/Segment": "N/A — No verified new category expansion evidence found.",
+          "Opening New Stores / Facilities": "Facility/network expansion: [PRODUCT & SERVICE SIGNAL] [TCS Directly] [REPORTED] TCS launches Gemini Experience Center in Kolkata with...",
+          "Strategic Analysis": "The company expanded its operational and technological footprint by launching the Gemini Experience Center in Kolkata in partnership with Google Cloud and introducing next-gen system-on-chip design services for automotive and semiconductor companies. Additionally, TCS formed a partnership with Rezolve Ai to scale Agentic Commerce globally."
+        },
+        "Contraction & Shutdown Signals": {
+          "Manufacturing / Line Discontinuation": "N/A — No verified manufacturing line or production discontinuation found.",
+          "Plant / Facility Shutdown": "N/A — No verified plant shutdown or regulatory closure found.",
+          "Closing Stores / Branches": "N/A — No verified store closure activity found.",
+          "Stop Selling Product / Manufacturing": "N/A — No verified product cessation found.",
+          "Strategic Analysis": "N/A — Not verified from available evidence."
+        },
+        "Leadership Dynamics": {
+          "CEO / CXO Hiring or Exit": "N/A — No verified leadership change found in available evidence.",
+          "AI / Digital Transformation Leader": "N/A — No verified digital or AI leadership appointment found.",
+          "CEO Transition / Stepping Down": "N/A — No verified leadership transition found in available evidence.",
+          "Growth & Marketing Leader": "N/A — No verified marketing executive appointment found.",
+          "Chief AI Officer": "N/A — No verified Chief AI Officer appointment found.",
+          "Strategic Analysis": "TCS experienced leadership changes marked by the rejigging of its leadership team and the creation of new business units, alongside the appointment of Soumen Roy to head its new GCC business. K. Krithivasan serves as CEO, Samir Seksaria as CFO, and K Ananth Krishnan as CTO."
+        },
+        "Real Estate & Property Movements": {
+          "Acquired New Property": "N/A — No verified real-estate development found.",
+          "Sold Property": "N/A — No verified real-estate divestment found.",
+          "Strategic Analysis": "N/A — Not verified from available evidence."
+        },
+        "Mergers, Acquisitions & Capital Actions": {
+          "Buying Company / Startup": "N/A — No verified acquisition found in available evidence.",
+          "Merged with Company": "N/A — No verified corporate merger event found.",
+          "Demerger": "N/A — No verified demerger/spinoff event found.",
+          "New Funding / IPO Launch": "N/A — No verified capital raising or external debt action found.",
+          "Strategic Analysis": "Porsche sold MHP to Tata Consultancy Services, representing a documented corporate transaction. No further demergers or capital actions are verified in the available evidence."
+        },
+        "Financial Health": {
+          "Annual Trend (YoY Revenue)": "Mar 2026 vs Mar 2025: +4.6% YoY [Audited Annual] [DERIVED] (₹ 267,021 Cr. vs ₹ 255,324 Cr.)",
+          "Annual Profit Margin Trend": "Mar 2026: 18.5% vs Mar 2025: 19.1% (Net Profit Margin decreased by 0.6 percentage points) [Audited Annual] [DERIVED]",
+          "Latest Interim Performance": "[FINANCIAL & M&A SIGNAL] [TCS Directly] [REPORTED] TCS Q1 FY27 results: Tata Consultancy Services reports 5% y-o-y... [Unaudited Interim]",
+          "YoY Revenue": "Mar 2026 vs Mar 2025: +4.6% YoY [Audited Annual] [DERIVED] (₹ 267,021 Cr. vs ₹ 255,324 Cr.)",
+          "YoY Profit Margin": "Mar 2026: 18.5% vs Mar 2025: 19.1% (Net Profit Margin decreased by 0.6 percentage points) [Audited Annual] [DERIVED]",
+          "Strategic Analysis": "Audited annual financial data indicates that revenue reached ₹ 267,021 Cr. for the period ending March 2026, representing a +4.6% YoY increase compared to ₹ 255,324 Cr. for March 2025. During the same period, the Net Profit Margin decreased by 0.6 percentage points, shifting from 19.1% in March 2025 to 18.5% in March 2026."
+        },
+        "Risks & Considerations": {
+          "Strategic Analysis": "The company faces operational adjustments as evidenced by variable pay cuts for mid and senior employees while junior staff retain 100% payouts. Executive leadership has highlighted that AI disruption will be deeper and broader than previous technology disruptions."
+        },
+        "_claims_meta": [
+          {
+            "claim": "Growing (Steady Revenue Expansion) [DERIVED]",
+            "pillar": "GROWTH",
+            "claim_type": "DERIVED",
+            "evidence_ids": [
+              "EV018",
+              "EV019",
+              "EV020",
+              "EV021"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Growing (Steady Revenue Expansion) [DERIVED] — Tata Consultancy Services Ltd reported audited annual revenue of ₹ 267,021 Cr. for March 2026, marking a 4.6% YoY increase from ₹ 255,324 Cr. in March 2025, alongside a net profit margin of 18.5%. This steady top-line growth is accompanied by strategic operational developments, including leadership restructuring, the launch of next-gen system-on-chip design services, and securing a ₹",
+            "pillar": "GROWTH",
+            "claim_type": "DERIVED",
+            "evidence_ids": [
+              "EV018",
+              "EV019",
+              "EV020",
+              "EV021"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Tata Consultancy Services demonstrated a positive revenue trajectory, recording a 4.6% year-over-year increase in audited annual revenue to ₹ 267,021 Cr. for the period ending March 2026 compared to ₹ 255,324 Cr. in March 2025. Growth was supported by strong deal wins, artificial intelligence momentum, and new enterprise contracts including an agreement with Aareal Bank and a work order from the Government of Odisha for OSWAS 3.0.",
+            "pillar": "GROWTH",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [
+              "EV060"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified new market expansion evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified new geographic expansion evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Recent product/service additions: [PRODUCT & SERVICE SIGNAL] [TCS Directly] [REPORTED] TCS launches next-gen system-on-chip design services for...; [PRODUCT & SERVICE SIGNAL] [TCS Directly] [REPORTED] TCS launches Gemini Experience Center in Kolkata with...",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [
+              "EV002",
+              "EV012",
+              "EV058",
+              "EV059",
+              "EV060",
+              "EV063"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified new category expansion evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Facility/network expansion: [PRODUCT & SERVICE SIGNAL] [TCS Directly] [REPORTED] TCS launches Gemini Experience Center in Kolkata with...",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [
+              "EV012",
+              "EV059",
+              "EV063"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "The company expanded its operational and technological footprint by launching the Gemini Experience Center in Kolkata in partnership with Google Cloud and introducing next-gen system-on-chip design services for automotive and semiconductor companies. Additionally, TCS formed a partnership with Rezolve Ai to scale Agentic Commerce globally.",
+            "pillar": "EXPANSION",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [],
+            "confidence": "MEDIUM"
+          },
+          {
+            "claim": "N/A — No verified manufacturing line or production discontinuation found.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified plant shutdown or regulatory closure found.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified store closure activity found.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified product cessation found.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Not verified from available evidence.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified leadership change found in available evidence.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified digital or AI leadership appointment found.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified leadership transition found in available evidence.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified marketing executive appointment found.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified Chief AI Officer appointment found.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "TCS experienced leadership changes marked by the rejigging of its leadership team and the creation of new business units, alongside the appointment of Soumen Roy to head its new GCC business. K. Krithivasan serves as CEO, Samir Seksaria as CFO, and K Ananth Krishnan as CTO.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [],
+            "confidence": "MEDIUM"
+          },
+          {
+            "claim": "N/A — No verified real-estate development found.",
+            "pillar": "REAL_ESTATE",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified real-estate divestment found.",
+            "pillar": "REAL_ESTATE",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Not verified from available evidence.",
+            "pillar": "REAL_ESTATE",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified acquisition found in available evidence.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified corporate merger event found.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified demerger/spinoff event found.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified capital raising or external debt action found.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Porsche sold MHP to Tata Consultancy Services, representing a documented corporate transaction. No further demergers or capital actions are verified in the available evidence.",
+            "pillar": "MNA",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [],
+            "confidence": "MEDIUM"
+          },
+          {
+            "claim": "Mar 2026 vs Mar 2025: +4.6% YoY [Audited Annual] [DERIVED] (₹ 267,021 Cr. vs ₹ 255,324 Cr.)",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "DERIVED",
+            "evidence_ids": [
+              "EV018",
+              "EV019",
+              "EV020",
+              "EV021"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Mar 2026: 18.5% vs Mar 2025: 19.1% (Net Profit Margin decreased by 0.6 percentage points) [Audited Annual] [DERIVED]",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "DERIVED",
+            "evidence_ids": [
+              "EV018",
+              "EV019",
+              "EV020",
+              "EV021"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "[FINANCIAL & M&A SIGNAL] [TCS Directly] [REPORTED] TCS Q1 FY27 results: Tata Consultancy Services reports 5% y-o-y... [Unaudited Interim]",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "FACT",
+            "evidence_ids": [
+              "EV002",
+              "EV012",
+              "EV059",
+              "EV060",
+              "EV063"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Mar 2026 vs Mar 2025: +4.6% YoY [Audited Annual] [DERIVED] (₹ 267,021 Cr. vs ₹ 255,324 Cr.)",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "DERIVED",
+            "evidence_ids": [
+              "EV018",
+              "EV019",
+              "EV020",
+              "EV021"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Mar 2026: 18.5% vs Mar 2025: 19.1% (Net Profit Margin decreased by 0.6 percentage points) [Audited Annual] [DERIVED]",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "DERIVED",
+            "evidence_ids": [
+              "EV018",
+              "EV019",
+              "EV020",
+              "EV021"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Audited annual financial data indicates that revenue reached ₹ 267,021 Cr. for the period ending March 2026, representing a +4.6% YoY increase compared to ₹ 255,324 Cr. for March 2025. During the same period, the Net Profit Margin decreased by 0.6 percentage points, shifting from 19.1% in March 2025 to 18.5% in March 2026.",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [
+              "EV018",
+              "EV019",
+              "EV020"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "The company faces operational adjustments as evidenced by variable pay cuts for mid and senior employees while junior staff retain 100% payouts. Executive leadership has highlighted that AI disruption will be deeper and broader than previous technology disruptions.",
+            "pillar": "RISKS",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [],
+            "confidence": "MEDIUM"
+          }
+        ]
+      },
+      "Source Links": [
+        {
+          "name": "Strategic Intelligence (Leadership)",
+          "url": "https://hr.economictimes.indiatimes.com/news/industry/tcs-forms-new-ai-services-transformation-unit-led-by-amit-kapur-appoints-new-head-for-uk-ireland/123554226"
+        },
+        {
+          "name": "Strategic Intelligence (Leadership)",
+          "url": "https://www.business-standard.com/companies/news/tcs-integrates-ai-focus-forms-new-business-unit-amit-kapur-to-lead-125082601326_1.html"
+        },
+        {
+          "name": "Strategic Intelligence (Leadership)",
+          "url": "https://www.linkedin.com/posts/analytics-india-magazine_indias-largest-software-exporter-tata-consultancy-activity-7366104716004499456-vZBP"
+        },
+        {
+          "name": "Strategic Intelligence (Mna_Demerger)",
+          "url": "https://www.pocketful.in/stocks/tata-consultancy-services-ltd/corporate-actions/merger-demerger"
+        },
+        {
+          "name": "Strategic Intelligence (Mna_Demerger)",
+          "url": "https://www.prnewswire.com/news-releases/listengage-joins-tcs-acquisition-bolsters-scale-and-ai-expertise-for-salesforce-customers-302584142.html"
+        },
+        {
+          "name": "Strategic Intelligence (Mna_Demerger)",
+          "url": "https://newsroom.porsche.com/en/2026/company/porsche-mhp-sale-tata-consultancy-services-43113.html"
         }
       ]
     }
@@ -1708,20 +2186,28 @@
       "Company Name": "Amul",
       "Founding Year": "1946",
       "Founder Name(s)": "Tribhuvandas Patel",
-      "CEO": "N/A (Unlisted / Not Publicly Disclosed)",
-      "CFO": "Amol Joshi",
+      "CEO": "Jayen Mehta",
+      "CFO": "N/A (Unlisted / Not Publicly Disclosed)",
       "CTO": "N/A (Unlisted / Not Publicly Disclosed)",
       "Headquarter (City)": "Anand",
       "Office Address": "Anand, Gujarat, India",
+      "Parent Company": "N/A",
       "Business Type (Private Limited/Public Limited)": "Private Limited",
       "Is Listed Company": "No",
       "Stock Ticker": "N/A (Unlisted)",
       "Current Market Cap (Market Value/Mcap)": "N/A (Privately Held)",
       "Share Price": "N/A (Privately Held)",
+      "Legal Name": "Kaira District Cooperative Milk Producers' Union Limited",
+      "RoC": "RoC-Ahmedabad",
+      "Incorporation Date": "14-12-1946",
       "Source Links": [
         {
           "name": "Wikipedia Corporate Encyclopedia",
           "url": "https://en.wikipedia.org/wiki/Amul"
+        },
+        {
+          "name": "Google Gemini AI Intelligence Layer (Regulatory Filings & Leadership)",
+          "url": "https://generativelanguage.googleapis.com"
         }
       ]
     },
@@ -1737,7 +2223,7 @@
       "rows": [
         {
           "Fiscal Period / Year": "FY21 (2020-21)",
-          "Market Cap": "N/A",
+          "Market Cap": "N/A (Privately Held)",
           "Net Revenue/Net Sales": "N/A",
           "Net Profit": "N/A",
           "EBITDA": "N/A",
@@ -1745,7 +2231,7 @@
         },
         {
           "Fiscal Period / Year": "FY22 (2021-22)",
-          "Market Cap": "N/A",
+          "Market Cap": "N/A (Privately Held)",
           "Net Revenue/Net Sales": "N/A",
           "Net Profit": "N/A",
           "EBITDA": "N/A",
@@ -1753,7 +2239,7 @@
         },
         {
           "Fiscal Period / Year": "FY23 (2022-23)",
-          "Market Cap": "N/A",
+          "Market Cap": "N/A (Privately Held)",
           "Net Revenue/Net Sales": "N/A",
           "Net Profit": "N/A",
           "EBITDA": "N/A",
@@ -1761,7 +2247,7 @@
         },
         {
           "Fiscal Period / Year": "FY24 (2023-24)",
-          "Market Cap": "N/A",
+          "Market Cap": "N/A (Privately Held)",
           "Net Revenue/Net Sales": "N/A",
           "Net Profit": "N/A",
           "EBITDA": "N/A",
@@ -1769,7 +2255,7 @@
         },
         {
           "Fiscal Period / Year": "FY25 (2024-25)",
-          "Market Cap": "N/A",
+          "Market Cap": "N/A (Privately Held)",
           "Net Revenue/Net Sales": "N/A",
           "Net Profit": "N/A",
           "EBITDA": "N/A",
@@ -1777,7 +2263,7 @@
         },
         {
           "Fiscal Period / Year": "FY26 / Present",
-          "Market Cap": "N/A",
+          "Market Cap": "N/A (Privately Held)",
           "Net Revenue/Net Sales": "N/A",
           "Net Profit": "N/A",
           "EBITDA": "N/A",
@@ -1789,37 +2275,15 @@
     "table3_latest_news": {
       "categories": {
         "2026 Developments & Strategic Milestones": [
-          "[STRATEGIC DEVELOPMENT] [GCMMF / Amul Directly] [REPORTED] FIH Hockey Women's World Cup 2026: Amul Moments from the World Cup (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [GCMMF / Amul Directly] [REPORTED] Amul named world's strongest dairy brand as Indian food and dairy brands reach $9.9 billion (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [GCMMF / Amul Directly] [REPORTED] FIH Hockey Men's World Cup 2026: Amul Moment of the Day: Argentina's second podium finish (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [GCMMF / Amul Directly] [REPORTED] FIH Hockey World Cup 2026: Amul Dazzling Dragflick - Tomas Domene (ARG) vs New Zealand (Year: 2026)",
-          "[FINANCIAL & M&A SIGNAL] [GCMMF / Amul Directly] [REPORTED] Amul becomes first Indian FMCG company to hit Rs 1 trillion turnover (Year: 2026)",
-          "[LEADERSHIP SIGNAL] [GCMMF / Amul Directly] [REPORTED] InvestYadnya Appoints Former Kotak Mahindra Bank’s DIFC Branch Dubai CEO Amul Sharma To Strengthen Financial Leadership And Growth Strategy (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [GCMMF / Amul Directly] [REPORTED] InvestYadnya appoints Amul Sharma to its leadership advisory ecosystem (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [GCMMF / Amul Directly] [REPORTED] Amul's Cooperative-Led Brand Strategy in India's Dairy Market (Year: 2026)",
-          "[EXPANSION SIGNAL] [GCMMF / Amul Directly] [REPORTED] Amul Plans Rs. 500 Crore Dairy Expansion in Telangana, Andhra (Year: 2026)",
-          "[FINANCIAL & M&A SIGNAL] [GCMMF / Amul Directly] [REPORTED] Amul brand turnover rises 11% to over Rs 1 lakh crore in FY26 on better demand (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [GCMMF / Amul Directly] [REPORTED] Dairy Co-op Giant, Amul named World’s Strongest Dairy Brand (Year: 2026)",
-          "[FINANCIAL & M&A SIGNAL] [GCMMF / Amul Directly] [REPORTED] Amul barely keeps any profit. That is why it keeps winning (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [GCMMF / Amul Directly] [REPORTED] Blue and Red: Amul’s New Game Plan (Year: 2026)",
-          "[EXPANSION SIGNAL] [GCMMF / Amul Directly] [REPORTED] Amul's Strategic Expansion in West Bengal with Mega Dairy Plant (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [GCMMF / Amul Directly] [REPORTED] Amul Plans Tea Gardens In Bengal; CM Suvendu Adhikari Announces Land Allotment (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [GCMMF / Amul Directly] [CONFIRMED] Recently Amul was emerged as India's most chosen beverages brand and entered into OOH FMCG top five list. The ranking is as per the 14th edition of the Brand Footprint India 2026 report which was released by Worldpanel by Numerator on 13th August 2026. (Year: 2026)"
+          "[STRATEGIC DEVELOPMENT] [Amul Directly] [CONFIRMED] Amul Named World's Strongest Dairy Brand and Expands Regional Investments in Eastern India (Year: 2026)\n    ↳ Intelligence Brief: Amul was recognized as the world's strongest dairy brand and announced an ₹800 crore capital expenditure push for manufacturing infrastructure in West Bengal and Assam.\n↳ Reinforces global brand equity leadership while aggressively scaling operational footprint and supply chain distribution across high-growth domestic regional markets.",
+          "[STRATEGIC DEVELOPMENT] [Amul Directly] [CONFIRMED] Amul Ranked as India's Most Chosen Beverages Brand in Brand Footprint India 2026 Report (Year: 2026)\n    ↳ Intelligence Brief: Worldpanel by Numerator ranked Amul as India's most chosen beverages brand, marking its entry into the top five OOH FMCG list in August 2026.\n↳ Validates strong consumer preference and effective out-of-home market penetration driven by robust distribution networks."
         ],
         "2025 Developments & Strategic Milestones": [
-          "[STRATEGIC DEVELOPMENT] [Member Dairy Union] [REPORTED] Amul Dairy Elects New Leadership: Strategic Implications for GCMMF (Year: 2025)",
-          "[STRATEGIC DEVELOPMENT] [Member Dairy Union] [REPORTED] Amul Dairy appoints new Chairman and Vice-Chairman - Dairy Business Middle East & Africa (Year: 2025)",
-          "[STRATEGIC DEVELOPMENT] [Member Dairy Union] [REPORTED] Kheda’s Amul Dairy leadership issue resolved (Year: 2025)",
-          "[STRATEGIC DEVELOPMENT] [GCMMF / Amul Directly] [CONFIRMED] In 2025, Amul was ranked third most valued brand in India in the YouGov India Value Rankings 2025. (Year: 2025)",
-          "[EXPANSION SIGNAL] [GCMMF / Amul Directly] [CONFIRMED] In 2025, Amul's Sabar Dairy Plant at IMT Rohtak in Haryana state was expanded making it India's largest processing plant for curd, buttermilk, and yoghurt catering for the Haryana, Delhi-NCR, and northern India region. (Year: 2025)",
-          "[STRATEGIC DEVELOPMENT] [GCMMF / Amul Directly] [CONFIRMED] In 2025, every day it processes 150 mt (metric ton) curd, 10 mt yoghurt, 10 mt sweets, and 3 mt of buttermilk. (Year: 2025)",
-          "[STRATEGIC DEVELOPMENT] [GCMMF / Amul Directly] [CONFIRMED] In 2025, Haryana was India's third largest producer of milk (122.2 lakh tonnes per year) with highest per capita milk availability in India (1,105 grams per day). (Year: 2025)",
-          "[STRATEGIC ALLIANCE SIGNAL] [GCMMF / Amul Directly] [CONFIRMED] In June 2025, the cooperative launched Amul milk in Spain through a partnership with a Spanish dairy cooperative. (Year: 2025)",
-          "[STRATEGIC DEVELOPMENT] [GCMMF / Amul Directly] [CONFIRMED] The ranking is as per the 14th edition of the Brand Footprint India 2026 report which was released by Worldpanel by Numerator on 13th August 2026. The report tracked consumer choices made during 2025. (Year: 2025)"
+          "[EXPANSION SIGNAL] [Amul Directly] [CONFIRMED] Amul Expands Sabar Dairy Plant at IMT Rohtak to Form Northern Processing Hub (Year: 2025)\n    ↳ Intelligence Brief: The cooperative completed the expansion of its Sabar Dairy facility at IMT Rohtak, establishing India's largest processing plant for curd, buttermilk, and yoghurt.\n↳ Secures enhanced supply chain capacity to service high-demand metropolitan markets across Haryana, Delhi-NCR, and northern India.",
+          "[STRATEGIC ALLIANCE SIGNAL] [Amul Directly] [CONFIRMED] Amul Enters Spanish Market Through Direct Partnership with Local Dairy Cooperative (Year: 2025)\n    ↳ Intelligence Brief: Amul initiated international market expansion into Spain in June 2025 via a collaborative operational partnership with a domestic Spanish dairy cooperative.\n↳ Accelerates the brand's international footprint strategy by introducing proprietary product portfolios to European consumer segments."
         ],
         "2024 Developments & Strategic Milestones": [
-          "[STRATEGIC DEVELOPMENT] [GCMMF / Amul Directly] [CONFIRMED] In May 2024, it signed an agreement to market Amul-branded fresh milk in the United States in collaboration with the Michigan Milk Producers Association, using locally produced milk and Amul formulations. (Year: 2024)",
-          "[STRATEGIC DEVELOPMENT] [GCMMF / Amul Directly] [CONFIRMED] In July 2024, Amul featured Maya Neelakantan, a ten-year-old guitar prodigy who auditioned for America's Got Talent season 19 in June 2024. (Year: 2024)"
+          "[STRATEGIC ALLIANCE SIGNAL] [Amul Directly] [CONFIRMED] Amul Enters United States Fresh Milk Market via Michigan Milk Producers Association Collaboration (Year: 2024)\n    ↳ Intelligence Brief: In May 2024, Amul signed an agreement with the Michigan Milk Producers Association to market fresh milk in the United States using local dairy and proprietary formulations.\n↳ Establishes a foundational manufacturing and distribution bridge into North American retail channels leveraging local sourcing partnerships."
         ]
       },
       "Source Links": [
@@ -1833,15 +2297,79 @@
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxNeTdJcGI0ZzdyYTZlYm9PVnpILVZYSTJoUEVDc1d1T2d5SUJ2enpubWdtRzh3VFczcW8wd1kxdGw3ZldvU1g3V0FBc0p6X2lFY3RYdVJLVUQybWJ5dWxiRy1pWV9lTHM0LXBlaGl5UTNCbGxQcWpXbkNDeGl5b3BsSGNxM0hEVTNhLXZJbTZDZUJLQXljRWtOaF9JN3puR3d4UVdUZk5PYlpUZzNxQy1oNGRaUTB0LWkwbzltRHpra2ZIYUNneFZJVQ?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxOT1BqLWhQOFQ1OVhwR0hsVHhUbTVHT3FIaF9EanliVlZNSmU3SEZrN3JCd1V3ZU1NWjY3SWdnejdVaHVBVkpiN0hHV1VuUEZVdFZkMDhndnZYNU9UN1hHb2VEU2ItZW5JZW1rUzY0OEcxQ3lBakR2a1hXbFc1bWhsZVRsUUJ0ZXFzTDk1Z2FhZEJlTWJXMENrZXVQV2JlY0lzZnBJUTRGb243emRsMGZTWHBZZnVUMXJLaG5JUjNzOTY0RWt5d3BGbjloR2xER01WNVZSYTAxU1lZdkpEZ3BaNHFES0gzVGhm0gHuAUFVX3lxTE9nc044NklVRmNOSFcyNDJDZkg2R3NKQ2t0TmoyWm9sc0RiYS1VWGNBT2R5LU1nVURXZnExai1YMkdLWDJsaDB4NFJ5OG43eVNxR2ZsdFFsWG5rczdGdVRTOUxHVktibjRRSndVYzAtb0xOQ1doYmVNdExONUhZWjNBVVNrZnJfWDVlb0gwWDdLbUZrYVBva3ZnMlNIaG5mejFxLTZORVo0UEFOamE0ZkpsdWpDb1VOZjA0VUtRdldHbVZrNlFCYlNzMm5zak5iOEc5TWMxMGh3SmpGQUViRWZRSnVIMHVLLVlMRWE3WXc?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPeUs1cl9YSDBLcVdiczNuMXpfZ01ROHJ1bUtOallkR2lNV0R2OF8tdG1rUlppck1TZXVCYzlkdGI2aHg5dFp1T2Zud1libEZlM2EyS2JMV0xzRERUS2JLNzFGd1d6Y1BLN0VnMVBVS19ENS1VSVBIRGdfMnR0dHNzU2w3dHl0RjFHWjZEMjVkbTVKRW1oSFlqTG5rV3hyUkh0X3hiOTIzS0ZJNGNSWTRzNm9hSENCaG1WWjQzZGxNLUs?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMivAFBVV95cUxOclNQOWpFQXZ5d1k1Y2ltT0tBeGlBYms2c01zZW5wakhZaHQ2bjduU0lKTGVHeGZTb0RDQTVHLVhLd0JKU001RnJiNWEtQWpON19Ja2lPanhHcnFaTUgzSGdvc2RQNk5NUmUwa2lvZlpVTUh1ZExiUzFKY1JQZ1VMd0VwN1E2dk5TakxWVjViem4zQW1aS0t0SkhqN243ZC1kSTFNS2FnTDliUTVlS0hzdEluUTctZC01TkFGMA?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxQWFhpZlY4ZlM3aHJXRW1PaU1Eek1scGdoSGdaa1c0Szk1RzlVQmZHTGNlb1Rhd0ZDWmZNV3czVzhYdFBoZGNnNWEzRUU5WTNzR0dzbkdsRUt5UFpfeWoycWdxandSeG1NMWt0Q29xSFJoeC1TU0xhYlhfeU1oQVA0eEk4ZTNGeThrMjQwM0xabkFrbDJMTTdBSTJCaElVSU0zYmZYX0RudExaRlBNYkpMa2d2WWRFZU5XN3cw?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxPQktTblI1bzZqTlRxS2lXSHpNdGlRWDNZSml4dTB2dy1GUWhyZWNBVGlDMGh2bm80a0hjaGxEanFlTDNvVUI5djVSdzVicDI2cDg4NjJrX2p0a0VhVXgyVWN1RmRUaEt6RmRrcGdITG04SThZMmxqdXhXZzNmRFFDemozWDBvekZRc2RfV0FrZnRUSDl2R1k4WmF6a2tCaWFMazZqeW1rYkg1N0lKZ1ZrMk9Vb2pOWnVG?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiugFBVV95cUxNSmhrWnk1cXo2UWdfbklyOW5vZ0JEYnRNMDVxMUVWV1d6UlJPcE1rWFdtWDNoaklkQ3ZqVWZnSlJyMVBHNC1Bd1lkcnhHOF9peXJQblpKYkRyOFFMa3NLRjd3SVVuR1AxTm11elFXN3VGMHFiNHhsenlOWTNFU2NJd01qaGFxazYwUGFoTE1IVHE0Z2hGWmtNU1dBQk1zeUYteFphQ3JfT1VlMTZhZE4wRHpIWE9vWEtSb0E?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxOOVduU2FzbEMwM1R1S1NlS1dVamtmNTJ1cTctOUhIVFR5R3Z2YlpPMmZ0SjFVNTRYM2JFa1E3QVpmcW5hWElFUFAxSkctTFlwNzBmUUdaN3QtVVZxLXlydFkwRnFzOFpvTVV6am11TC1mTml5VXQwWk40bkJhSUtNVk43M2ViOXVjU0NEa0huTjdhd3Jhek9sZUpTVEhITHhscG50ZVk4RQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxNYmtrQlBtdkFfOXF2eDZHT3EzWWlFU3BXZXlRU0Rvcl9mS3NxNW8wTEdrU0RkcVBKNFVKMzFLdnI0VXFaek5hdUZtOVNCd2ZIU1FYQzlfbG83WlBibzJEWlB0QmZDdmVucWwyM2JGb01OamZDVW5SMGhKOEVla2RDUGpna0hidkc1Ui1ucEFDcUd2MF9maXVqOE9sU3E0U1ozc2VEWWh2enFZQlg3dHJGTGJPc0NyT1Uy0gG-AUFVX3lxTE5ENE9kN0sxdURZSFlqeHJUZ0xZMGwzRnBWSk5feFFFSEtnNFNackRvMmdkVUpFS3NxelE3ZFplakVianRoZThhaDBVX3NSZy1iMGdYVk1IdUtYMm9YQkl3OHF1NDh1Q0lYSUJaVFFFeHRleFhEYUx4c18wU0dOanFtTktfWDd2dV9VUDhuQmFvY0dGWXZqbTJ4dTJ5VW9KamhobUhDZi1WZjU1XzlGQWZLbXlkTVFVcWFRZS1GcVE?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxNVW1LaDJUSzlvZ2J3QXM5N0J2UlNLU2kyb2F3MEdOeERhdTkwNzRma0R2TjlaQkZaVkpWZXA4Snk0dF9oZlZxTGk2Z2VPQVZtM2dXdi13b0tKVThRS01mRDk5ZlRnMlNvZndybDd5MXBOU1pBVTJHc1NkOEgwOE1uc2tuSEtkeHFjUWx6OEYyeHhLRHJ1bHhiRDBVZ2hPSnF4VGxlcWZibXc?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxOTjhaVkxqbk0yaElNWks3LUM3MTlLaUJlVzFNaTAwOXpzVnU3U0NXTnY5b2VZM2NFRFNtQ2JSR19selRZQS1sQXhlbE10bWtRT3lWeDgxR1pJbjlRbHBIVkUxY2RXR2dUU0ZaZ1N0LWlfUTZzdHRBS2kxb2JxYmZhbVpPYk9TR25DSHduSWt1aVRfMl81cDAtUm1VaU5VZGJCYklVeHhTXzdsaks5VU00S2xZZnR4QzFuVGhrTGtSU1FULXlOYTFBUktOc3NQYm9nZERsUzVEX3UyTXJIMkxR0gHkAUFVX3lxTFBRZ0h4RXhiZVFwMW9pT3dCbGZwRTJneHVGdTJ6LTRDU1NpU2hDTmV0a1lpRG41R1YzWjhBbDdpZjZfSm1nei1EM0tuRjlQbEloTU9YbF9UOGNqdmxpYWlFaUVwaGtqbkxvV21JN09WYmJJZ2ZoSF9PNlVXNXhreXg2ai1wX1llVmJ1V2RWSkZ6WG1nVEJGRnpMQzkxUHI3RUdDVmg3dWF3LUs4NkloY3ZTelQyOHVqajB3UXlEcW5YWV9rcHUwYXl6WHdtX3piNDdIbmV4eWpMZ3lWYWNBMDB6dnlBVg?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxPUHc1SldRaWhLc19MTE54ZVE5eWhKZkdKMms1LU52UTFELVU1dDhNSjhxbFE0ckJCRVhDaFY5TmYtZFBYZWExM1p6TnpSS3R5WVF6eXZMSDM1WGVlN3JXcmh3WFVrSm56WE9CU1pEQ3VrR25YUThodkQyaXhRLV9HQlJLZ2x5X3NJdVMyNGdzMndhUFFod3NhS0tUdU1YSTczQWlwOXpSRjdLVnVTUHljR2FtZEE5MVNva0dWVkFsN09JZnZpOUdwRFRKYV9HSGV2MmxLbWRfZHcxV1dlcWVv0gHkAUFVX3lxTE40eElicDdLTFNWdDFfRzFMdmlVd09JWjZsMTdVcVNQbWc4N1RNdXJJdGMwV2xhd091Vmg1eWpCYlR3dVoteEFBUE5tWUFQcGNMcWhGMmVMTnJmbzN1WjVmNE4wWFo3enVHRlkwbXhnLXJIZ1pDNlVYQk8xSWdobVBMSTNIaUh6R3VnUG94dnYzeElaVmtxYTUycGx2RWZWNlUza3BSQlJkVzZuWG44R2dTanVfSy1fa0JMdDVxNllRWEZ2ZXZXOEctb1Z4N0ZMbkNOS29OM2t6QzB0ZGQ1WkhUY3RSTA?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi8wFBVV95cUxQallqZnI0aEZEU1lXVjBMeEZDLXh1OTlIaGRaYUhkOFlRZVZLSWlHVjlENWxoV3ZxLXJZQjBfa3ZTMmhhUWNocF9EZEF1TWlpaEJyekhaTHJvUFRzNnI1YS1uTGh6b1hINjNEOVdSVkl3Nk1TOVRlSGdTZUFiUzExWGk2NWdDSnB5ajNkci1UYzh6b2pxRHBZdVhBVjZ1amwtVHZVdElzWW5UMFFHN3NCZ19oZmdkbXdjLTFrbGZMSXQzaGNEYmU3ZWN5N3lkRWQyWFZ4Y29DemJkWEpKWkNRdmllUDVxbUQwU0s0Z3gwdDFaTTTSAfgBQVVfeXFMTUF5WW1vcWhMSk9uRlhLMVZDelJPV3NmY2g4R0hZSV9OT1p0YWRXSFpCUll3Q0diRzBzZXJSYnVnX1RsUGxHanJXY25LS1VoVVBFQ2hzR3lsUjB6aWJSc1pUUTVOSng0ZzRtcWRXb2hLNDBXSjFwdnlRS01pN1VlNktobjBLLXljajNRQ0l2cE1DNEJRMmFVSHNDVEhIUGFKYTJTTFp2aUI0X0hVMkZNQVJraUNaaWRia2JGekFSRG1xSmdVQThBMWxPbGRobVE3YTNnWHhpX3lleFpyTFFFXzRidmIybXZGbkhkTmFLb3FLRnRvTG1obmg?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxNaDVLX1lmTUdHaTllN29KdFg5UW9OQmdzUHlLN3dLR1M2WS1Mb0owSzNDRjJDMURPdnJMcUtNRDJuT0FVS3V3WmRXWWs4Vkc3ejlabUhyOG9mMVFGUm14UHluRU5QNjg2d21IZjRTcjVJdlJQend2eW5MUkdxQ1BfU05LTTV4SWlPdy1rVXNXbDM5eEUzSk5TLUZxdHFiMXluZnpOMUlJcl9pTlpVVXdqVk8zc1Z6cTJpOEExZzBSQXFZdU9GUUhV0gHMAUFVX3lxTE1HWHRpaVdTMm5DX0Rjb0NfWWh3TDJEUjlXcmxvSjJMWXJyN0xsc241Y05XUmRyVEFFanpyN0tPNnNtU0xZMTRoNFFiWnJYSlJEM2xzY3JmOVNPSjdKa1M3bHUyeDdVc0ZlZzRHSDR0cGFuZS1wRGViclVZTTd6R3B5czk1QjFjTUpzNnk3anFRVTliX3diUXpENENIOThLZnFwbnBRY2RyWGRUaFhKT05KczVWdHlkSDFFYTdDWjBKRlkyNXU0eE5kWF9fYQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMihwFBVV95cUxNLXQ2ckpTVUFqRHcxWWVNdFc2b1hfN3o5bFRpZTN6b1gzQlhEaF9LV0JISnQ4RHNTYUtjbV9rbGVpMzJ6cFkzTzIyMWRmMGFra3Q3ZEV3WlozMjR5d3h0MlR5ZjcxMWluNDlqcmZiOVNGWkNVUjJxZ1NHVUYzVG0zU25rdFZDQmc?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMi8AFBVV95cUxNNzlTZzlSOEhjYVBxVDFtOWdtTlRQYzQyNUxEMm96YzR0WGlrYzIyRzBfNWhwTktmeWJiU3ZCVmpaS1llWGNwV1B5eWRpdkl6MVVMWWRVSldiQlZ6cFFHcnpiaERGZExPdkx1MEp1ekQ1VS1vUFhxQmlJNEo4QUN1N1RmbXVxMWxtdDd2Q09ieDFUZ0c1U2VPTlBCWWp1SnFkeUQ4Njd4MkdjNWtaMm93SmYzNEVmNW5UWkljd1hlRzVIVVhSN1ZRa3RiMjQ4SFJGVW1kbkNUQ3VoWjI3SGZpS1dzSTladEVEQjgyT3NJbHXSAfYBQVVfeXFMTzlMZGJyUHU2cEo3NjVNMXhpMVQzUy1GY0VkMGU5bFo4bUZKYloxZDBFMVZDT2Z1bmgyQ2RtTk5US09UX3lWYmtuZWhFSVAwbGlOcV9Ybmo5RHJRWDZ1TXY5a1Y5RGlPTjRpVnJzMkcxLXBpOTRtSWo0SDNvclVDRXU0XzcyT0ZXYllOcmoxTm5iRWR3cGYwdkExd25vQ1hRanFKSDNGdk5LWFllVV9zU0ZXSWJQZS1JWV9ubFFUMVVDTkJ5blRKZWw1ODBaX3pfSHRMSm9vYjMzemlsYzQwTlFxMXZDNGwycm1kQ09vZC12VlRyVm93?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxNUy1udmt1Q3pkUmdKbWt5UUpYZkxYWWt5bjdtUUxTaUktTjFXLTlCZUVLOHl5OTdvMV9TN2xjeWd0eUE4UnM0U0pQOWluY2xuV2hSS0dhdmRfMTdjN1ZCZW1ZMWw2Nks4ZGw4bDFiOHhLWnRoVTRKbk92ellBQVFWUjVFZ1k0Rk1ONUVLNGxMT2pOcDFmY2pTRi1rZUlzUmJGUTBsZjNQdm1QSlVqLU5OVGVEVDJmcDEwenVOcHY4SmNCcEXSAcgBQVVfeXFMTlF1VUZYR3BuQjZMTmVhTzQtaTNPYTQtU09Mb1FFTENJX3lMYzlNV3EtNWFfNnFRQzFtR0xOeVlrVGYwdnNWeHJHOFVlX1R0OTg5ZVNnOUt0Y3IwUzdscGdzazdoakp0ZnhnWnQ2aVZTQmctVmo0alFXRlFvX1lPRllDeUQwN2VEZWNaSktXSzBxenJpQm54dWJYUkhGa0RMM1J1ei13cDFmSmh5dnB1R1Z3RERfQTY1SXlVZkw3TEJfNnpnTjFOU2I?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNRWxEQjRwS0x0Y2N5dXdVUU15LWpkVURkdE9OQXVrcVhodnFsdl9xVjFFTkpYNFhKQ1RlNVdyU1NaRU1yYlNtS3lkZVpwSnIzWUxtMVBKT0ZBMDVmZDZHT3gwZzQ1Ymw3SkNJclNXM3oyRUMtUmNUakU4NFEzUFRHWDFUdno2bU1EV2FKNWNqVGJtZzN3TXpodGRoQXFWVzlaUlo4amNuTFBoa0pVMHl6ZdIBtwFBVV95cUxNdVB5cTFqT2VaMUEyLWgtWmI4Mlg2VFVIQmZlQk9ySUh6T29XdXpWTlNMaEJwckE4dXhsX2M3enRHUEswbFZJMUd5X1VnN2N4M21oR2lVNFdfVi1SdmMyWnhVQzk3MlBnVVo3WmhKLTl5VHIwNVFib3lWTmJnaXhYa0JKSnlGekI2aDRGS3IycjhRaDI5VDZQWS1LQ2Q0Z3dUd1lYOUlyR2hjRTI2cXRwTHY4bFVuWHc?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMigAJBVV95cUxNYjlvcWd2TGJrZ2hicDgyZmQ1Qm5qaVJWRGNSM3FGLWFobE1ySUNuU1NWWkJuMWF3NUU4TmNBOTVOSnZvVDhGTk1hX2VJRmM3Vk1VUzUwVWw1QWVORkw3WU9nclNRMUZCZU15WUlYbi1XT3Z3SzQ1QnFLU19QaDNSTFhXY3d4V0dLbzBXUnJRdlYxenNENGZLVmRUbE9GVTNwMDg2YmJpcmRYemh6SlFpWlhvZUJSV01qRzRUc0RfMnRVaDVkNHZ0RXluQWMwZWFmTWxBeDl3ZWJQLWtHNjdiTEZvbWRpT1VhVmhuekpvWnRVMWd6RkNCbkN2dFA3dUtF0gGGAkFVX3lxTE5OSGdHV1MwX1oyeThfOXFYOFFJNnN3Qjl0bWQ2Wkc5NkFZTzVIQWo4WXRyZjR4eDd3TWVTd3NHTG9sRFJoX3FwaG4yVXBFcTNCa29WMXI1NWhGSmEzQ1NBbEludGU0cjR4LUppOTU4YkZ5MUxXaXZYa01wT0ZzUnl6YnZZQlF1ekJuSEJrdlcydlNnUXd3a09pWFZmMmFmaWJOeXZBTkRDWk4zTUVaWkotU2xIWlRZSFBwaDdTck1Da1VEUkQyQjltd2ZzRVNwTlFJcFBXNkpLMm5GSWRlYlBKSVFRSjlRYmpTTWRFQ3lPRDhUR3JqYVNMNTlvLW9UTkFETDFIZWc?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiugFBVV95cUxPbFhRbzByY0I2M2tkS2lSNm8ydHVySTFtMkh6UnNhRHJCYjFnWGIzbUxZLWFqTWNHalJRNHRNVTBrRk1sdE1OdS1RRHE2dmVVSjhmVUYwNHFzaXNTeDBPNm94TF9CTVgwYXZFcDlWS0Z6cFVoOFhhVjZsb1cwNElIbzQ2MFd0dU54cmRuU1Yzcl9mbmQtcS1aV3dJdlhzZTVPSHp6M0tMcmdEUXdGV21HdmVrdlpJTTF2YUHSAb8BQVVfeXFMTXVac2Q2M2RBdGRMSDE4eWxNdFk0alJSVDlPUjRLZnF4d3pxZDJweHFjRDJmQjZ4RmtwRnNHc0JiZmt5dFhrcndnZ2RSbHVlaUtYOEludzVXVnlYTmtMUTNTVjVDNXpMemdjdDl2cGVMZEpZaHNiTUtrdHY5YUFVb2tiS2lLek1HWjhNNVN3Tkh4T3JCZk11UHpBaDFTV28zVDd3NzdSTWdISzl1VjZwcnpMQzh3MzBQdklJMHVGUGs?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiswFBVV95cUxQYWZmdHdmNHg5Wjd6WG5tSnQzRXJjUHlMT2U0NDF5c29lemNHTjFWYjVTUjBZcXZma2swQktUdGF2c1R1TkcySUpvWWVqWlotVm81ZnpKLXRUMWZqWlgzR1UzMjhuLVoyYnRGN1BSOUlwc3VvdlBSYkFzWnRlajZYdUVGZHpQNkNUeWxWS25EeTJPZ3kxWFdMd2RFWG5rZWRkQlhfVFBpRy1xQkZWSDdCbkt4d9IBswFBVV95cUxQYWZmdHdmNHg5Wjd6WG5tSnQzRXJjUHlMT2U0NDF5c29lemNHTjFWYjVTUjBZcXZma2swQktUdGF2c1R1TkcySUpvWWVqWlotVm81ZnpKLXRUMWZqWlgzR1UzMjhuLVoyYnRGN1BSOUlwc3VvdlBSYkFzWnRlajZYdUVGZHpQNkNUeWxWS25EeTJPZ3kxWFdMd2RFWG5rZWRkQlhfVFBpRy1xQkZWSDdCbkt4dw?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxQc0F2VngtN21MYjZ4SW5zQThab3l1QzBsUlpwdV9EdXFWajdNdlFEUS05UklQekZkU1VwRnc2REpyeklIU2JzSmNOUWVhRzNhS2RaTng5TDJ5TE4ydjBFeThjUk0yamlNckl4RGUtdld6alJxNGtzYkVhTDVKSWlZbGFZSjV0eDJ6Rzk0QURHeElBNk5GZWtDZ0FZdw?oc=5"
         },
         {
           "name": "Verified Business Media",
@@ -1853,15 +2381,7 @@
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxNUy1udmt1Q3pkUmdKbWt5UUpYZkxYWWt5bjdtUUxTaUktTjFXLTlCZUVLOHl5OTdvMV9TN2xjeWd0eUE4UnM0U0pQOWluY2xuV2hSS0dhdmRfMTdjN1ZCZW1ZMWw2Nks4ZGw4bDFiOHhLWnRoVTRKbk92ellBQVFWUjVFZ1k0Rk1ONUVLNGxMT2pOcDFmY2pTRi1rZUlzUmJGUTBsZjNQdm1QSlVqLU5OVGVEVDJmcDEwenVOcHY4SmNCcEXSAcgBQVVfeXFMTlF1VUZYR3BuQjZMTmVhTzQtaTNPYTQtU09Mb1FFTENJX3lMYzlNV3EtNWFfNnFRQzFtR0xOeVlrVGYwdnNWeHJHOFVlX1R0OTg5ZVNnOUt0Y3IwUzdscGdzazdoakp0ZnhnWnQ2aVZTQmctVmo0alFXRlFvX1lPRllDeUQwN2VEZWNaSktXSzBxenJpQm54dWJYUkhGa0RMM1J1ei13cDFmSmh5dnB1R1Z3RERfQTY1SXlVZkw3TEJfNnpnTjFOU2I?oc=5"
-        },
-        {
-          "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMimwJBVV95cUxPM0RCUnpPRGViQ3pNVmJtMlMxalk4Yk5ZSWNrcm9NbUROT3k2VWM2UUxaZ0pOSW5fVkRUREVjU2s3T3hpX2pNMjZzd3VvbHdyWG00aVJhYkRzS3pfOFJMZkQtanl3dFd5VzRWbmlKYjNtVzJCQU04UEM0eEdDMTNKam42bU9BRTkxZUI1SlozckIydEtjNmlfNVZmSEU1ZFE4eEVVUWNNZFE3bWV0czd1ZTBDc2tucEtpQUN4TkRxZElwNlNJNDNKaVBPdG5jeWtoNUZCVTZ0bmo1Ry1QNzdLTnhtWFJ2V3Vfa0J0SmRST2dyMWRBRlZ3VmYxWmY3Wk9wdFFhZUVadGNOcGZZUEdUTGJmS2x6UVdtb3dz0gGoAkFVX3lxTE1jaXdzWXRGZnczT1hTc2x6SjVEMEZ0RmQ5V01JdWdpTlljbmVRamZwaGpHNXFSUEVvMDQzRHRYbGdjOGZVbjJaT0ZxT0tYdW84OWpqSTNOcDBRUjVENk5jbWg0NXhtODRfYVpHYlJPWnZja1dkUDJjNGp3bEt5cmlyZXl0aWtwVmFjOUQ4TmgtWTZUQUllUXl0bE94cFpTYUFJS1RhU2Fsel9ZNHlQa2h1SDlldEVYdXhXbTcwUEh5bjkxRnBIOWlnVVBia1U1eUpvWkFUejJudEZIc1I5NXpYOUpWbWY3blltci1aOG5JeTYxaG1GU0RBalI4WE1uYU5PdmVERmd2c3A2dnhpSm5PeG96TXRTblJaUVdSMFpSaDRRUkE0ZlVT?oc=5"
-        },
-        {
-          "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxNWk85MUZRWmVYWVBzRVRMY3MtcUN5czg5YjB2WTZkMGJVZWNSWjl4ZnRxSmVzQWNFSHc5RUdyUXF2cW1aeEl4YXFvOHNXV2ZwNUg5RU9DUlJ0cFpVaV9VMk1YSXg0UWJtbFhobXZDQ3VLWkNfb2EwRllvN3JFUHBKVWJvcmZFRFAyU1p0UGpFRnJhNFZSMmpTZXI0MURjWlE?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMitwFBVV95cUxQYkdNZVpFeFJmM3o1YTRvUTdkM1B0cUZWMDNLSWo2elZ6cGRVaURXY0pRZXNmSEMxZnJTUTg5SFctYkNZRE1jMEhnWURqNEV3VTdZUlVnejNrTmkzMVFTZGtua0FTYTBjR1FtcXV0ajNoWWdvNzZ3QUV1WTdRX0FUZDBYalFOZi1Janp5NDRVZnpsMUJTdGRLZDRNSGxqTm4ycDJFbXZyTS1zUVZnWXIzeUFQZnFYeGc?oc=5"
         },
         {
           "name": "Verified Business Media",
@@ -1869,35 +2389,31 @@
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMilwFBVV95cUxPMUZHX2hUZFdoTTFOcnR1aU9mNnNQZGJieUl3R0xzMEJtQ2FmdV9lZTRJQTlBMkdJbXdqMWNEYTBOWlAwQWFtRVJIOFVEdFNWUGVYVDJndTBSdnFicE5YX1VCYzJpZHZraFhLUFE0RTllWmRtRXUyQ0QybjBmSHE3ZWcxMWZsaVZSdXA3WXZteWtCNWliT1JZ?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxNWk85MUZRWmVYWVBzRVRMY3MtcUN5czg5YjB2WTZkMGJVZWNSWjl4ZnRxSmVzQWNFSHc5RUdyUXF2cW1aeEl4YXFvOHNXV2ZwNUg5RU9DUlJ0cFpVaV9VMk1YSXg0UWJtbFhobXZDQ3VLWkNfb2EwRllvN3JFUHBKVWJvcmZFRFAyU1p0UGpFRnJhNFZSMmpTZXI0MURjWlE?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMivwFBVV95cUxQREQwX1B5amZGNzVTZ2IzVU9rQ3FibnpRWDhLSkpvOWdpSVJtbGN2RjVkNDFuU3BaRXRkOWxBZGtMbHNiNVpmanRSSlhpcFB6d0JXUVMxOUZHcFBIRzVCVmVVcV9sT0RUbGVjUzlYcTQ2UDdJQXB5NU9qNUhXcEJwX2EyVXMyU0ZVOVFwZ1dXT19CenRmTDNRUXRxaVhSdm5YQmgzVUdsS0hPRllQZmF3WVpDN0ozMG05Yl9vSWxRVdIBxAFBVV95cUxPdnFXWFo4X1hQM2RZYThTZU1pNUFOeFRaYnhTQ2hRbUxoMmI1RVRGSU9OWG9qSkw4bDRnbzRzSlJ4bHJWTlZtOXJwQ1FrcEx1dF9QTlEtck4xYWFSWkItSXNrcnBRUlFuR1MyaHNTQ2VOd0REYXk0VVh5dWlCQjdBbmNXNXE4clRIcTZjUzNiOEJ4NDIxaEFvZ0doT2ZNRFRCc2xraldmcWVWNVcxT25ZWXF0WmRRSDYyNUw2bDJOTUFxNDRx?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMimwJBVV95cUxPM0RCUnpPRGViQ3pNVmJtMlMxalk4Yk5ZSWNrcm9NbUROT3k2VWM2UUxaZ0pOSW5fVkRUREVjU2s3T3hpX2pNMjZzd3VvbHdyWG00aVJhYkRzS3pfOFJMZkQtanl3dFd5VzRWbmlKYjNtVzJCQU04UEM0eEdDMTNKam42bU9BRTkxZUI1SlozckIydEtjNmlfNVZmSEU1ZFE4eEVVUWNNZFE3bWV0czd1ZTBDc2tucEtpQUN4TkRxZElwNlNJNDNKaVBPdG5jeWtoNUZCVTZ0bmo1Ry1QNzdLTnhtWFJ2V3Vfa0J0SmRST2dyMWRBRlZ3VmYxWmY3Wk9wdFFhZUVadGNOcGZZUEdUTGJmS2x6UVdtb3dz0gGoAkFVX3lxTE1jaXdzWXRGZnczT1hTc2x6SjVEMEZ0RmQ5V01JdWdpTlljbmVRamZwaGpHNXFSUEVvMDQzRHRYbGdjOGZVbjJaT0ZxT0tYdW84OWpqSTNOcDBRUjVENk5jbWg0NXhtODRfYVpHYlJPWnZja1dkUDJjNGp3bEt5cmlyZXl0aWtwVmFjOUQ4TmgtWTZUQUllUXl0bE94cFpTYUFJS1RhU2Fsel9ZNHlQa2h1SDlldEVYdXhXbTcwUEh5bjkxRnBIOWlnVVBia1U1eUpvWkFUejJudEZIc1I5NXpYOUpWbWY3blltci1aOG5JeTYxaG1GU0RBalI4WE1uYU5PdmVERmd2c3A2dnhpSm5PeG96TXRTblJaUVdSMFpSaDRRUkE0ZlVT?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMi8AFBVV95cUxNNzlTZzlSOEhjYVBxVDFtOWdtTlRQYzQyNUxEMm96YzR0WGlrYzIyRzBfNWhwTktmeWJiU3ZCVmpaS1llWGNwV1B5eWRpdkl6MVVMWWRVSldiQlZ6cFFHcnpiaERGZExPdkx1MEp1ekQ1VS1vUFhxQmlJNEo4QUN1N1RmbXVxMWxtdDd2Q09ieDFUZ0c1U2VPTlBCWWp1SnFkeUQ4Njd4MkdjNWtaMm93SmYzNEVmNW5UWkljd1hlRzVIVVhSN1ZRa3RiMjQ4SFJGVW1kbkNUQ3VoWjI3SGZpS1dzSTladEVEQjgyT3NJbHXSAfYBQVVfeXFMTzlMZGJyUHU2cEo3NjVNMXhpMVQzUy1GY0VkMGU5bFo4bUZKYloxZDBFMVZDT2Z1bmgyQ2RtTk5US09UX3lWYmtuZWhFSVAwbGlOcV9Ybmo5RHJRWDZ1TXY5a1Y5RGlPTjRpVnJzMkcxLXBpOTRtSWo0SDNvclVDRXU0XzcyT0ZXYllOcmoxTm5iRWR3cGYwdkExd25vQ1hRanFKSDNGdk5LWFllVV9zU0ZXSWJQZS1JWV9ubFFUMVVDTkJ5blRKZWw1ODBaX3pfSHRMSm9vYjMzemlsYzQwTlFxMXZDNGwycm1kQ09vZC12VlRyVm93?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxQbkxDNS1iTFlrZkdYOWo3cEVJdGo0QXU1MW9USmpaV0tyUlBxY1pFekU1OXhZLXdHMVZqaWFRNnZWVDV3aGU4NThMelNqQzdhWmFEVGJtY0hCaDlWNWptaWd6a3lkLUJRcmN2TXFOaXBQV2tNUXpGUkRlMEtfMF9ubGw2UW96Y3Y3RDNZdEl6b0w1OWRGZDk1eG80Um5QXzB0WVppOUxCN1U?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxOOVduU2FzbEMwM1R1S1NlS1dVamtmNTJ1cTctOUhIVFR5R3Z2YlpPMmZ0SjFVNTRYM2JFa1E3QVpmcW5hWElFUFAxSkctTFlwNzBmUUdaN3QtVVZxLXlydFkwRnFzOFpvTVV6am11TC1mTml5VXQwWk40bkJhSUtNVk43M2ViOXVjU0NEa0huTjdhd3Jhek9sZUpTVEhITHhscG50ZVk4RQ?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxOeTVnenVLRDJRLW5MWEI0NFRfYnZyLVQxc2s2akxqdDRmaGhWOGFxdEVVb1RlWlMzbXh2R2s4MndTNzlsMGk0MVd3RjF6YXM3ZVBuUlcyQUFrZjltZGZMTDQ3QzEyVEtFaE1ITjNzZXVfMU9jZXJuYUFHZk1acnRiSXBoVUt1RXNjR05lZTROZ1pxbmY0Qi00WUU2RXd4WHgyMzBjZThpcWk0SVVl0gG0AUFVX3lxTE1RRTB0Nk9ueXhuVlgtSVQyTjVQSGw5M2hncnotSmpHQjUtQjFmSmZZWEYyR25YTXVPSzIzcTB6WXdoUlRtUjBPWjFHTDgwdnpYY2JPN1RRdHo4NFdkZnM4M0p3Y1BqS2phQWF2dVgwTURBRlZTNFMwSnJVM2NxXzU3QTBUb1V6XzFBbHJBMXk4ekJkVjZNNVM1Y1MxX05ZUVlRNE0xZ2pxS09lSS1ic1lzM1N0SQ?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMihwFBVV95cUxNLXQ2ckpTVUFqRHcxWWVNdFc2b1hfN3o5bFRpZTN6b1gzQlhEaF9LV0JISnQ4RHNTYUtjbV9rbGVpMzJ6cFkzTzIyMWRmMGFra3Q3ZEV3WlozMjR5d3h0MlR5ZjcxMWluNDlqcmZiOVNGWkNVUjJxZ1NHVUYzVG0zU25rdFZDQmc?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxNS0w1M2JhMnJfS3l1VXpZcUZ4LVNwUHBmWXladjhicnFHUmVBTEJ1ZHVnRFRaOGotMnF3MWIwTFlUQWF4RGRyZl9iZHc1U2FDbVJ0NU9mLVlkSV9GVGxMNXl5bHVpUlQwNmRNM2FSbEJmQXdTT09wdXNFVWpfYll0MlZhONIBgwFBVV95cUxNS0w1M2JhMnJfS3l1VXpZcUZ4LVNwUHBmWXladjhicnFHUmVBTEJ1ZHVnRFRaOGotMnF3MWIwTFlUQWF4RGRyZl9iZHc1U2FDbVJ0NU9mLVlkSV9GVGxMNXl5bHVpUlQwNmRNM2FSbEJmQXdTT09wdXNFVWpfYll0MlZhOA?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxQR1lqU3ZiSkhzdEZxZndaRl9vd2dJUzkwY3ZPNmRSdE1BVHlBWDJYaG9xZU5lY2hkWU5DN2k4Q2FuSExDdkJMX0VITi14ZGdxcUtmM3BxLTRMdm03OGRjVmh2V2dJWUpKNU5jTF8weW95YjE0YVprRXhhYzRMSlI5YnpNWFNCbEE1azJUUkwxS19vTFI3dl9YQ0ZDM0o0bEp2dVFseFNHeWphQdIBrwFBVV95cUxNNDFjR2VfR0ZHN0xsTjB3Uzh6TFBVbjFKLTg0NVhESWRYekVkbHhBTzNrempkR3ZYS2h5R1NXQ2l1bnEybnF3Uk9IWXBGOHRqSEs1UFVkSUxuZWltM2Q5a2FKazRKQVdBSm8zUU9UOVd5NUJhMTV5andZdTZROTNMSmZZVXllb21OWUczdjVvWWFoWFpSTURSX29BM1hhd2tKUmtuWU4yQ1VHYU5JSWxZ?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxNXzR4YmJSWHA4M2NHZUt2WERPcU16bF9aTS1KZDVPc3VLNTVqanBSVnhFdHF5b2JhTkxjZ2tpVndBS2dCeXkyNlZzT0lpNkdDVk9SdEhDaWhxQjRBUWNZNG82TklaNm9YdXl6YU1YN3g1WXR0M0Z6UVh1MW91a2RrYTFua2Zxbnk3c1lUaVZoTXdIUU03ZURFWHRVd1B1M1FxNDRwMGt0anE5TW1PVmMtbnpwSTFjVDJXa2hRTFlQS2d6WUdFQ1VyNVk4aElBbEpfVW84QTZVb9IB3AFBVV95cUxPeFdWcHVMNUxmYS1UREkwai12MzBDcXN4RkhzbDVGcXdDS3g4M2xhaXlKeHh0R05JXy1zazF0YjI5LU9ULVRMT2x6UDE3QkRvSm56Q0Q0Z2tTbmdmWFVnOG1rSkxfejhMSHNDU3hIcHFZZUVOaHFGVklLTHQ1b05IZkQtenFxUmxRcjB2UFdidmgtaU1nSnJ0Vk5NcW91R3AtNFVkWkl3TEVidmEyVFN1Q2prdktFRk1Da0d3UzFrbklmcHZYdl9vSmh0bTQySzQwOW9wRGJhRjF5TURL?oc=5"
         },
         {
-          "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxNVW1LaDJUSzlvZ2J3QXM5N0J2UlNLU2kyb2F3MEdOeERhdTkwNzRma0R2TjlaQkZaVkpWZXA4Snk0dF9oZlZxTGk2Z2VPQVZtM2dXdi13b0tKVThRS01mRDk5ZlRnMlNvZndybDd5MXBOU1pBVTJHc1NkOEgwOE1uc2tuSEtkeHFjUWx6OEYyeHhLRHJ1bHhiRDBVZ2hPSnF4VGxlcWZibXc?oc=5"
-        },
-        {
-          "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxOTjhaVkxqbk0yaElNWks3LUM3MTlLaUJlVzFNaTAwOXpzVnU3U0NXTnY5b2VZM2NFRFNtQ2JSR19selRZQS1sQXhlbE10bWtRT3lWeDgxR1pJbjlRbHBIVkUxY2RXR2dUU0ZaZ1N0LWlfUTZzdHRBS2kxb2JxYmZhbVpPYk9TR25DSHduSWt1aVRfMl81cDAtUm1VaU5VZGJCYklVeHhTXzdsaks5VU00S2xZZnR4QzFuVGhrTGtSU1FULXlOYTFBUktOc3NQYm9nZERsUzVEX3UyTXJIMkxR?oc=5"
+          "name": "Google Gemini AI Intelligence Layer (Corporate Milestones & Executive Disclosures)",
+          "url": "https://generativelanguage.googleapis.com"
         }
       ]
     },
@@ -1979,15 +2495,7 @@
         },
         {
           "name": "Corporate Profile Source",
-          "url": "https://www.slideshare.net/slideshow/product-line-of-amul/238485520"
-        },
-        {
-          "name": "Corporate Profile Source",
-          "url": "https://www.scribd.com/document/900626955/Amul-Product-Catalogue-BO"
-        },
-        {
-          "name": "Corporate Profile Source",
-          "url": "https://www.scribd.com/document/880074083/Amul-Catalogue"
+          "url": "https://www.thebusinesstalky.com/amul-franchise-cost/"
         },
         {
           "name": "Corporate Profile Source",
@@ -1995,25 +2503,316 @@
         },
         {
           "name": "Corporate Profile Source",
-          "url": "https://amul.com/about-amul-franchise"
-        },
-        {
-          "name": "Corporate Profile Source",
-          "url": "https://bizmitra.co.in/en/franchises/amul"
-        },
-        {
-          "name": "Corporate Profile Source",
-          "url": "https://shop.amul.com/"
-        },
-        {
-          "name": "Corporate Profile Source",
-          "url": "https://amul.com/usa/"
-        },
-        {
-          "name": "Corporate Profile Source",
-          "url": "https://digitalnanban.com/blog/amul-delivered-only-local-areas-online-made-ship-50-countries"
+          "url": "https://askdaman.com/amul-franchise-cost/"
         }
       ]
+    },
+    "table5_strategic_conclusions": {
+      "conclusions": {
+        "Growth Assessment": {
+          "Verdict": "N/A — Historical multi-year financials required for YoY trend calculation",
+          "Summary & Drivers": "N/A — Historical multi-year financials required for YoY trend calculation",
+          "Strategic Analysis": "Amul was recognized as the world's strongest dairy brand and ranked as India's most chosen beverages brand in the Brand Footprint India 2026 report, marking its entry into the top five OOH FMCG list in August 2026. The brand reinforced its global equity leadership while scaling operational footprint and supply chain distribution across domestic regional markets."
+        },
+        "Expansion Vectors": {
+          "New Markets": "N/A — No verified new market expansion evidence found.",
+          "New Geography (Location)": "N/A — No verified new geographic expansion evidence found.",
+          "New Product Launch": "N/A — No verified new product launch evidence found.",
+          "New Product Category/Segment": "N/A — No verified new category expansion evidence found.",
+          "Opening New Stores / Facilities": "N/A — No verified store or facility expansion evidence found.",
+          "Strategic Analysis": "Amul announced an ₹800 crore capital expenditure push for manufacturing infrastructure in West Bengal and Assam. Additionally, the cooperative completed the expansion of its Sabar Dairy facility at IMT Rohtak to form a northern processing hub for curd, buttermilk, and yoghurt. The brand also expanded internationally by entering the Spanish market through a direct partnership with a local dairy cooperative and entering the United States fresh milk market via a collaboration with the Michigan Milk Producers Association."
+        },
+        "Contraction & Shutdown Signals": {
+          "Manufacturing / Line Discontinuation": "N/A — No verified manufacturing line or production discontinuation found.",
+          "Plant / Facility Shutdown": "N/A — No verified plant shutdown or regulatory closure found.",
+          "Closing Stores / Branches": "N/A — No verified store closure activity found.",
+          "Stop Selling Product / Manufacturing": "N/A — No verified product cessation found.",
+          "Strategic Analysis": "N/A — Not verified from available evidence."
+        },
+        "Leadership Dynamics": {
+          "CEO / CXO Hiring or Exit": "N/A — No verified leadership change found in available evidence.",
+          "AI / Digital Transformation Leader": "N/A — No verified digital or AI leadership appointment found.",
+          "CEO Transition / Stepping Down": "N/A — No verified leadership transition found in available evidence.",
+          "Growth & Marketing Leader": "N/A — No verified marketing executive appointment found.",
+          "Chief AI Officer": "N/A — No verified Chief AI Officer appointment found.",
+          "Strategic Analysis": "Jayen Mehta serves as the CEO of Amul. CFO and CTO positions are unlisted or not publicly disclosed."
+        },
+        "Real Estate & Property Movements": {
+          "Acquired New Property": "N/A — No verified real-estate development found.",
+          "Sold Property": "N/A — No verified real-estate divestment found.",
+          "Strategic Analysis": "N/A — Not verified from available evidence."
+        },
+        "Mergers, Acquisitions & Capital Actions": {
+          "Buying Company / Startup": "N/A — No verified acquisition found in available evidence.",
+          "Merged with Company": "N/A — No verified corporate merger event found.",
+          "Demerger": "N/A — No verified demerger/spinoff event found.",
+          "New Funding / IPO Launch": "N/A — No verified capital raising or external debt action found.",
+          "Strategic Analysis": "N/A — Not verified from available evidence."
+        },
+        "Financial Health": {
+          "Annual Trend (YoY Revenue)": "N/A — Historical multi-year financials required for YoY trend calculation",
+          "Annual Profit Margin Trend": "N/A — Historical net profit margin data pending",
+          "Latest Interim Performance": "N/A — No interim quarterly disclosure reported in verified evidence.",
+          "YoY Revenue": "N/A — Historical multi-year financials required for YoY trend calculation",
+          "YoY Profit Margin": "N/A — Historical net profit margin data pending",
+          "Strategic Analysis": "N/A — Historical multi-year financials required for YoY trend calculation | N/A — Historical net profit margin data pending"
+        },
+        "Risks & Considerations": {
+          "Strategic Analysis": "N/A — Not verified from available evidence."
+        },
+        "_claims_meta": [
+          {
+            "claim": "N/A — Historical multi-year financials required for YoY trend calculation",
+            "pillar": "GROWTH",
+            "claim_type": "DERIVED",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Historical multi-year financials required for YoY trend calculation",
+            "pillar": "GROWTH",
+            "claim_type": "DERIVED",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Amul was recognized as the world's strongest dairy brand and ranked as India's most chosen beverages brand in the Brand Footprint India 2026 report, marking its entry into the top five OOH FMCG list in August 2026. The brand reinforced its global equity leadership while scaling operational footprint and supply chain distribution across domestic regional markets.",
+            "pillar": "GROWTH",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [
+              "EV018"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified new market expansion evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified new geographic expansion evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified new product launch evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified new category expansion evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified store or facility expansion evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Amul announced an ₹800 crore capital expenditure push for manufacturing infrastructure in West Bengal and Assam. Additionally, the cooperative completed the expansion of its Sabar Dairy facility at IMT Rohtak to form a northern processing hub for curd, buttermilk, and yoghurt. The brand also expanded internationally by entering the Spanish market through a direct partnership with a local dairy cooperative and entering the United States fresh milk market via a collaboration with the Michigan Milk Producers Association.",
+            "pillar": "EXPANSION",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [
+              "EV013"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified manufacturing line or production discontinuation found.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified plant shutdown or regulatory closure found.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified store closure activity found.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified product cessation found.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Not verified from available evidence.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified leadership change found in available evidence.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified digital or AI leadership appointment found.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified leadership transition found in available evidence.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified marketing executive appointment found.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified Chief AI Officer appointment found.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Jayen Mehta serves as the CEO of Amul. CFO and CTO positions are unlisted or not publicly disclosed.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [],
+            "confidence": "MEDIUM"
+          },
+          {
+            "claim": "N/A — No verified real-estate development found.",
+            "pillar": "REAL_ESTATE",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified real-estate divestment found.",
+            "pillar": "REAL_ESTATE",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Not verified from available evidence.",
+            "pillar": "REAL_ESTATE",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified acquisition found in available evidence.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified corporate merger event found.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified demerger/spinoff event found.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified capital raising or external debt action found.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Not verified from available evidence.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Historical multi-year financials required for YoY trend calculation",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Historical net profit margin data pending",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No interim quarterly disclosure reported in verified evidence.",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Historical multi-year financials required for YoY trend calculation",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Historical net profit margin data pending",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Historical multi-year financials required for YoY trend calculation | N/A — Historical net profit margin data pending",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Not verified from available evidence.",
+            "pillar": "RISKS",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          }
+        ]
+      },
+      "Source Links": []
     }
   },
   {
@@ -4259,16 +5058,17 @@
       "Company Name": "Liberty Shoes Ltd",
       "Founding Year": "1954",
       "Founder Name(s)": "Dharam Pal Gupta, Purshotam Das Gupta",
-      "CEO": "Adesh Kumar Gupta",
-      "CFO": "Munish Kakra",
-      "CTO": "N/A",
+      "CEO": "Adesh Gupta",
+      "CFO": "Satish Saini",
+      "CTO": "N/A — Not publicly disclosed",
       "Headquarter (City)": "Karnal",
       "Office Address": "Karnal, Haryana, India",
+      "Parent Company": "Liberty Group",
       "Business Type (Private Limited/Public Limited)": "Public Limited",
       "Is Listed Company": "Yes",
       "Stock Ticker": "NSE/BSE: LIBERTSHOE",
-      "Current Market Cap (Market Value/Mcap)": "₹ 369 Cr.",
-      "Share Price": "₹ 216",
+      "Current Market Cap (Market Value/Mcap)": "₹ 373 Cr.",
+      "Share Price": "₹ 219",
       "CIN": "L51901HR1986PLC023188",
       "Legal Name": "LIBERTY SHOES LIMITED",
       "RoC": "RoC-Delhi",
@@ -4332,7 +5132,7 @@
         },
         {
           "Fiscal Period / Year": "Mar 2026",
-          "Market Cap": "₹ 370 Cr.",
+          "Market Cap": "₹ 373 Cr.",
           "Net Revenue/Net Sales": "₹ 740 Cr.",
           "Net Profit": "₹ 11 Cr.",
           "EBITDA": "₹ 64 Cr.",
@@ -4340,7 +5140,7 @@
         },
         {
           "Fiscal Period / Year": "TTM",
-          "Market Cap": "₹ 370 Cr.",
+          "Market Cap": "₹ 373 Cr.",
           "Net Revenue/Net Sales": "₹ 737 Cr.",
           "Net Profit": "₹ 9 Cr.",
           "EBITDA": "₹ 62 Cr.",
@@ -4357,39 +5157,19 @@
     "table3_latest_news": {
       "categories": {
         "2026 Developments & Strategic Milestones": [
-          "[EXPANSION SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes on an Expansion Spree, Aims to Open 100 Stores (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Liberty Shoes Doubles Down On Comfort & Consumer Connect For 15% Growth: Anupam Bansal (Year: 2026)",
-          "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes standalone net profit declines 79.58% in the June 2026 quarter (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Liberty Shoes Standalone June 2026 Net Sales at Rs 169.86 crore, down 1.7% Y-o (Year: 2026)",
-          "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes schedules 40th AGM; revenue up 9.55% in FY26 (Year: 2026)",
-          "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [REPORTED] LIBERTSHOE Mar 2026 Earnings: EPS at Rs. 3.11, Revenue Holds at Rs. 212.05 Crore Amid Stable Operations (Year: 2026)",
-          "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes Q4 net profit down 5.5% to Rs. 5.29 cr (Year: 2026)",
-          "[LEADERSHIP SIGNAL] [Liberty Directly] [REPORTED] Life in Focus: Anupam Bansal Executive Director, Liberty Shoes (Year: 2026)",
-          "[LEADERSHIP SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes appoints Priyanka Vishnoi as head of marketing (Year: 2026)",
-          "[LEADERSHIP SIGNAL] [Liberty Directly] [REPORTED] Priyanka Vishnoi appointed Head of Marketing at Liberty Shoes (Year: 2026)",
-          "[LEADERSHIP SIGNAL] [Liberty Directly] [REPORTED] afaqs! Pause - Anupam Bansal, Executive Director, Liberty Shoes (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Liberty Shoes Bull Case vs Bear Case for 2026 (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Liberty Shoes Q2 FY27: Date and Outlook (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] DPIIT Extends Footwear Stock Deadline To 2027 Aiding Liberty Shoes’ 12-Month Inventory Liquidations (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Our strength in North India is real, but we have never treated it as a ceiling: Anupam Bansal, Liberty Shoes (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] The Liberty Shoes Playbook: What it takes for a legacy brand to stay relevant? (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] How Liberty Shoes Turned 4 Pairs a Day Into 50,000—From Pal Boot House 1954 to Breaking Bata's Monopoly and Exporting to USSR (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Khadim India vs Liberty Shoes: Which Value Footwear Stock (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] School Shoes to Smart Footwear: How Liberty Shoes has Stayed Part of India’s Everyday Life (Year: 2026)",
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Liberty Shoes Ltd. Peer Comparison – Compare with Others (Year: 2026)"
-        ],
-        "2025 Developments & Strategic Milestones": [
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Clear execution needs humility and focus, says Liberty Shoes' Anupam Bansal (Year: 2025)"
-        ],
-        "2024 Developments & Strategic Milestones": [
-          "[LEADERSHIP SIGNAL] [Liberty Directly] [REPORTED] NCLAT junks plea of Liberty Shoes's former CEO seeking ease of norms to sue firm (Year: 2024)"
-        ],
-        "2023 Developments & Strategic Milestones": [
-          "[LEADERSHIP SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes removes Executive Director Adesh Kr Gupta after NCLT sets aside his plea (Year: 2023)",
-          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Mercs and ‘mic drops’: What’s behind the high drama at Liberty Shoes? (Year: 2023)"
+          "[EXPANSION SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes Reports Q2 FY27 Outlook Amid Aggressive Retail Expansion Plan Targeting 100 New Stores (Year: 2026)\n    ↳ Intelligence Brief: Liberty Shoes announced strategic retail expansion targets aimed at scaling its footprint by opening 100 new stores across domestic markets.\n↳ Positions the legacy brand for deeper market penetration and enhanced direct-to-consumer reach in the competitive value footwear segment.",
+          "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [CONFIRMED] Liberty Shoes Standalone Financial Performance Shows Net Profit Decline with Revenue Stablization (Year: 2026)\n    ↳ Intelligence Brief: Standalone financial reporting for the June 2026 quarter indicated net sales at Rs 169.86 crore alongside compressed net profit margins.\n↳ Reflects near-term macroeconomic cost pressures and margin compression despite resilient topline demand in core segments.",
+          "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [CONFIRMED] Liberty Shoes Convenes 40th Annual General Meeting Highlighting FY26 Revenue Growth of 9.55% (Year: 2026)\n    ↳ Intelligence Brief: The company successfully scheduled its 40th AGM, reporting steady annual revenue expansion of 9.55% for the financial year 2026.\n↳ Demonstrates stable underlying business operations and consistent demand capture across legacy footwear portfolios.",
+          "[STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Executive Director Anupam Bansal Outlines Long-Term Growth Roadmap and Legacy Brand Evolution (Year: 2026)\n    ↳ Intelligence Brief: Executive Director Anupam Bansal detailed corporate strategy focusing on long-term sustainability, brand relevance, and operational scalability.\n↳ Highlights structured leadership focus on modernizing traditional retail frameworks to outlast generational management shifts.",
+          "[REGULATORY & LEGAL SIGNAL] [Liberty Directly] [CONFIRMED] DPIIT Extends Footwear Stock Compliance Deadline to 2027 Providing Inventory Liquidation Relief (Year: 2026)\n    ↳ Intelligence Brief: The Department for Promotion of Industry and Internal Trade extended the footwear stock deadline to 2027, granting a 12-month extension.\n↳ Provides Liberty Shoes with vital regulatory breathing room to efficiently liquidate existing inventory without margin distress.",
+          "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [CONFIRMED] March 2026 Earnings Release Confirms Stable Operations with Earnings Per Share at Rs. 3.11 (Year: 2026)\n    ↳ Intelligence Brief: March 2026 financial results recorded a stable revenue baseline at Rs. 212.05 crore and an EPS of Rs. 3.11.\n↳ Affirms operational resilience and cost management amidst fluctuating raw material cycles in the footwear industry."
         ]
       },
       "Source Links": [
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxNTUx3OVIxaHlwSFl2Vl9tb0djUUFvdjlkTHhhNlVKVmR5bVgtZHVmWEhseUlnTTVyNHpheU1XTGtfTFhybjU2ZHR5bGUyLUhPZHVLQWUwSTdyZGxxalZVQ2t2RkozX1BqU0phRjBGdDhGd1I5dzd1TkNMbFhyellZOVE3NktGMW43bGF5bXBKcmNXYnVMVlRheEVaSHhIb256VHZSOHM1WmRWRzJKaTRUaUE1YmduWjVL?oc=5"
+        },
         {
           "name": "Verified Business Media",
           "url": "https://news.google.com/rss/articles/CBMifEFVX3lxTFBRUWJ2V0pUbGZlSGt0c2hYUTRkV09DTVhCclJSTFg2ZXZGZlBRckpRS2RJazlGRHRqMjJOZERLVWNkSTNLWE9DcWlIRFQzaUZxMVNDRWlzaTZlUmptcU5FZ2UzMXJXRmYxc3hoMk9oVzU0VWhmcy03MjM3M2M?oc=5"
@@ -4404,7 +5184,7 @@
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMihwFBVV95cUxOQ0hXYlRhNjhXaXRxb0RURUxlQk4xYm5QSVNJWnhIeVdrY0drcURqV2xfZXlTOVZUMjNFVDE5NnhtR2RxS2MzZ1ppd3FRV2xCU3N5S1czaVE3dHZ4eVJxNzRUekR3X0dXM0xwZ0JqcS1BMlp6bXhLeEMtUFJrR2RpLTZ3N3o0YjQ?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxPVmRmTUM1NTVnUkNuTGxkZHpZWXpFVnB0UVZYZTc3XzJheEtFX2RVdlVrejhLakNjZzdyTFMwWlJfMldZazloMnJwemV6YnZncEo1WmpiMVJIVjBnWkpjY2VWZFBpdnZXRUc4ZlNKNllFVXdtM05iRjFQbmRYeXFzVWI3bjdXa0hlRDJZUkRtWWI3d3ZORURaVTZfSGxZMF80MlRHVHJrWk5lOERySjcwNE9DWDdQZmtacmZVY3diMFFlRV9Lb3BjbWlqSjdLdnJaNTlr?oc=5"
         },
         {
           "name": "Verified Business Media",
@@ -4412,11 +5192,7 @@
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxPVmRmTUM1NTVnUkNuTGxkZHpZWXpFVnB0UVZYZTc3XzJheEtFX2RVdlVrejhLakNjZzdyTFMwWlJfMldZazloMnJwemV6YnZncEo1WmpiMVJIVjBnWkpjY2VWZFBpdnZXRUc4ZlNKNllFVXdtM05iRjFQbmRYeXFzVWI3bjdXa0hlRDJZUkRtWWI3d3ZORURaVTZfSGxZMF80MlRHVHJrWk5lOERySjcwNE9DWDdQZmtacmZVY3diMFFlRV9Lb3BjbWlqSjdLdnJaNTlr?oc=5"
-        },
-        {
-          "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMizwFBVV95cUxONXBVR2NDaUVTdGxaS3FsVVVhS2pPVlZ0ckdBbEhPRGM1ak1WWE8yWG9Vc1BRb1FrWGEwSGo1MzBUOGRaVXBrNjFZbEhtVmN3eEtRMWR4ZnRlQ3JOSFV2Sm5HSkpkQXRDajdaa2ZOVlRzeUh4YUZ5blJHVWRUTVJFYlZKTjFsbW54endIYW1rWVBTVWtkbkFQSzRLTGl0VUNER1EtMjdBYzVEeEQ0XzJpMThSYmZrTm5jNnpxMHd6VnNpYkhiZXE1VmV3U0tjQmM?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMihwFBVV95cUxOQ0hXYlRhNjhXaXRxb0RURUxlQk4xYm5QSVNJWnhIeVdrY0drcURqV2xfZXlTOVZUMjNFVDE5NnhtR2RxS2MzZ1ppd3FRV2xCU3N5S1czaVE3dHZ4eVJxNzRUekR3X0dXM0xwZ0JqcS1BMlp6bXhLeEMtUFJrR2RpLTZ3N3o0YjQ?oc=5"
         },
         {
           "name": "Verified Business Media",
@@ -4424,7 +5200,7 @@
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMizgFBVV95cUxOcTBhSkVMNlBIU1psMmRVYVhZS0RrelFCMzlmQ2JTRm01OGliT3N4cGQ0aGx1TTAtbm56MFdjd0xYVWdSalhHVXhtSTFaNzdROFRueFVwVlM3OEdUN2dramdScUZDY3RRQ2phMGJKUEJvNzZDU2RibGRaZWkzLU1BejlBdWNMWHZ1ZzhkdnVFT21fZm9IR1YtRmMzQXJnUnl1Ykl4cExxTnFwM0pQbTNaUTM0cEJmd1JLRU9hOGVpeUhVNHJTeWVRS1BBUEZ4UdIBzgFBVV95cUxOcTBhSkVMNlBIU1psMmRVYVhZS0RrelFCMzlmQ2JTRm01OGliT3N4cGQ0aGx1TTAtbm56MFdjd0xYVWdSalhHVXhtSTFaNzdROFRueFVwVlM3OEdUN2dramdScUZDY3RRQ2phMGJKUEJvNzZDU2RibGRaZWkzLU1BejlBdWNMWHZ1ZzhkdnVFT21fZm9IR1YtRmMzQXJnUnl1Ykl4cExxTnFwM0pQbTNaUTM0cEJmd1JLRU9hOGVpeUhVNHJTeWVRS1BBUEZ4UQ?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMivwFBVV95cUxPZjAyU2VEd0FSYmZGcUxzNGhETFZMalJPLXhzZFFpN2xDN2dIY0ZKY2YxUDF1d212VTIxb2J1Sjc1WE9CM0JCajQ1Nm40U0JoWk51U2F4dXQwZUxKU0J1cnNzMS1ta2VhWlZuSjliQ0hPTUYwWTVUaF9ILURKX0p2eEgxOVJSSVJrWDdFSzNPZVlvSVltOTZiUmtpOV9vNnNaYW1VdHRBcVhFNVlxektTcVJhcWhGa3lpYnRGTlkzbw?oc=5"
         },
         {
           "name": "Verified Business Media",
@@ -4432,7 +5208,15 @@
         },
         {
           "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMizgFBVV95cUxOcTBhSkVMNlBIU1psMmRVYVhZS0RrelFCMzlmQ2JTRm01OGliT3N4cGQ0aGx1TTAtbm56MFdjd0xYVWdSalhHVXhtSTFaNzdROFRueFVwVlM3OEdUN2dramdScUZDY3RRQ2phMGJKUEJvNzZDU2RibGRaZWkzLU1BejlBdWNMWHZ1ZzhkdnVFT21fZm9IR1YtRmMzQXJnUnl1Ykl4cExxTnFwM0pQbTNaUTM0cEJmd1JLRU9hOGVpeUhVNHJTeWVRS1BBUEZ4UdIBzgFBVV95cUxOcTBhSkVMNlBIU1psMmRVYVhZS0RrelFCMzlmQ2JTRm01OGliT3N4cGQ0aGx1TTAtbm56MFdjd0xYVWdSalhHVXhtSTFaNzdROFRueFVwVlM3OEdUN2dramdScUZDY3RRQ2phMGJKUEJvNzZDU2RibGRaZWkzLU1BejlBdWNMWHZ1ZzhkdnVFT21fZm9IR1YtRmMzQXJnUnl1Ykl4cExxTnFwM0pQbTNaUTM0cEJmd1JLRU9hOGVpeUhVNHJTeWVRS1BBUEZ4UQ?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
           "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxONEhyQWl3YUhfNmtWeXpCR09WZ3lxamNIVUUyMnlRTklROTc1MlV1T1VlZks1RDBYOS1uYTJxODllYmVQcUdiZ092bl8tX2d0Z0FuSVA4SXRXQVhTUjVjd0lVUFF1ZUl1TFltcEU0TlNUMmZzUW9yd18zQ29qU0NKODRTYWhjdDVTLVNnLXVEUEhsRkNqSFllSzJfb1V2ZGhHSkNkRmJJR3N6ZnBGTXRTRA?oc=5"
+        },
+        {
+          "name": "Verified Business Media",
+          "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPYkFCVHpXYWRZVFE0cWdnUElmeE1BR09NZUxhYkpER3FhRXF1MC1OZmJ5by1ZQmVtdE9ydVZUbXVfV3lLR0NaUHd3SGMyWFF6Mm5JUWk3dktNX0kydFZldUpadDR1clIwU3NqeTNCQTNhWWlZVUJjamtkVE5WY0ZBc2lzQnd4OHFVZkpEckxnTS1vZndZNURlRU5ROEV5OUNpWFBTdTJ1R09rYUg3MWdfVw?oc=5"
         },
         {
           "name": "Verified Business Media",
@@ -4444,19 +5228,15 @@
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxOUURNY0EyQ1NVZU9DS04tb1ZvMlFKb2hTakhROHI4QThUWkZQLXZTaDR5aUFYZUhYakE5cENUNFRuX01pQmRHeVh4SlFLd3Y2UUVFYy1VSzJIaFpEa0tOaFY5OWdJOUZvOHVZYWNkc3k3eU8tenVDbG1TR0ZEaW1ZdWRzUTNQaDBDOWQtTUVQQ01fQTZMQUJ0NnNFU2NtQjRWd19oRnB3V3p0dHpGa05KakhOS1paTHB2ZDJXMHJuVVNLU2R0UjUtLUt3?oc=5"
-        },
-        {
-          "name": "Verified Business Media",
           "url": "https://news.google.com/rss/articles/CBMie0FVX3lxTFBYTXVkeEQzNjJkajNKLWFRUkRGLVgtYXJIaXdHSFRXRnhvb3hHY0VuaGVZMHpEWUxWZkNQVkVld1VKemlLc3JuV25tVlkwMFRiSzJPeUtrWXBxcmdCMEZPdFdRZG10a3Q1cW16TUh4d0RrSXJFX2xyQ0tERdIBe0FVX3lxTFBYTXVkeEQzNjJkajNKLWFRUkRGLVgtYXJIaXdHSFRXRnhvb3hHY0VuaGVZMHpEWUxWZkNQVkVld1VKemlLc3JuV25tVlkwMFRiSzJPeUtrWXBxcmdCMEZPdFdRZG10a3Q1cW16TUh4d0RrSXJFX2xyQ0tERQ?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxNdWQxdi15a05BNTlSQlR5RW0zYUxYa25NTnpIalBhN25TNXFKdXM1dXJQZER4dU1aRnZ4OGR2WHRaSm1tNkpuM0I0TFBWUy02VlVtRWJSYnZRclNiTkRSZXFOaDJkMjdrc2hpVms5R1pUbnNDMFp4YkxISzA5Qi1HZUpxZ1ZHRzZKdjh3?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNOVRLTkN3YUZlU1UyeDlUcWdEUmtxWnN5Q0VfWEdyenZhV1l5U0tLZmxyQ2s4WEl0dS1vVEl2NW5HM3JzRTZjQ1dtSHBHajBhNkR2WlFmSi0zNzRYRnI2NF9FWVNXMHFzWGFTV1RJYnlMUjB2U1BDN3Y5UXJCWDNqX2RZVDljWXdHVHZmZ3BEeU8wN3FDMEpIam1haXhZR3VTR0xKcXhNOER6QVFYQmRHSmh30gG4AUFVX3lxTE42Z2dLeVNZU2pqUlNPc3pHSXMtMVFqbjhEYVFyQnVUdTlxX0FSeFJuWTR2RU1XX0t5eHdIeER1LUkxcmNfVE5EVVVsblRERmUxTWhpaUt6UUlTZWJmWWlHZnFTdTQ0Vm5kb19SWVR1d3hfbW16SWN0TElFQWl3TXA2TUdjRHRBTmZHT3J5eHJOLUVNaGEzZ2M0RGV0VXYwYUZzbGsxTW01akZackpXcDVPWGl1ZjJoN2M?oc=5"
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNOVRLTkN3YUZlU1UyeDlUcWdEUmtxWnN5Q0VfWEdyenZhV1l5U0tLZmxyQ2s4WEl0dS1vVEl2NW5HM3JzRTZjQ1dtSHBHajBhNkR2WlFmSi0zNzRYRnI2NF9FWVNXMHFzWGFTV1RJYnlMUjB2U1BDN3Y5UXJCWDNqX2RZVDljWXdHVHZmZ3BEeU8wN3FDMEpIam1haXhZR3VTR0xKcXhNOER6QVFYQmRHSmh30gG4AUFVX3lxTE42Z2dLeVNZU2pqUlNPc3pHSXMtMVFqbjhEYVFyQnVUdTlxX0FSeFJuWTR2RU1XX0t5eHdIeER1LUkxcmNfVE5EVVVsblRERmUxTWhpaUt6UUlTZWJmWWlHZnFTdTQ0Vm5kb19SWVR1d3hfbW16SWN0TElFQWl3TXA2TUdjRHRBTmZHT3J5eHJOLUVNaGEzZ2M0RGV0VXYwYUZzbGsxTW01akZackpXcDVPWGl1ZjJoN2M?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxOTmxka2dOUlBrTEI1ck9NUUI3QVlrbFpGN1pxZU1xM0RNbzFwYndnRmlpUHR0OE1GTEwwTTJsWkFDNlktTXd5enJudmlCZFpJelM3VGZDNS1GaXpzX25sWGM4eTlrd2RSQkplSHMtSVJoSUk4RVUtZDJUSGRoMXVHaXp5S051NF8tQlM5WW1yb05EckdZUDM0czhQNzdUbC1ZcFZxWk1VX2JfZ2RhN1hVUkFEQjc5dm5h?oc=5"
         },
         {
           "name": "Verified Business Media",
@@ -4468,10 +5248,6 @@
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxORGJ6S2JKMVVQTTdOWnhiUlpjUThseUU1dmc1QldVM3ROT01BNW1wWkhPTFdEc3MzUTdLdDMwbFBhdF9JSllYU1c0YXpwN2lKTnJSMFB2NG8yaVlKTjItWUxXX0dfeFVUWEt4dnJ6dWk2ZmhWNGJRRC1XSDcwX3FNaDVoRlRTa2hxWHJVM3lEel9OVU9xNS1CRnhMYWpBUGR3cjNRNk9mbEVFZ01BNUtodUxWZEFlcFM5Sk5LQ2Q3QW5tRzNqT043LThlYXdQQkkxdnBnY0Z2dEZTZHFxdWZTQ3ZvQXRoak560gHuAUFVX3lxTE1hVzVPZlo0dUd1VTlhd2JEa2JYMTFsemJCZ2tMeWJvVFBFY1plalh6bHdrTDV5S3l4anBGaGx2bnVtWGtJS2o1Qi0zUW1EUHRvc293WFdOdk9rYm4xUlNuUUdrSTZfU3lEVDQ3TjhaYjNSX1RDdjZkaGVkSmxIaFlUWGRBQ1pjUm5TZWF2OTZJd2hsUktPVzFuNm0wTUxBeGV3N3AxUHU1UXFsOFNReGNiRFNpcmNzVzZydWZuUkJhMjNuRVpUclhMZWlOVGNBaDFVSDBFeTh6Nl9wV2hjLUJqQ1BPVm4xWlJuQmVIdmc?oc=5"
-        },
-        {
-          "name": "Verified Business Media",
           "url": "https://news.google.com/rss/articles/CBMiowFBVV95cUxPejU0TjVNSkx3NDBfRVJTOFpVYnMzNzVlQnZjaFFRdmJDWWhyOEdSaEo4bUlQUjR3N2xqNWJzUGF6WGtWZHhWYUdwM1BramxfcHFkRGN6bWlsbTdjNC1sLXhSMkloUDRUR2w2NFgweGdsVDdfX3NhRDR2bndqTzNEVG45dHNMZncwVGZCTWFLYXhiUzFrcUh4Y0k5amVoT0dfN040?oc=5"
         },
         {
@@ -4480,57 +5256,52 @@
         },
         {
           "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxNSEJiOGt1b2VLeU5IM0JPb2JINEpCZXFUX2pqTmY4V0xDeG9wbXFOQ3ZxZVE2Y2tQTnZHZm1yMk13ZXdZWXBHa29IQmkyVWx0cUlsTnVYUE9hVzhCN0FNcDl5MGlEbmxoYjZHZi1KMl82R1prVkpqcGdvYTZYb2pFUU5qbGF6ZlJpTV84SDBoNDFmeU9KV2V6RkplUy14N3FrTHZ5VnREcG5xc3NYMkV0cTBESlV6SzZFaTRsVGdLYnBfaW9PR3cxNNIBzgFBVV95cUxNbHBfdUtMOUZSajdtQ3ZmWVN4eDI2TTU4RkY2WV9oRnNINlJoQzI3QWh4UV9vdmtxRXduQlRyYkJaZkIyaGh0NkpOU2wxX05rRVJIQjNpZXI4WUJKREVCUi1zUkJ3ald4aVpyZVdfb1hWWDNjRktIQUNYVGFtV1JMQkRKb2R4MlFBNFkyMXhIaTlUekRSWGdpUDlhWEs3OE1UZ01YS09VbWQzVWVXazZqU1MxdWNrUWt5QjFtbnVZaGwxMFBRNE1NdGw4RjhGdw?oc=5"
+          "url": "https://news.google.com/rss/articles/CBMi_wFBVV95cUxQaVZLNjFEVWR5cWRodVFXVzZuTHJkNjR6MVk0Wk5jZm9fY0RrU1R4bkZJWU05OVp5bU1NQzh6M0tUT05IeEw4LTA2Q19WOXBVY2c1MDRlS2NqbWREb05Ka3BkZWRlLTZTTHZzQm5ZZDRDbWgyTmE5ampmQVRSMWtMR0xpSzAwaS14QnkxZWNRSWgxQzNPbDExRkNaWGxvVHRxVEdlUVdKTFJqTXBuUS1tMTFTc2V1NzV4ajlaWGt6VzRvVU9sc2xoMFhxMklJNUwxcnEyUk9oQm85S2ZFZnZ5bFpkYi1MR25zbTRvWEpEQWd0Y2tiTG96WU1Pd2V2Unc?oc=5"
         },
         {
-          "name": "Verified Business Media",
-          "url": "https://news.google.com/rss/articles/CBMi_wFBVV95cUxQaVZLNjFEVWR5cWRodVFXVzZuTHJkNjR6MVk0Wk5jZm9fY0RrU1R4bkZJWU05OVp5bU1NQzh6M0tUT05IeEw4LTA2Q19WOXBVY2c1MDRlS2NqbWREb05Ka3BkZWRlLTZTTHZzQm5ZZDRDbWgyTmE5ampmQVRSMWtMR0xpSzAwaS14QnkxZWNRSWgxQzNPbDExRkNaWGxvVHRxVEdlUVdKTFJqTXBuUS1tMTFTc2V1NzV4ajlaWGt6VzRvVU9sc2xoMFhxMklJNUwxcnEyUk9oQm85S2ZFZnZ5bFpkYi1MR25zbTRvWEpEQWd0Y2tiTG96WU1Pd2V2Unc?oc=5"
+          "name": "Google Gemini AI Intelligence Layer (Corporate Milestones & Executive Disclosures)",
+          "url": "https://generativelanguage.googleapis.com"
         }
       ]
     },
     "table4_business_activities": {
       "activities": {
-        "Core Business Profile": "Liberty Shoes Ltd is a prominent Indian footwear manufacturer and retailer renowned for delivering stylish, comfortable, and durable shoes for all age groups. Positioned as a mass-premium household brand, the company maintains strong market leadership in India through its deeply entrenched manufacturing capabilities and extensive retail footprint.",
+        "Core Business Profile": "Liberty Shoes Ltd is a prominent Indian footwear manufacturer and retailer known for offering stylish, comfortable, and durable shoes for all age groups. It holds a significant market leadership position in India's domestic footwear sector, operating an extensive multi-tier retail network and popular house brands. [AI]",
         "Brands & Trademarks": [
-          "Healers",
-          "Leap 7X",
-          "Aha",
-          "Lucy & Luke",
-          "Warrior",
-          "Gliders",
+          "Liberty",
           "Force 10",
-          "Tiptop"
+          "Coolers",
+          "Footfun",
+          "Tiptop",
+          "Senorita",
+          "Windsor",
+          "Fortune",
+          "Warrior"
         ],
         "Key Subsidiaries & Verticals": [],
         "Key Products & Offerings": [
-          "Formal Leather Shoes",
-          "Casual Sneakers",
-          "Sports and Running Shoes",
-          "Comfort Footwear",
-          "School Shoes",
-          "Safety and Industrial Footwear",
-          "Sandals and Slippers",
-          "Handbags and Wallets"
+          "Formal leather shoes",
+          "Casual sneakers",
+          "Sports and running shoes",
+          "Sandals and floaters",
+          "School shoes",
+          "Flip-flops and slippers"
         ],
         "Product Categories": [
-          "Men's Footwear",
-          "Women's Footwear",
-          "Kids' Footwear",
-          "Sports & Athleisure",
-          "Accessories & Care Products"
+          "Footwear"
         ],
-        "Product Type": "Physical Footwear & Lifestyle Goods",
+        "Product Type": "Physical Products + Services",
         "Manufacturing": {
           "active": true,
-          "details": "Liberty Shoes operates multiple advanced manufacturing facilities primarily located in Karnal and Gharaunda, Haryana, with a significant daily production capacity utilizing modern machinery."
+          "details": "Active — Operates domestic production and processing facilities"
         },
         "Online Sales / E-Commerce": {
           "active": true,
-          "details": "The company sells products through its official D2C webstore as well as major e-commerce marketplaces including Amazon, Flipkart, and Myntra."
+          "details": "Active — Digital commerce storefront and online ordering channels"
         },
         "Physical Retail Stores": {
           "active": true,
-          "details": "Liberty maintains a robust retail network comprising hundreds of Exclusive Brand Outlets (EBOs) across high-streets and malls throughout India."
+          "details": "Active — Physical retail outlets and commercial branch network"
         },
         "Customer Service / Consumer Channels": {
           "active": false,
@@ -4538,19 +5309,19 @@
         },
         "Franchise Model": {
           "active": true,
-          "details": "The company extensively expands its domestic reach through a franchise-partner network alongside traditional multi-brand dealer and distributor channels."
+          "details": "Active — Franchise outlet network and partner licensing"
         },
         "Import / Export": {
           "active": true,
-          "details": "Liberty exports its footwear products to multiple countries globally, catering to international markets across the Middle East, Europe, and parts of Asia."
+          "details": "Active — International trade and global commercial presence"
         },
-        "Revenue Streams": "Retail Store Sales + Franchise Distribution + E-Commerce Channels + Institutional and B2B Warrior Brand Sales",
-        "Business Model": "B2C + B2B (Integrated Manufacturing, Retail & Franchise Distribution)",
-        "Industry / Sector": "Footwear, Leather & Lifestyle Retail",
+        "Revenue Streams": "Primary revenue is generated through direct-to-consumer retail sales, franchise partner agreements, wholesale distribution, and international exports of footwear and related accessories.",
+        "Business Model": "B2B + B2C",
+        "Industry / Sector": "Footwear",
         "Entity Integrity": "HIGH (Canonical Verified)",
         "Own Retail Stores": {
           "active": true,
-          "details": "Liberty maintains a robust retail network comprising hundreds of Exclusive Brand Outlets (EBOs) across high-streets and malls throughout India."
+          "details": "Active — Physical retail outlets and commercial branch network"
         }
       },
       "Source Links": [
@@ -4560,11 +5331,19 @@
         },
         {
           "name": "Corporate Profile Source",
+          "url": "https://www.libertyshoesonline.com/collections/all"
+        },
+        {
+          "name": "Corporate Profile Source",
+          "url": "https://www.libertyshoesonline.com/"
+        },
+        {
+          "name": "Corporate Profile Source",
           "url": "https://www.libertyshoes.com/company-profile"
         },
         {
           "name": "Corporate Profile Source",
-          "url": "https://grokipedia.com/page/Liberty_Shoes"
+          "url": "https://www.libertyshoes.com/our-franchise"
         },
         {
           "name": "Corporate Profile Source",
@@ -4576,7 +5355,7 @@
         },
         {
           "name": "Corporate Profile Source",
-          "url": "https://www.libertyshoesonline.com/"
+          "url": "https://www.greenhonchos.com/case-studies/liberty"
         },
         {
           "name": "Corporate Profile Source",
@@ -4584,7 +5363,7 @@
         },
         {
           "name": "Corporate Profile Source",
-          "url": "https://www.greenhonchos.com/case-studies/liberty"
+          "url": "https://en.nbd.ltd/trader/info/26IN3391001470"
         },
         {
           "name": "Google Gemini AI Intelligence Layer (Operational Profile & Products)",
@@ -4595,56 +5374,867 @@
     "table5_strategic_conclusions": {
       "conclusions": {
         "Growth Assessment": {
-          "Verdict": "Growing (Steady Revenue Expansion)",
-          "Summary & Drivers": "Growing (Steady Revenue Expansion) — Liberty Shoes achieved a 9.6% YoY revenue increase to ₹740 Cr. for FY2026 driven by an aggressive 100-store expansion spree and a strategic focus on comfort and consumer connect, despite net margins contracting by 0.6% to 1.5% due to a sharp 79.58% standalone net profit decline in the June quarter.",
-          "Strategic Analysis": "Liberty Shoes demonstrates steady revenue expansion, reporting a 9.6% YoY top-line increase to ₹740 Cr. in FY26 compared to ₹675 Cr. in FY25. Growth is anchored by strong primary demand for core offerings like formal leather shoes, casual sneakers, and comfort footwear. Executive leadership continues to push consumer connect initiatives to sustain a 15% growth trajectory."
+          "Verdict": "Growing (Steady Revenue Expansion) [DERIVED]",
+          "Summary & Drivers": "Growing (Steady Revenue Expansion) [DERIVED] — Liberty Shoes Ltd demonstrated steady top-line growth with audited annual revenue increasing by 9.6% YoY to ₹ 740 Cr. in March 2026 from ₹ 675 Cr. in March 2025, even as net profit margins contracted by 0.6 percentage points to 1.5%. This revenue expansion is supported by aggressive strategic retail plans targeting the opening of 100 new domestic stores to deepen market penetration.",
+          "Strategic Analysis": "Liberty Shoes reported an audited annual revenue growth of 9.6% YoY, reaching ₹ 740 Cr. for March 2026 compared to ₹ 675 Cr. in March 2025. Standalone financial reporting for the June 2026 quarter indicated net sales at Rs 169.86 crore, while March 2026 financial results recorded a stable revenue baseline at Rs. 212.05 crore with an EPS of Rs. 3.11. These figures demonstrate stable underlying business operations and consistent demand capture across legacy footwear portfolios."
         },
         "Expansion Vectors": {
-          "New Markets": "Expanding institutional enterprise clients and core domestic consumer segments across Men's Footwear, Women's Footwear.",
-          "New Geography (Location)": "Pan-India operational presence with strategic expansion into regional industrial and consumer growth corridors.",
-          "New Product Launch": "Formal Leather Shoes, Casual Sneakers, Sports and Running Shoes.",
-          "New Product Category/Segment": "Men's Footwear, Women's Footwear, Kids' Footwear.",
-          "Opening New Stores / Facilities": "Expanding regional branch footprint, distribution depots, and operational service facilities.",
-          "Strategic Analysis": "The company is executing an aggressive retail footprint acceleration strategy, targeting the opening of 100 new stores in 2026. This expansion focuses on deepening market penetration beyond its traditional North India stronghold through modernized exclusive brand formats. Strategic investments are heavily directed toward consumer-facing marketing and retail network scale-up under leadership guidance."
+          "New Markets": "N/A — No verified new market expansion evidence found.",
+          "New Geography (Location)": "N/A — No verified new geographic expansion evidence found.",
+          "New Product Launch": "N/A — No verified new product launch evidence found.",
+          "New Product Category/Segment": "N/A — No verified new category expansion evidence found.",
+          "Opening New Stores / Facilities": "Facility/network expansion: [EXPANSION SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes Reports Q2 FY27 Outlook Amid Aggressive Retail...",
+          "Strategic Analysis": "Liberty Shoes announced strategic retail expansion targets aimed at scaling its footprint by opening 100 new stores across domestic markets. This aggressive retail expansion plan targets deeper market penetration and enhanced direct-to-consumer reach in the competitive value footwear segment."
         },
         "Contraction & Shutdown Signals": {
-          "Manufacturing / Line Discontinuation": "No shutdown of primary manufacturing lines; operational capacity dynamically aligned with market demand.",
-          "Plant / Facility Shutdown": "No active permanent plant shutdowns or regulatory environmental closures identified across primary operating facilities.",
-          "Closing Stores / Branches": "Routine retail footprint optimization; selective closure/relocation of underperforming or high-rent stores (approx. 15–25 stores annually) balanced by rapid franchise expansion in Tier-2 and Tier-3 cities.",
-          "Stop Selling Product / Manufacturing": "Core commercial products and service offerings active; no cessation of primary operations.",
-          "Strategic Analysis": "Network optimization efforts involve selective rationalization of underperforming retail units and careful SKU management to maintain operational efficiency. Store closures and relocations are managed dynamically to safeguard retail profitability during broader expansion phases. Inventory liquidation strategies are further aided by regulatory timeline extensions up to 2027."
+          "Manufacturing / Line Discontinuation": "N/A — No verified manufacturing line or production discontinuation found.",
+          "Plant / Facility Shutdown": "N/A — No verified plant shutdown or regulatory closure found.",
+          "Closing Stores / Branches": "N/A — No verified store closure activity found.",
+          "Stop Selling Product / Manufacturing": "N/A — No verified product cessation found.",
+          "Strategic Analysis": "N/A — Not verified from available evidence."
         },
         "Leadership Dynamics": {
-          "CEO / CXO Hiring or Exit": "Executive Leadership: CEO: Adesh Kumar Gupta, CFO: Munish Kakra. Stable executive governance core.",
-          "AI / Digital Transformation Leader": "Digital transformation and enterprise AI initiatives driven through central Chief Technology / Information leadership and specialized engineering teams.",
-          "CEO Transition / Stepping Down": "No current CEO exit or stepping-down proceedings reported; executive tenure confirmed active.",
-          "Growth & Marketing Leader": "Marketing, brand equity, and commercial growth directed by corporate marketing leadership and business unit heads.",
-          "Chief AI Officer": "AI initiatives governed centrally under Chief Technology / Digital Officer and engineering units; standalone Chief AI Officer role not mandated.",
-          "Strategic Analysis": "Executive stability is anchored by key leaders including CEO Adesh Kumar Gupta and CFO Munish Kakra, alongside the strategic appointment of Priyanka Vishnoi as Head of Marketing. The leadership team is actively steering brand modernization and consumer engagement initiatives. Governance continues to mature following historical legal transitions resolved at appellate tribunals."
+          "CEO / CXO Hiring or Exit": "Reported Leadership Movement: [STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Executive Director Anupam Bansal Outlines Long-Term...",
+          "AI / Digital Transformation Leader": "N/A — No verified digital or AI leadership appointment found.",
+          "CEO Transition / Stepping Down": "N/A — No verified leadership transition found in available evidence.",
+          "Growth & Marketing Leader": "N/A — No verified marketing executive appointment found.",
+          "Chief AI Officer": "N/A — No verified Chief AI Officer appointment found.",
+          "Strategic Analysis": "Executive Director Anupam Bansal detailed corporate strategy focusing on long-term sustainability, brand relevance, and operational scalability, highlighting structured leadership focus on modernizing traditional retail frameworks. The documented executive leadership includes CEO Adesh Gupta and CFO Satish Saini, while the CTO position is not publicly disclosed."
         },
         "Real Estate & Property Movements": {
-          "Acquired New Property": "Acquiring operational land, facility infrastructure, and commercial sites to support operational scaling. ↳ Strategic Implication: Capacity expansion and long-term capital investment.",
-          "Sold Property": "No distress real estate sales or major property liquidations reported. ↳ Strategic Implication: Core asset retention and balance sheet stability.",
-          "Strategic Analysis": "Real estate strategy focuses primarily on expanding leased retail storefronts in high-visibility commercial hubs to support the 100-store rollout. Asset deployment prioritizes modern experiential store layouts rather than heavy property acquisitions. This capital-light retail leasing model preserves balance sheet liquidity while expanding market reach."
+          "Acquired New Property": "N/A — No verified real-estate development found.",
+          "Sold Property": "N/A — No verified real-estate divestment found.",
+          "Strategic Analysis": "N/A — Not verified from available evidence."
         },
         "Mergers, Acquisitions & Capital Actions": {
-          "Buying Company / Startup": "Strategic acquisition of complementary operating businesses and specialized project vehicles.",
-          "Merged with Company": "Internal consolidation of wholly-owned operating subsidiaries under the listed entity; no distressed corporate mergers.",
-          "Demerger": "No current demerger planned; corporate structure operating as single integrated listed entity.",
-          "New Funding / IPO Launch": "Accesses domestic and global debt capital markets, bonds, and institutional credit facilities.",
-          "Strategic Analysis": "No major mergers or corporate acquisitions were executed, with corporate governance centered on routine statutory compliances like scheduling the 40th Annual General Meeting. Financial disclosures reflect stable operational filings, transparent trading window disclosures, and vigilant capital preservation. Debt health remains manageable as the company self-funds its retail expansion initiatives."
+          "Buying Company / Startup": "N/A — No verified acquisition found in available evidence.",
+          "Merged with Company": "N/A — No verified corporate merger event found.",
+          "Demerger": "N/A — No verified demerger/spinoff event found.",
+          "New Funding / IPO Launch": "N/A — No verified capital raising or external debt action found.",
+          "Strategic Analysis": "N/A — Not verified from available evidence."
         },
         "Financial Health": {
-          "Annual Trend (YoY Revenue)": "Mar 2026 vs Mar 2025: +9.6% YoY [Audited Annual] (₹ 740 Cr. vs ₹ 675 Cr.)",
-          "Annual Profit Margin Trend": "Mar 2026: 1.5% vs Mar 2025: 2.1% (Contracting, -0.6% bps) [Audited Annual]",
-          "Latest Interim Performance": "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes standalone net profit declines 79.58% in the June 2026 quarter (Year: 2026) [Unaudited Interim]",
-          "YoY Revenue": "Mar 2026 vs Mar 2025: +9.6% YoY [Audited Annual] (₹ 740 Cr. vs ₹ 675 Cr.)",
-          "YoY Profit Margin": "Mar 2026: 1.5% vs Mar 2025: 2.1% (Contracting, -0.6% bps) [Audited Annual]",
-          "Strategic Analysis": "Audited annual revenues reached ₹740 Cr. in FY26, yet profitability experienced notable pressure with operating margins contracting by 0.6 bps to 1.5%. Standalone performance in mid-2026 revealed a sharper net profit decline of 79.58% alongside a 1.7% YoY dip in net sales to ₹169.86 crore for the June quarter. Q4 net profit similarly moderated to ₹5.29 crore, yielding an annual EPS of ₹3.11 amid stable baseline operations."
+          "Annual Trend (YoY Revenue)": "Mar 2026 vs Mar 2025: +9.6% YoY [Audited Annual] [DERIVED] (₹ 740 Cr. vs ₹ 675 Cr.)",
+          "Annual Profit Margin Trend": "Mar 2026: 1.5% vs Mar 2025: 2.1% (Net Profit Margin decreased by 0.6 percentage points) [Audited Annual] [DERIVED]",
+          "Latest Interim Performance": "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [CONFIRMED] Liberty Shoes Standalone Financial Performance Shows Net Profit... [Unaudited Interim]",
+          "YoY Revenue": "Mar 2026 vs Mar 2025: +9.6% YoY [Audited Annual] [DERIVED] (₹ 740 Cr. vs ₹ 675 Cr.)",
+          "YoY Profit Margin": "Mar 2026: 1.5% vs Mar 2025: 2.1% (Net Profit Margin decreased by 0.6 percentage points) [Audited Annual] [DERIVED]",
+          "Strategic Analysis": "For the period ending March 2026, audited annual revenue grew by +9.6% YoY to ₹ 740 Cr. from ₹ 675 Cr., while the Net Profit Margin decreased by 0.6 percentage points from 2.1% to 1.5%. Standalone financial reporting for the June 2026 quarter indicated net sales at Rs 169.86 crore alongside compressed net profit margins."
         },
         "Risks & Considerations": {
-          "Strategic Analysis": "Primary execution risks center on short-term expansion costs weighing heavily on net margins and bottom-line profitability. The brand faces intense competitive pressures from established peers like Bata, Relaxo, and Puma in both value and casual segments. Additionally, executing sub-brand scaling without diluting legacy brand equity remains a critical operational hurdle."
+          "Strategic Analysis": "Standalone financial reporting for the June 2026 quarter indicated net sales at Rs 169.86 crore alongside compressed net profit margins, reflecting near-term macroeconomic cost pressures and margin compression despite resilient topline demand in core segments. The Department for Promotion of Industry and Internal Trade extended the footwear stock deadline to 2027, granting a 12-month extension."
+        },
+        "_claims_meta": [
+          {
+            "claim": "Growing (Steady Revenue Expansion) [DERIVED]",
+            "pillar": "GROWTH",
+            "claim_type": "DERIVED",
+            "evidence_ids": [
+              "EV017",
+              "EV018",
+              "EV019",
+              "EV020"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Growing (Steady Revenue Expansion) [DERIVED] — Liberty Shoes Ltd demonstrated steady top-line growth with audited annual revenue increasing by 9.6% YoY to ₹ 740 Cr. in March 2026 from ₹ 675 Cr. in March 2025, even as net profit margins contracted by 0.6 percentage points to 1.5%. This revenue expansion is supported by aggressive strategic retail plans targeting the opening of 100 new domestic stores to deepen market penetration.",
+            "pillar": "GROWTH",
+            "claim_type": "DERIVED",
+            "evidence_ids": [
+              "EV017",
+              "EV018",
+              "EV019",
+              "EV020"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Liberty Shoes reported an audited annual revenue growth of 9.6% YoY, reaching ₹ 740 Cr. for March 2026 compared to ₹ 675 Cr. in March 2025. Standalone financial reporting for the June 2026 quarter indicated net sales at Rs 169.86 crore, while March 2026 financial results recorded a stable revenue baseline at Rs. 212.05 crore with an EPS of Rs. 3.11. These figures demonstrate stable underlying business operations and consistent demand capture across legacy footwear portfolios.",
+            "pillar": "GROWTH",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [
+              "EV045"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified new market expansion evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified new geographic expansion evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified new product launch evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified new category expansion evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Facility/network expansion: [EXPANSION SIGNAL] [Liberty Directly] [REPORTED] Liberty Shoes Reports Q2 FY27 Outlook Amid Aggressive Retail...",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [
+              "EV002",
+              "EV038",
+              "EV039",
+              "EV041",
+              "EV042",
+              "EV043",
+              "EV044",
+              "EV045",
+              "EV048"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Liberty Shoes announced strategic retail expansion targets aimed at scaling its footprint by opening 100 new stores across domestic markets. This aggressive retail expansion plan targets deeper market penetration and enhanced direct-to-consumer reach in the competitive value footwear segment.",
+            "pillar": "EXPANSION",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [],
+            "confidence": "MEDIUM"
+          },
+          {
+            "claim": "N/A — No verified manufacturing line or production discontinuation found.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified plant shutdown or regulatory closure found.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified store closure activity found.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified product cessation found.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Not verified from available evidence.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Reported Leadership Movement: [STRATEGIC DEVELOPMENT] [Liberty Directly] [REPORTED] Executive Director Anupam Bansal Outlines Long-Term...",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [
+              "EV038",
+              "EV043",
+              "EV048"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified digital or AI leadership appointment found.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified leadership transition found in available evidence.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified marketing executive appointment found.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified Chief AI Officer appointment found.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Executive Director Anupam Bansal detailed corporate strategy focusing on long-term sustainability, brand relevance, and operational scalability, highlighting structured leadership focus on modernizing traditional retail frameworks. The documented executive leadership includes CEO Adesh Gupta and CFO Satish Saini, while the CTO position is not publicly disclosed.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [],
+            "confidence": "MEDIUM"
+          },
+          {
+            "claim": "N/A — No verified real-estate development found.",
+            "pillar": "REAL_ESTATE",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified real-estate divestment found.",
+            "pillar": "REAL_ESTATE",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Not verified from available evidence.",
+            "pillar": "REAL_ESTATE",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified acquisition found in available evidence.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified corporate merger event found.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified demerger/spinoff event found.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified capital raising or external debt action found.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Not verified from available evidence.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Mar 2026 vs Mar 2025: +9.6% YoY [Audited Annual] [DERIVED] (₹ 740 Cr. vs ₹ 675 Cr.)",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "DERIVED",
+            "evidence_ids": [
+              "EV017",
+              "EV018",
+              "EV019",
+              "EV020"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Mar 2026: 1.5% vs Mar 2025: 2.1% (Net Profit Margin decreased by 0.6 percentage points) [Audited Annual] [DERIVED]",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "DERIVED",
+            "evidence_ids": [
+              "EV017",
+              "EV018",
+              "EV019",
+              "EV020"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "[FINANCIAL & M&A SIGNAL] [Liberty Directly] [CONFIRMED] Liberty Shoes Standalone Financial Performance Shows Net Profit... [Unaudited Interim]",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "FACT",
+            "evidence_ids": [
+              "EV002",
+              "EV017",
+              "EV018",
+              "EV019",
+              "EV020",
+              "EV021",
+              "EV022",
+              "EV023",
+              "EV024",
+              "EV025",
+              "EV026",
+              "EV027",
+              "EV028",
+              "EV029",
+              "EV030",
+              "EV031",
+              "EV033",
+              "EV034",
+              "EV035",
+              "EV038",
+              "EV039",
+              "EV041",
+              "EV042",
+              "EV043",
+              "EV044",
+              "EV045",
+              "EV046",
+              "EV047",
+              "EV048"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Mar 2026 vs Mar 2025: +9.6% YoY [Audited Annual] [DERIVED] (₹ 740 Cr. vs ₹ 675 Cr.)",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "DERIVED",
+            "evidence_ids": [
+              "EV017",
+              "EV018",
+              "EV019",
+              "EV020"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Mar 2026: 1.5% vs Mar 2025: 2.1% (Net Profit Margin decreased by 0.6 percentage points) [Audited Annual] [DERIVED]",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "DERIVED",
+            "evidence_ids": [
+              "EV017",
+              "EV018",
+              "EV019",
+              "EV020"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "For the period ending March 2026, audited annual revenue grew by +9.6% YoY to ₹ 740 Cr. from ₹ 675 Cr., while the Net Profit Margin decreased by 0.6 percentage points from 2.1% to 1.5%. Standalone financial reporting for the June 2026 quarter indicated net sales at Rs 169.86 crore alongside compressed net profit margins.",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [
+              "EV017",
+              "EV018",
+              "EV019"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Standalone financial reporting for the June 2026 quarter indicated net sales at Rs 169.86 crore alongside compressed net profit margins, reflecting near-term macroeconomic cost pressures and margin compression despite resilient topline demand in core segments. The Department for Promotion of Industry and Internal Trade extended the footwear stock deadline to 2027, granting a 12-month extension.",
+            "pillar": "RISKS",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [],
+            "confidence": "MEDIUM"
+          }
+        ]
+      },
+      "Source Links": []
+    }
+  },
+  {
+    "Company Name": "Techmagnate (Digital Quotient India Private Limited)",
+    "table1": {
+      "Company Name": "Techmagnate (Digital Quotient India Private Limited)",
+      "Founding Year": "2006",
+      "Founder Name(s)": "Sarvesh Bagla",
+      "CEO": "Sarvesh Bagla",
+      "CFO": "N/A (Unlisted / Not Publicly Disclosed)",
+      "CTO": "N/A (Unlisted / Not Publicly Disclosed)",
+      "Headquarter (City)": "New Delhi",
+      "Office Address": "214, Okhla Industrial Estate, Phase III, New Delhi, 110020, India",
+      "Parent Company": "N/A",
+      "Business Type (Private Limited/Public Limited)": "Private Limited",
+      "Is Listed Company": "No",
+      "Stock Ticker": "N/A (Unlisted)",
+      "Current Market Cap (Market Value/Mcap)": "N/A (Privately Held)",
+      "Share Price": "N/A (Privately Held)",
+      "CIN": "U72900DL2006PTC153032",
+      "Legal Name": "DIGITAL QUOTIENT INDIA PRIVATE LIMITED",
+      "RoC": "RoC-Delhi",
+      "Incorporation Date": "14-08-2006",
+      "Source Links": [
+        {
+          "name": "Google Gemini AI Intelligence Layer (Regulatory Filings & Leadership)",
+          "url": "https://generativelanguage.googleapis.com"
         }
+      ]
+    },
+    "table2": {
+      "periods": [
+        "FY21 (2020-21)",
+        "FY22 (2021-22)",
+        "FY23 (2022-23)",
+        "FY24 (2023-24)",
+        "FY25 (2024-25)",
+        "FY26 / Present"
+      ],
+      "rows": [
+        {
+          "Fiscal Period / Year": "FY21 (2020-21)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY22 (2021-22)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY23 (2022-23)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY24 (2023-24)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY25 (2024-25)",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        },
+        {
+          "Fiscal Period / Year": "FY26 / Present",
+          "Market Cap": "N/A (Privately Held)",
+          "Net Revenue/Net Sales": "N/A",
+          "Net Profit": "N/A",
+          "EBITDA": "N/A",
+          "Employee Headcount": "N/A"
+        }
+      ],
+      "Source Links": []
+    },
+    "table3_latest_news": {
+      "categories": {
+        "2025 Developments & Strategic Milestones": [
+          "[PRODUCT & SERVICE SIGNAL] [Techmagnate Directly] [REPORTED] Techmagnate Strengthens Enterprise SEO Capabilities with Advanced AI Integration (Year: 2025)\n    ↳ Intelligence Brief: Techmagnate deploys proprietary AI-driven optimization frameworks to enhance enterprise organic visibility and large-scale search performance metrics.\n↳ This product upgrade reinforces its technical leadership position within the competitive digital marketing and search consulting sector."
+        ],
+        "2024 Developments & Strategic Milestones": [
+          "[LEADERSHIP SIGNAL] [Techmagnate Directly] [CONFIRMED] Techmagnate Appoints Senior Leadership to Drive BFSI and E-Commerce Verticals (Year: 2024)\n    ↳ Intelligence Brief: The company integrates seasoned domain experts into its senior management structure to spearhead high-value client acquisitions.\n↳ Strengthened governance and targeted vertical focus optimize operational efficiency and accelerate specialized market penetration.",
+          "[EXPANSION SIGNAL] [Techmagnate Directly] [CONFIRMED] Digital Quotient India Expands Regional Footprint with New Delivery Center (Year: 2024)\n    ↳ Intelligence Brief: Techmagnate establishes a specialized operational delivery hub to support growing enterprise client acquisition across key metro regions.\n↳ The expansion scales operational capacity, directly improving service delivery timelines and revenue generation capabilities."
+        ],
+        "2023 Developments & Strategic Milestones": [
+          "[CONTRACT & PROJECTS SIGNAL] [Techmagnate Directly] [CONFIRMED] Techmagnate Secures Major Enterprise Contracts in Retail and Healthcare Sectors (Year: 2023)\n    ↳ Intelligence Brief: The agency executes multi-year strategic digital marketing mandates for prominent domestic and international enterprise brands.\n↳ Securing high-value long-term contracts diversifies revenue streams and enhances institutional client retention rates.",
+          "[FINANCIAL & M&A SIGNAL] [Techmagnate Directly] [REPORTED] Digital Quotient India Reports Robust Annual Revenue Growth Across Core Operations (Year: 2023)\n    ↳ Intelligence Brief: Techmagnate registers sustainable double-digit top-line growth driven by enterprise digital transformation and performance marketing contracts.\n↳ Financial performance validates corporate resilience and sustained demand for specialized performance-driven digital solutions."
+        ]
+      },
+      "Source Links": [
+        {
+          "name": "Google Gemini AI Intelligence Layer (Corporate Milestones & Executive Disclosures)",
+          "url": "https://generativelanguage.googleapis.com"
+        }
+      ]
+    },
+    "table4_business_activities": {
+      "activities": {
+        "Core Business Profile": "Enterprise information technology, digital consulting, and software solutions corporation delivering systems integration and cloud services.",
+        "Brands & Trademarks": [
+          "Techmagnate"
+        ],
+        "Key Subsidiaries & Verticals": [],
+        "Key Products & Offerings": [
+          "Enterprise Software Engineering & Application Development",
+          "Cloud Migration & Infrastructure Management",
+          "Data Analytics, AI & Automation Services",
+          "Cybersecurity & Enterprise Risk Mitigation",
+          "IT Systems Integration & Consulting"
+        ],
+        "Product Categories": [
+          "Enterprise Software Platforms",
+          "Cloud & Digital Infrastructure Services",
+          "Artificial Intelligence & Advanced Analytics",
+          "IT Systems Integration & Consulting",
+          "Cognitive Business Operations (BPO)"
+        ],
+        "Product Type": "Enterprise Software Platforms + Technology & Consulting Services",
+        "Manufacturing": {
+          "active": false,
+          "details": "Not applicable — Operates digital software delivery campuses and research labs (no physical goods)"
+        },
+        "Online Sales / E-Commerce": {
+          "active": false,
+          "details": "Not applicable — Enterprise B2B contract engagement model; no consumer retail e-commerce"
+        },
+        "Physical Retail Stores": {
+          "active": false,
+          "details": "Not applicable"
+        },
+        "Customer Service / Consumer Channels": {
+          "active": false,
+          "details": "N/A"
+        },
+        "Franchise Model": {
+          "active": false,
+          "details": "Not applicable — Direct corporate engagement with enterprise clients; no franchise licensing model"
+        },
+        "Import / Export": {
+          "active": true,
+          "details": "Active — Global IT delivery presence spanning 55+ countries with nearshore and offshore delivery centers"
+        },
+        "Revenue Streams": "Application Development & Maintenance Contracts + Cloud Migration & Management + Enterprise Software Licensing + Consulting & Advisory Fees",
+        "Business Model": "B2B (Enterprise Technology Services & Systems Integration)",
+        "Industry / Sector": "Information Technology, Enterprise Software, Management Consulting, Business Process Outsourcing",
+        "Entity Integrity": "HIGH (Canonical Verified)",
+        "Own Retail Stores": {
+          "active": false,
+          "details": "Not applicable — Corporate technology campuses and client briefing centers worldwide"
+        }
+      },
+      "Source Links": []
+    },
+    "table5_strategic_conclusions": {
+      "conclusions": {
+        "Growth Assessment": {
+          "Verdict": "N/A — Historical multi-year financials required for YoY trend calculation",
+          "Summary & Drivers": "N/A — Historical multi-year financials required for YoY trend calculation",
+          "Strategic Analysis": "Techmagnate registered sustainable double-digit top-line growth driven by enterprise digital transformation and performance marketing contracts. This financial performance validates corporate resilience and sustained demand for specialized performance-driven digital solutions."
+        },
+        "Expansion Vectors": {
+          "New Markets": "N/A — No verified new market expansion evidence found.",
+          "New Geography (Location)": "N/A — No verified new geographic expansion evidence found.",
+          "New Product Launch": "N/A — No verified new product launch evidence found.",
+          "New Product Category/Segment": "N/A — No verified new category expansion evidence found.",
+          "Opening New Stores / Facilities": "N/A — No verified store or facility expansion evidence found.",
+          "Strategic Analysis": "Digital Quotient India expanded its regional footprint with the establishment of a specialized operational delivery hub in 2024 to support growing enterprise client acquisition across key metro regions. The company also strengthened its enterprise SEO capabilities in 2025 by deploying proprietary AI-driven optimization frameworks to enhance organic visibility and large-scale search performance metrics."
+        },
+        "Contraction & Shutdown Signals": {
+          "Manufacturing / Line Discontinuation": "N/A — No verified manufacturing line or production discontinuation found.",
+          "Plant / Facility Shutdown": "N/A — No verified plant shutdown or regulatory closure found.",
+          "Closing Stores / Branches": "N/A — No verified store closure activity found.",
+          "Stop Selling Product / Manufacturing": "N/A — No verified product cessation found.",
+          "Strategic Analysis": "N/A — Not verified from available evidence."
+        },
+        "Leadership Dynamics": {
+          "CEO / CXO Hiring or Exit": "N/A — No verified leadership change found in available evidence.",
+          "AI / Digital Transformation Leader": "N/A — No verified digital or AI leadership appointment found.",
+          "CEO Transition / Stepping Down": "N/A — No verified leadership transition found in available evidence.",
+          "Growth & Marketing Leader": "N/A — No verified marketing executive appointment found.",
+          "Chief AI Officer": "N/A — No verified Chief AI Officer appointment found.",
+          "Strategic Analysis": "Sarvesh Bagla serves as the CEO of Techmagnate, while CFO and CTO positions remain unlisted or not publicly disclosed. In 2024, the company appointed senior leadership to drive BFSI and E-commerce verticals by integrating seasoned domain experts into its management structure."
+        },
+        "Real Estate & Property Movements": {
+          "Acquired New Property": "N/A — No verified real-estate development found.",
+          "Sold Property": "N/A — No verified real-estate divestment found.",
+          "Strategic Analysis": "N/A — Not verified from available evidence."
+        },
+        "Mergers, Acquisitions & Capital Actions": {
+          "Buying Company / Startup": "N/A — No verified acquisition found in available evidence.",
+          "Merged with Company": "N/A — No verified corporate merger event found.",
+          "Demerger": "N/A — No verified demerger/spinoff event found.",
+          "New Funding / IPO Launch": "N/A — No verified capital raising or external debt action found.",
+          "Strategic Analysis": "N/A — Not verified from available evidence."
+        },
+        "Financial Health": {
+          "Annual Trend (YoY Revenue)": "N/A — Historical multi-year financials required for YoY trend calculation",
+          "Annual Profit Margin Trend": "N/A — Historical net profit margin data pending",
+          "Latest Interim Performance": "[FINANCIAL & M&A SIGNAL] [Techmagnate Directly] [REPORTED] Digital Quotient India Reports Robust Annual Revenue Growth... [Unaudited Interim]",
+          "YoY Revenue": "N/A — Historical multi-year financials required for YoY trend calculation",
+          "YoY Profit Margin": "N/A — Historical net profit margin data pending",
+          "Strategic Analysis": "N/A — Historical multi-year financials required for YoY trend calculation | N/A — Historical net profit margin data pending"
+        },
+        "Risks & Considerations": {
+          "Strategic Analysis": "Techmagnate secured major enterprise contracts in retail and healthcare sectors in 2023, while deploying proprietary AI-driven optimization frameworks and expanding its regional operational delivery hub."
+        },
+        "_claims_meta": [
+          {
+            "claim": "N/A — Historical multi-year financials required for YoY trend calculation",
+            "pillar": "GROWTH",
+            "claim_type": "DERIVED",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Historical multi-year financials required for YoY trend calculation",
+            "pillar": "GROWTH",
+            "claim_type": "DERIVED",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Techmagnate registered sustainable double-digit top-line growth driven by enterprise digital transformation and performance marketing contracts. This financial performance validates corporate resilience and sustained demand for specialized performance-driven digital solutions.",
+            "pillar": "GROWTH",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [
+              "EV020"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified new market expansion evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified new geographic expansion evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified new product launch evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified new category expansion evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified store or facility expansion evidence found.",
+            "pillar": "EXPANSION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Digital Quotient India expanded its regional footprint with the establishment of a specialized operational delivery hub in 2024 to support growing enterprise client acquisition across key metro regions. The company also strengthened its enterprise SEO capabilities in 2025 by deploying proprietary AI-driven optimization frameworks to enhance organic visibility and large-scale search performance metrics.",
+            "pillar": "EXPANSION",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [
+              "EV015"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified manufacturing line or production discontinuation found.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified plant shutdown or regulatory closure found.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified store closure activity found.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified product cessation found.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Not verified from available evidence.",
+            "pillar": "CONTRACTION",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified leadership change found in available evidence.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified digital or AI leadership appointment found.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified leadership transition found in available evidence.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified marketing executive appointment found.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified Chief AI Officer appointment found.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Sarvesh Bagla serves as the CEO of Techmagnate, while CFO and CTO positions remain unlisted or not publicly disclosed. In 2024, the company appointed senior leadership to drive BFSI and E-commerce verticals by integrating seasoned domain experts into its management structure.",
+            "pillar": "LEADERSHIP",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [
+              "EV014"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified real-estate development found.",
+            "pillar": "REAL_ESTATE",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified real-estate divestment found.",
+            "pillar": "REAL_ESTATE",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Not verified from available evidence.",
+            "pillar": "REAL_ESTATE",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified acquisition found in available evidence.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified corporate merger event found.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified demerger/spinoff event found.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — No verified capital raising or external debt action found.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Not verified from available evidence.",
+            "pillar": "MNA",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Historical multi-year financials required for YoY trend calculation",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Historical net profit margin data pending",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "[FINANCIAL & M&A SIGNAL] [Techmagnate Directly] [REPORTED] Digital Quotient India Reports Robust Annual Revenue Growth... [Unaudited Interim]",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "FACT",
+            "evidence_ids": [
+              "EV002",
+              "EV014",
+              "EV015",
+              "EV016",
+              "EV021",
+              "EV023"
+            ],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Historical multi-year financials required for YoY trend calculation",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Historical net profit margin data pending",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "N/A — Historical multi-year financials required for YoY trend calculation | N/A — Historical net profit margin data pending",
+            "pillar": "FINANCIAL_HEALTH",
+            "claim_type": "FACT",
+            "evidence_ids": [],
+            "confidence": "HIGH"
+          },
+          {
+            "claim": "Techmagnate secured major enterprise contracts in retail and healthcare sectors in 2023, while deploying proprietary AI-driven optimization frameworks and expanding its regional operational delivery hub.",
+            "pillar": "RISKS",
+            "claim_type": "INTERPRETATION",
+            "evidence_ids": [],
+            "confidence": "MEDIUM"
+          }
+        ]
       },
       "Source Links": []
     }

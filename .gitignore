@@ -103,3 +103,6 @@ Thumbs.db
 # Scratch directory
 scratch/
 
+# Generated Report Documents
+*.docx
+
