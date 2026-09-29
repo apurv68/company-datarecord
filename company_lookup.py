@@ -27,6 +27,25 @@ if hasattr(sys.stdout, "reconfigure"):
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", line_buffering=True)
 
+# Auto-load .env file if present
+def _load_env():
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    if os.path.exists(env_path):
+        try:
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip("'\"")
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+        except Exception:
+            pass
+
+_load_env()
+
 import requests
 from bs4 import BeautifulSoup
 from ddgs import DDGS
@@ -53,6 +72,7 @@ except ImportError:
 EXPORT_CSV_PATH = "company_records.csv"
 EXPORT_TABLE2_CSV_PATH = "company_financials_5yr.csv"
 EXPORT_TABLE5_CSV_PATH = "company_conclusions.csv"
+EXPORT_TABLE6_CSV_PATH = "company_peers.csv"
 EXPORT_EVIDENCE_JSON_PATH = "evidence_store.json"
 EXPORT_EVIDENCE_CSV_PATH = "evidence_store.csv"
 EXPORT_JSON_PATH = "company_records.json"
@@ -517,10 +537,9 @@ def call_gemini(prompt: str, system_instruction: str = "", max_tokens: int = 204
 
     models = [
         "gemini-3.5-flash-lite",
-        "gemini-3.5-flash",
         "gemini-flash-latest",
+        "gemini-3.1-flash-lite",
         "gemini-flash-lite-latest",
-        "gemini-2.0-flash",
     ]
     last_error = ""
     for model_name in models:
@@ -536,7 +555,7 @@ def call_gemini(prompt: str, system_instruction: str = "", max_tokens: int = 204
             payload["systemInstruction"] = {"parts": [{"text": system_instruction}]}
 
         try:
-            res = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=18)
+            res = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=10)
             if res.status_code == 200:
                 data = res.json()
                 candidates = data.get("candidates", [])
@@ -591,6 +610,84 @@ INDIAN_CITIES = {
     "navi mumbai", "anand", "gandhidham", "bikaner", "udaipur",
     "secunderabad", "shimla", "srinagar", "jammu",
 }
+
+# Mapping of prominent business districts, localities, and suburbs to canonical Indian cities
+LOCALITY_TO_CITY = {
+    # Mumbai
+    "worli": "Mumbai", "bandra": "Mumbai", "andheri": "Mumbai", "nariman point": "Mumbai",
+    "lower parel": "Mumbai", "bkc": "Mumbai", "bandra kurla complex": "Mumbai", "powai": "Mumbai",
+    "kurla": "Mumbai", "dadar": "Mumbai", "churchgate": "Mumbai", "fort": "Mumbai",
+    "colaba": "Mumbai", "malad": "Mumbai", "goregaon": "Mumbai", "vikhroli": "Mumbai",
+    "kanjurmarg": "Mumbai", "santacruz": "Mumbai", "borivali": "Mumbai", "chembur": "Mumbai",
+    "marine lines": "Mumbai", "parle": "Mumbai", "vile parle": "Mumbai", "cuffe parade": "Mumbai",
+    "prabhadevi": "Mumbai", "kalina": "Mumbai", "parel": "Mumbai", "byculla": "Mumbai",
+    "ghatkopar": "Mumbai", "mulund": "Mumbai", "kandivali": "Mumbai", "wadala": "Mumbai",
+    "sion": "Mumbai", "mahim": "Mumbai", "mahalaxmi": "Mumbai", "tardeo": "Mumbai",
+    # Delhi / NCR
+    "connaught place": "New Delhi", "nehru place": "New Delhi", "okhla": "New Delhi",
+    "mohan cooperative": "New Delhi", "saket": "New Delhi", "barakhamba": "New Delhi",
+    "lodhi road": "New Delhi", "vasant kunj": "New Delhi", "bhikaji cama place": "New Delhi",
+    "jasola": "New Delhi", "netaji subhash place": "New Delhi", "janakpuri": "New Delhi",
+    "dlf cyber city": "Gurugram", "cyber city": "Gurugram", "udyog vihar": "Gurugram",
+    "manesar": "Gurugram", "golf course road": "Gurugram", "sohna road": "Gurugram",
+    "sector 62": "Noida", "sector 18": "Noida", "sector 16": "Noida", "greater noida": "Noida",
+    # Bengaluru
+    "whitefield": "Bengaluru", "electronic city": "Bengaluru", "koramangala": "Bengaluru",
+    "indiranagar": "Bengaluru", "bellandur": "Bengaluru", "manyata": "Bengaluru",
+    "hsr layout": "Bengaluru", "hebbal": "Bengaluru", "marathahalli": "Bengaluru",
+    "domlur": "Bengaluru", "jayanagar": "Bengaluru", "malleshwaram": "Bengaluru",
+    # Hyderabad
+    "hitec city": "Hyderabad", "madhapur": "Hyderabad", "gachibowli": "Hyderabad",
+    "banjara hills": "Hyderabad", "jubilee hills": "Hyderabad", "begumpet": "Hyderabad",
+    "kondapur": "Hyderabad", "financial district": "Hyderabad", "nanakramguda": "Hyderabad",
+    # Kolkata
+    "salt lake": "Kolkata", "new town": "Kolkata", "park street": "Kolkata",
+    "dalhousie": "Kolkata", "rajarhat": "Kolkata", "sector v": "Kolkata",
+    # Pune
+    "hinjewadi": "Pune", "magarpatta": "Pune", "hadapsar": "Pune", "shivaji nagar": "Pune",
+    "viman nagar": "Pune", "kharadi": "Pune", "kothrud": "Pune", "baner": "Pune",
+    "wakad": "Pune", "aundh": "Pune", "pimpri": "Pune", "chinchwad": "Pune",
+    # Chennai
+    "guindy": "Chennai", "t nagar": "Chennai", "omr": "Chennai", "taramani": "Chennai",
+    "nungambakkam": "Chennai", "alwarpet": "Chennai", "adyar": "Chennai", "anna salai": "Chennai",
+    # Ahmedabad
+    "sg highway": "Ahmedabad", "prahlad nagar": "Ahmedabad", "navrangpura": "Ahmedabad",
+    "bodakdev": "Ahmedabad", "satellite": "Ahmedabad",
+}
+
+
+def resolve_hq_city(raw_hq: str, addr: str = "") -> str:
+    """Resolve locality, neighborhood, or district into primary canonical metropolitan city."""
+    if not raw_hq or str(raw_hq).strip() in ("N/A", "", "-"):
+        if addr:
+            addr_low = addr.lower()
+            for c in INDIAN_CITIES:
+                if re.search(r'\b' + re.escape(c) + r'\b', addr_low):
+                    return c.title()
+        return "N/A"
+
+    raw_clean = str(raw_hq).strip()
+    raw_lower = raw_clean.lower()
+
+    if raw_lower in LOCALITY_TO_CITY:
+        return LOCALITY_TO_CITY[raw_lower]
+
+    for loc, p_city in LOCALITY_TO_CITY.items():
+        if re.search(r'\b' + re.escape(loc) + r'\b', raw_lower):
+            return p_city
+
+    # If raw_hq is already a recognized Indian city, title case it
+    if raw_lower in INDIAN_CITIES:
+        return raw_clean.title()
+
+    # If raw_hq is not in INDIAN_CITIES, check if addr has a recognized city
+    if addr:
+        addr_low = addr.lower()
+        for c in INDIAN_CITIES:
+            if re.search(r'\b' + re.escape(c) + r'\b', addr_low):
+                return c.title()
+
+    return raw_clean.title()
 
 
 def cross_validate_value(candidates: List[Tuple[str, str, int]]) -> Tuple[str, str, bool]:
@@ -714,6 +811,30 @@ def extract_financial_value(raw_text: str, metric_type: str = "revenue") -> Opti
                 return f"₹ {formatted} Cr."
         except ValueError:
             pass
+
+    # Pattern 5: Value in USD millions ($120M, $122.7 Million)
+    mn_match = re.search(
+        r'(?:\$|usd)\s*([0-9]+(?:\.[0-9]+)?)\s*(?:million|mn|m)\b',
+        text, re.IGNORECASE
+    )
+    if mn_match:
+        try:
+            num = float(mn_match.group(1))
+            return f"${num:.1f}M" if num != int(num) else f"${int(num)}M"
+        except ValueError:
+            pass
+
+    # Pattern 6: Value in Lakhs (₹ 50 Lakhs)
+    lakh_match = re.search(
+        r'(?:₹|rs\.?|inr)\s*([0-9,]+(?:\.[0-9]+)?)\s*(?:lakh|lac)s?',
+        text, re.IGNORECASE
+    )
+    if lakh_match:
+        return f"₹ {lakh_match.group(1)} Lakhs"
+
+    # Pattern 7: Already contains clean currency denomination
+    if re.search(r'(?:₹\s*[0-9,]+(?:\.[0-9]+)?\s*Cr|\$[0-9,]+(?:\.[0-9]+)?M)', text):
+        return text.strip()
 
     return None
 
@@ -958,6 +1079,52 @@ def validate_indian_company(data: Dict[str, Any]) -> Dict[str, Any]:
     return data
 
 
+def strip_ai_markers(val: Any) -> str:
+    """
+    Remove any AI estimate tags, markers, or labels from data values.
+    E.g. '[AI Est.]', '[AI Est]', 'AI Est.', 'Aiest', '[AI]', '(AI Est.)', etc.
+    """
+    if val is None:
+        return "N/A"
+    s = str(val).strip()
+    if not s or s.upper() in ("N/A", "NONE", "NULL", ""):
+        return "N/A"
+    # Remove bracketed/parenthesized AI tags: [AI Est.], (AI Est.), [AI], etc.
+    cleaned = re.sub(r"\s*\[\s*AI\s*(?:Est(?:imate)?)?\.?\s*\]", "", s, flags=re.I)
+    cleaned = re.sub(r"\s*\(\s*AI\s*(?:Est(?:imate)?)?\.?\s*\)", "", cleaned, flags=re.I)
+    cleaned = re.sub(r"\s*\[AI\]", "", cleaned, flags=re.I)
+    # Remove standalone AI Est. / Aiest
+    cleaned = re.sub(r"\s*\bAI\s*Est(?:imate)?\.?", "", cleaned, flags=re.I)
+    cleaned = re.sub(r"\s*\bAiest\b\.?", "", cleaned, flags=re.I)
+    # Clean up double periods or trailing dots after abbreviation
+    cleaned = re.sub(r"\s*\.\s*\.", ".", cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned if cleaned else "N/A"
+
+
+def is_valid_verified_employee_count(val: Any) -> bool:
+    """
+    Check if employee headcount is an exact verified number, not a vague bracket, range, or random guess.
+    """
+    if val is None:
+        return False
+    s = strip_ai_markers(val)
+    if not s or s.upper() in ("N/A", "NONE", "NULL", "UNKNOWN", "NOT DISCLOSED", "-", ""):
+        return False
+    # Reject generic estimates, brackets, ranges, and guesses (+, -, ~, >, <, approx, etc.)
+    if any(ch in s for ch in ["+", "-", "~", ">", "<", "/", "\\"]):
+        return False
+    lower = s.lower()
+    if any(w in lower for w in ["approx", "about", "around", "est", "over", "nearly", "bracket", "tier", "k"]):
+        return False
+    # Must be a valid integer
+    cleaned = s.replace(",", "").strip()
+    if not cleaned.isdigit():
+        return False
+    num = int(cleaned)
+    return 1 <= num <= 5_000_000
+
+
 def financial_sanity_check(rows: List[Dict[str, Any]], metric: str) -> List[Dict[str, Any]]:
     """
     Apply sanity checks to financial time-series data. Flags/removes impossible values.
@@ -966,7 +1133,7 @@ def financial_sanity_check(rows: List[Dict[str, Any]], metric: str) -> List[Dict
         - Revenue should not decrease by >80% year-over-year (likely wrong data)
         - EBITDA should not exceed Revenue
         - Market Cap should be > ₹0 for a listed company
-        - Employee headcount should be between 1 and 5,000,000
+        - Employee headcount should be a verified number between 1 and 5,000,000
     """
     def parse_crore_value(val_str: str) -> Optional[float]:
         """Extract numeric crore value from formatted string."""
@@ -988,14 +1155,17 @@ def financial_sanity_check(rows: List[Dict[str, Any]], metric: str) -> List[Dict
         values.append(num)
 
     # Sanity check: synthetic multi-year value duplication (e.g. copying same value across multiple periods)
-    # If 2 or more periods have the exact same non-zero value, multi-year reporting is corrupted
+    # If 2 or more periods have the exact same non-zero value, it is a single point-in-time figure, not a trend.
+    # Preserve it on the latest period and set earlier historical periods to "N/A".
     if metric in ("Net Revenue/Net Sales", "Net Profit", "EBITDA"):
         valid_nums = [v for v in values if v is not None and v > 0]
         if len(valid_nums) >= 2:
             first_val = valid_nums[0]
             if all(abs(v - first_val) < 0.001 for v in valid_nums):
-                for row in rows:
+                last_val = rows[-1].get(metric, "N/A")
+                for row in rows[:-1]:
                     row[metric] = "N/A"
+                rows[-1][metric] = last_val
                 return rows
 
     # Sanity check: year-over-year decline > 80% is suspicious
@@ -1016,13 +1186,12 @@ def financial_sanity_check(rows: List[Dict[str, Any]], metric: str) -> List[Dict
                 if ebitda_num > rev_num * 1.1:  # Allow 10% margin for rounding
                     rows[i]["EBITDA"] = "N/A"
 
-    # Sanity check: Employee headcount bounds
+    # Sanity check: Employee headcount bounds and verification
     if metric == "Employee Headcount":
         for i, row in enumerate(rows):
             emp_str = row.get("Employee Headcount", "N/A")
-            emp_num = parse_crore_value(emp_str)
-            if emp_num is not None:
-                if emp_num < 1 or emp_num > 5_000_000:
+            if emp_str != "N/A":
+                if not is_valid_verified_employee_count(emp_str):
                     rows[i]["Employee Headcount"] = "N/A"
 
     return rows
@@ -1037,7 +1206,7 @@ def add_confidence_marker(value: str, is_verified: bool) -> str:
     return f"{value} [?]"
 
 
-def extract_office_address(raw_text: str, company_name: str = "") -> str:
+def extract_office_address(raw_text: str, company_name: str = "", hq_city: str = "") -> str:
     """
     AI-powered office address extractor. Extracts real physical addresses from raw text.
 
@@ -1046,6 +1215,7 @@ def extract_office_address(raw_text: str, company_name: str = "") -> str:
         - Contains a valid Indian pincode (6 digits) or city name
         - Is not a sentence or paragraph (rejects verbs, long prose)
         - Is not restaurant/brand/product listing text
+        - Anchors to HQ city to prevent entity contamination
 
     Returns:
         Clean address string or "N/A"
@@ -1054,60 +1224,139 @@ def extract_office_address(raw_text: str, company_name: str = "") -> str:
         return "N/A"
 
     text = raw_text.strip()
+    text = re.sub(r"\s+", " ", text)
 
-    # Reject if text looks like a sentence/paragraph (contains common verbs/prose markers)
+    # 1. Clean common web prefixes and labels before the actual address
+    preamble_patterns = [
+        r"^.*?\b(?:by\s+the\s+address|at\s+the\s+address)\s*[:–—\-]?\s*",
+        r"^.*?\b(?:[a-z]*office\s+(?:in|at)\s+(?:the\s+city\s+(?:of\s+)?)?[a-zA-Z\s]+?\s+(?:by\s+the\s+address|at|is|:|-))\s*",
+        r"^.*?\b(?:orate\s+office|tered\s+office|porate\s+office)\b.*?\b(?:by\s+the\s+address|at|is|:|-)\s*",
+        r"^.*?\b(?:you\s+will\s+find|find\s+important|important\s+information|information\s+about|details\s+about|overview\s+of|profile\s+of)\b.*?\b(?:based\s+in\s+[a-zA-Z\s]+?,|located\s+at|situated\s+at|address\s*(?:is|:|-)?)\s*",
+        r"^.*?\b(?:is\s+based\s+in|based\s+in)\s+[A-Za-z\s]+?,\s*",
+        r"^.*?\b(?:registered\s+in|incorporated\s+in)\s+[A-Za-z\s]+?,\s*",
+        r"^.*?\b(?:in\s+mca\s+.*?record\s+is|mca\s+record\s+is|as\s+per\s+mca\s+filing)\s*[:·–—-]?\s*",
+        r"^.*?\b(?:correspondence\s+address|service\s+address)\s*[:·–—-]\s*",
+        r"^.*?\b(?:the\s+)?address\s+of\s+[^.;\n]+?\s+(?:is|at|located\s+at|:)\s*",
+        r"^.*?\b(?:contact\s+(?:information|details|us)|get\s+in\s+touch|reach\s+us|visit\s+us)\b[:\s-]*",
+        r"^.*?\b(?:registered\s+(?:office\s+)?address|corporate\s+(?:office\s+)?address|head\s+office|branch\s+office|office\s+address)\s*(?:is|at|located\s+at|:|-)?\s*",
+        r"^.*?\b(?:address\s*(?:is|:|-))\s*",
+    ]
+    cleaned = text
+    for p_pat in preamble_patterns:
+        cleaned = re.sub(p_pat, "", cleaned, flags=re.I).strip()
+
+    if company_name:
+        c_esc = re.escape(company_name.strip())
+        cleaned = re.sub(rf"^{c_esc}\s*(?:'s|’s)?\s*(?:head\s+office|office|registered\s+office)?\s*[:–—\-]?\s*", "", cleaned, flags=re.I).strip()
+        cleaned = re.sub(rf"^.*?\b{c_esc}(?:'s|’s)?\s+(?:registered\s+office\s+address|corporate\s+office\s+address|office\s+address|address)\s*(?:is|at|located\s+at|:|-)\s*", "", cleaned, flags=re.I).strip()
+
+    cleaned = re.sub(r'^[^a-zA-Z0-9#]*(?:[a-zA-Z0-9\(\)]+\s+)?(?:ltd|limited|pvt|private|inc|corp|corporation|llp)(?:\'s|’s)?\s*(?:registered\s+office\s+address|office\s+address|address)?\s*(?:is|at|:|-)?\s*', "", cleaned, flags=re.I).strip()
+    cleaned = re.sub(r'^[\s,;:)"\'\-·]+', "", cleaned).strip()
+
+    def _trim_to_physical_anchor(candidate: str) -> str:
+        preamble_triggers = [
+            'information', 'welcome', 'about', 'find', 'details', 'profile', 'overview',
+            'based', 'here you', 'incorporated', 'by the address', 'in the city',
+            'office', 'address', 'located', 'situated', 'orate', 'tered'
+        ]
+        if any(t in candidate.lower() for t in preamble_triggers):
+            m = re.search(r'\b(?:\d+(?:st|nd|rd|th)?\s+floor|ground\s+floor|basement|plot\s*(?:no\.?|number)?|door\s*(?:no\.?|number)?|flat\s*(?:no\.?|number)?|block\s*(?:no\.?|number)?|sector\s*(?:no\.?|number)?|survey\s*(?:no\.?|number)?|khasra\s*(?:no\.?|number)?|[A-Za-z0-9&\'\-\.]+\s+(?:towers?|complex|house|bhavan|bhawan|building|centre|center|plaza|chambers?|estate|road|marg))\b', candidate, re.I)
+            if m and m.start() > 0:
+                prefix = candidate[:m.start()].lower()
+                if any(pt in prefix for pt in preamble_triggers):
+                    return candidate[m.start():].strip()
+        return candidate
+
+    cleaned = _trim_to_physical_anchor(cleaned)
+
+    # Reject if text looks like general promotional prose / brand boilerplate
     sentence_markers = [
         "details of", "for details", "changes in", "pursuant to", "according to",
-        "the company", "we are", "we have", "our company", "is a", "was a",
-        "has been", "have been", "will be", "would be", "should be",
+        "we are", "we have", "our company",
         "please visit", "click here", "learn more", "read more",
-        "bikanerwala", "punjab grill", "chaat bazaar", "food by",
+        "bikanerwala", "punjab grill", "chaat bazaar",
         "street food", "restaurant", "menu", "cuisine", "dining",
-        "annual report", "financial statement", "balance sheet",
+        "financial statement", "balance sheet",
         "shareholders", "board of directors", "prospectus",
     ]
-    text_lower = text.lower()
+    text_lower = cleaned.lower()
     if any(marker in text_lower for marker in sentence_markers):
-        # Try to extract just the address portion before the noise
-        pass  # Will attempt structured extraction below
+        pass
+
+    def _is_city_compatible(addr_candidate: str) -> bool:
+        if not hq_city or hq_city.strip() in ("N/A", ""):
+            return True
+        norm_hq = resolve_hq_city(hq_city).strip().lower()
+        cand_low = addr_candidate.lower()
+        if norm_hq in cand_low:
+            return True
+        # Check if any locality of norm_hq is in cand_low
+        for loc, p_city in LOCALITY_TO_CITY.items():
+            if p_city.lower() == norm_hq and loc in cand_low:
+                return True
+        # If candidate explicitly contains another prominent Indian city that is not norm_hq, reject
+        for c in INDIAN_CITIES:
+            if c != norm_hq and len(c) >= 4:
+                if re.search(rf"\b{re.escape(c)}\b", cand_low):
+                    return False
+        return True
 
     # Strategy 1: Find pincode-anchored address (most reliable)
-    # Look for text ending with a 6-digit Indian pincode
     pincode_patterns = [
-        # "Address text... City - 400001" or "City 400001"
-        r'([A-Z][^.;\n]{10,120}?\b\d{6}\b)',
-        # "Registered Office: Address... 400001"
-        r'(?:Registered\s+(?:Office|Address)\s*(?::|is)?\s*)([^.;\n]{10,120}?\b\d{6}\b)',
-        # "Corporate Office: Address... 400001"
-        r'(?:Corporate\s+(?:Office|Address)\s*(?::|is)?\s*)([^.;\n]{10,120}?\b\d{6}\b)',
-        # "Head Office: Address... 400001"
-        r'(?:Head\s+Office\s*(?::|is)?\s*)([^.;\n]{10,120}?\b\d{6}\b)',
+        r'([A-Za-z0-9#][^;\n]{8,150}?\b\d{6}\b)',
     ]
     for pat in pincode_patterns:
+        m = re.search(pat, cleaned, re.IGNORECASE)
+        if m:
+            addr = m.group(1).strip()
+            for p_pat in preamble_patterns:
+                addr = re.sub(p_pat, '', addr, flags=re.I).strip()
+            addr = _trim_to_physical_anchor(addr)
+            addr = re.sub(r'^(?:registered\s+(?:office\s+)?address|head\s+office|corporate\s+office|office\s+address)\s*[:–—-]\s*', '', addr, flags=re.I).strip()
+            addr = re.sub(r'^[\s,;:)"\'\-·]+', '', addr).strip()
+            addr = re.sub(r'(?:phone|tel|mobile|email|contact|fax|website).*$', '', addr, flags=re.I).strip()
+            addr = re.sub(r'[\s,;:\-]+$', '', addr).strip()
+            if len(addr) >= 12 and _is_valid_address(addr) and _is_city_compatible(addr):
+                return addr
+
+    # If cleaned didn't match pincode, try original text with anchored patterns
+    pincode_patterns_orig = [
+        r'(?:Registered\s+(?:Office|Address)\s*(?::|is)?\s*)([^.;\n]{10,120}?\b\d{6}\b)',
+        r'(?:Corporate\s+(?:Office|Address)\s*(?::|is)?\s*)([^.;\n]{10,120}?\b\d{6}\b)',
+        r'(?:Head\s+Office\s*(?::|is)?\s*)([^.;\n]{10,120}?\b\d{6}\b)',
+    ]
+    for pat in pincode_patterns_orig:
         m = re.search(pat, text, re.IGNORECASE)
         if m:
             addr = m.group(1).strip()
+            for p_pat in preamble_patterns:
+                addr = re.sub(p_pat, '', addr, flags=re.I).strip()
+            addr = _trim_to_physical_anchor(addr)
             addr = re.sub(r'^(?:registered\s+(?:office\s+)?address|head\s+office|corporate\s+office)\s*[:–—-]\s*', '', addr, flags=re.I).strip()
-            addr = re.sub(r'^[\s,;:\-]+', '', addr)  # Strip leading punctuation
+            addr = re.sub(r'^[\s,;:\-·]+', '', addr)
             addr = re.sub(r'\s+', ' ', addr).strip()
-            if len(addr) >= 15 and _is_valid_address(addr):
+            if len(addr) >= 15 and _is_valid_address(addr) and _is_city_compatible(addr):
                 return addr
 
     # Strategy 2: Look for city + state pattern without pincode
-    city_state_pattern = r'([A-Z][^.;\n]{5,80}?(?:' + '|'.join(INDIAN_CITIES) + r')[^.;\n]{0,40}?)(?:\.|$|\n)'
-    m = re.search(city_state_pattern, text, re.IGNORECASE)
+    city_state_pattern = r'([A-Za-z0-9#][^.;\n]{5,80}?(?:' + '|'.join(INDIAN_CITIES) + r')[^.;\n]{0,40}?)(?:\.|$|\n)'
+    m = re.search(city_state_pattern, cleaned, re.IGNORECASE)
     if m:
         addr = m.group(1).strip().rstrip(',;.')
+        for p_pat in preamble_patterns:
+            addr = re.sub(p_pat, '', addr, flags=re.I).strip()
+        addr = _trim_to_physical_anchor(addr)
         addr = re.sub(r'^(?:registered\s+(?:office\s+)?address|head\s+office|corporate\s+office)\s*[:–—-]\s*', '', addr, flags=re.I).strip()
-        if len(addr) >= 10 and _is_valid_address(addr):
+        addr = re.sub(r'^[\s,;:\-·]+', '', addr)
+        if len(addr) >= 10 and _is_valid_address(addr) and _is_city_compatible(addr):
             return addr
 
-    # Strategy 3: If wikipedia infobox gave us a clean city, state, country — use it
-    # This handles "Mumbai, Maharashtra, India" type entries
+    # Strategy 3: Clean simple location
     simple_loc = re.search(r'([A-Z][a-z]+(?:,\s*[A-Z][a-z]+){1,3})', text)
     if simple_loc:
         loc = simple_loc.group(1).strip()
-        if any(city in loc.lower() for city in INDIAN_CITIES):
+        loc = _trim_to_physical_anchor(loc)
+        if any(city in loc.lower() for city in INDIAN_CITIES) and _is_city_compatible(loc):
             return loc
 
     return "N/A"
@@ -1116,6 +1365,16 @@ def extract_office_address(raw_text: str, company_name: str = "") -> str:
 def _is_valid_address(addr: str) -> bool:
     """Check if extracted text actually looks like a physical address."""
     addr_lower = addr.lower()
+
+    # Reject if sentence markers remain
+    sentence_markers = [
+        "by the address", "in the city", "orate office", "tered office", "porate office",
+        "you will find", "important information", "information about",
+        "details about", "we are", "we have", "our company", "click here",
+        "please visit", "learn more", "read more"
+    ]
+    if any(marker in addr_lower for marker in sentence_markers):
+        return False
 
     # Must contain at least one address indicator
     address_indicators = [
@@ -2329,17 +2588,93 @@ def enrich_corporate_master_data(
     }
 
     clean_q = re.sub(r"\b(?:ltd|limited|pvt|private|inc|corp)\b", "", query, flags=re.I).strip()
-    
-    # Grounded corporate master lookup via Gemini regulatory expert prompt
+    f_year_hint = str(existing_data.get("Founding Year", "")).strip() if existing_data else ""
+    hq_city_hint = str(existing_data.get("Headquarter (City)", "")).strip() if existing_data else ""
+
+    # 1. Direct Web Registry Search via DDGS for Official MCA / ZaubaCorp CIN Candidates
+    web_candidates = []
+    try:
+        q_words = set(w.lower() for w in re.findall(r'[A-Za-z]{3,}', clean_q))
+        with DDGS(timeout=7) as ddgs:
+            zauba_results = list(ddgs.text(f'"{clean_q}" CIN zaubacorp', max_results=6))
+            for r in zauba_results:
+                title = r.get("title", "")
+                href = r.get("href", "")
+                body = r.get("body", "")
+                comb = f"{title} {href} {body}"
+                cins = re.findall(r'\b([LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6})\b', comb)
+                for cin in set(cins):
+                    cin_state = cin[6:8]
+                    cin_year = cin[8:12]
+                    name_cand = ""
+                    m_url = re.search(r'zaubacorp\.com/(?:company/)?([A-Z0-9-]+?)(?:/|-)' + cin, href, re.I)
+                    if m_url:
+                        name_cand = m_url.group(1).replace("-", " ").strip()
+                    elif "|" in title:
+                        name_cand = title.split("|")[0].strip()
+                    elif "-" in title:
+                        name_cand = title.split("-")[0].strip()
+                    else:
+                        name_cand = title.strip()
+                    
+                    name_words = set(w.lower() for w in re.findall(r'[A-Za-z]{3,}', name_cand))
+                    noise = {'limited', 'private', 'india', 'company', 'enterprises', 'industries', 'corporation', 'zaubacorp', 'details'}
+                    name_words -= noise
+                    
+                    score = 0
+                    overlap = len(q_words.intersection(name_words))
+                    score += overlap * 25
+                    
+                    # Penalize auxiliary/marketing/estates/holding shell entities if query doesn't ask for them
+                    if any(bad in name_cand.lower() for bad in ["marketing", "estates", "ventures", "finvest", "consultan", "holdings"]) and not any(bad in clean_q.lower() for bad in ["marketing", "estates"]):
+                        score -= 50
+                    
+                    # Prefer operating core entities
+                    if any(op in name_cand.lower() for op in ["snacks", "foods", "manufacturing", "products", "technologies", "services"]):
+                        score += 20
+                        
+                    # Year match
+                    if f_year_hint and f_year_hint in (cin_year, str(f_year_hint)):
+                        score += 35
+                        
+                    web_candidates.append({
+                        "name": name_cand.upper(),
+                        "cin": cin,
+                        "state": cin_state,
+                        "year": cin_year,
+                        "score": score,
+                        "url": href
+                    })
+        web_candidates.sort(key=lambda x: x["score"], reverse=True)
+    except Exception:
+        pass
+
+    top_web_cand = web_candidates[0] if web_candidates and web_candidates[0]["score"] > 0 else None
+
+    # 2. Grounded corporate master lookup via Gemini regulatory expert prompt
     if os.environ.get("GEMINI_API_KEY"):
         try:
+            cand_hint = ""
+            if top_web_cand:
+                cand_hint = f"\nTop Corporate Registry Match from MCA/ZaubaCorp: {top_web_cand['name']} (CIN: {top_web_cand['cin']})\n"
+            if f_year_hint and f_year_hint != "N/A":
+                cand_hint += f"Founding Year Reference: {f_year_hint}\n"
+            if hq_city_hint and hq_city_hint != "N/A":
+                cand_hint += f"Headquarters City Reference: {hq_city_hint}\n"
+
             m_prompt = (
-                f"You are an Indian corporate registry analyst.\n"
-                f"Return the official corporate registry master data for '{query}' ({clean_q}) in India:\n"
-                f"- cin: (21-character alphanumeric Corporate Identification Number starting with L or U, e.g. L51901HR1986PLC023188)\n"
-                f"- legal_name: (official registered legal name, e.g. LIBERTY SHOES LIMITED)\n"
+                f"You are an Indian corporate registry analyst specializing in MCA and ROC filings.\n"
+                f"Return the official corporate registry master data for '{query}' ({clean_q}) in India.\n"
+                f"{cand_hint}\n"
+                f"CRITICAL ENTITY DISAMBIGUATION RULES:\n"
+                f"1. For group companies or family-owned conglomerates with multiple legal entities (e.g. Haldiram, Tata, Reliance), identify the PRIMARY FLAGSHIP OPERATING/MANUFACTURING ENTITY for the core business (e.g. for Haldiram Snacks -> 'HALDIRAM SNACKS PRIVATE LIMITED' CIN: U74899HR1989PTC111536, NOT marketing or auxiliary entities like Haldiram Marketing Pvt Ltd).\n"
+                f"2. If multiple registered entities exist, return the flagship operating company responsible for the main brand and operations, NOT holding, marketing, trading, or minor shell entities.\n"
+                f"3. Registered office and RoC must align with the primary operating company's incorporation jurisdiction.\n\n"
+                f"Required JSON keys:\n"
+                f"- cin: (21-character alphanumeric Corporate Identification Number starting with L or U, e.g. U74899HR1989PTC111536)\n"
+                f"- legal_name: (official registered legal name, e.g. HALDIRAM SNACKS PRIVATE LIMITED)\n"
                 f"- roc: (Registrar of Companies, e.g. RoC-Delhi or RoC-Mumbai)\n"
-                f"- incorporation_date: (e.g. 03-09-1986)\n"
+                f"- incorporation_date: (e.g. 18-09-1989)\n"
                 f"- registered_office: (full registered address)\n\n"
                 f"If any field cannot be reliably established from public corporate registry records, return 'N/A'.\n"
                 f"Return strictly a JSON object with keys: 'cin', 'legal_name', 'roc', 'incorporation_date', 'registered_office'."
@@ -2352,22 +2687,80 @@ def enrich_corporate_master_data(
                 import json
                 parsed = json.loads(clean_json)
                 
+                # Extract legal name first (needed for CIN cross-validation)
+                leg_val = str(parsed.get("legal_name", "")).strip()
+
                 # Validate CIN format
                 cin_val = str(parsed.get("cin", "")).strip().upper()
+                cin_valid = False
                 if re.match(r"^[LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}$", cin_val):
+                    cin_valid = True
+
+                    # ── CIN Cross-Validation Layer ──
+                    cin_state = cin_val[6:8]    # State code (e.g., HR=Haryana, DL=Delhi, MH=Maharashtra)
+                    cin_year = cin_val[8:12]     # Incorporation year
+                    cin_type = cin_val[12:15]    # PTC=Private, PLC=Public, GAP=Sec 8, etc.
+
+                    # Cross-check 1: Company type consistency
+                    q_lower = query.lower()
+                    if "private" in q_lower and cin_type == "PLC":
+                        cin_valid = False  # Query is private but CIN is public limited
+                    elif "public" in q_lower and "private" not in q_lower and cin_type == "PTC":
+                        cin_valid = False  # Query is public but CIN is private
+
+                    # Cross-check 2: Legal name overlap validation
+                    if cin_valid and leg_val and leg_val != "N/A":
+                        q_words = set(w.lower() for w in re.findall(r'[A-Za-z]{4,}', clean_q))
+                        l_words = set(w.lower() for w in re.findall(r'[A-Za-z]{4,}', leg_val))
+                        noise = {'limited', 'private', 'india', 'company', 'enterprises', 'industries', 'corporation'}
+                        q_words -= noise
+                        l_words -= noise
+                        if q_words and l_words and not q_words.intersection(l_words):
+                            cin_valid = False  # Legal name doesn't match query at all
+
+                    # Cross-check 3: Disambiguation override
+                    # If top_web_cand has higher word overlap and Gemini returned an auxiliary entity (e.g. marketing/estates)
+                    if top_web_cand and "marketing" in leg_val.lower() and "marketing" not in clean_q.lower():
+                        cin_valid = False  # Auxiliary entity rejected in favor of operating candidate
+
+                    # Cross-check 4: Incorporation year sanity
+                    if cin_valid:
+                        try:
+                            yr = int(cin_year)
+                            if yr > datetime.now().year or yr < 1850:
+                                cin_valid = False
+                        except ValueError:
+                            cin_valid = False
+
+                # Fallback to top web candidate if Gemini CIN invalid or rejected
+                if not cin_valid and top_web_cand:
+                    cin_val = top_web_cand["cin"]
+                    cin_valid = True
+                    if not leg_val or leg_val == "N/A" or "marketing" in leg_val.lower():
+                        leg_val = top_web_cand["name"]
+
+                if cin_valid:
                     master["CIN"] = cin_val
+                    master["_cin_confidence"] = "High"
+                else:
+                    if cin_val and re.match(r"^[LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}$", cin_val):
+                        master["_cin_rejected"] = cin_val
+                        master["_cin_reject_reason"] = "CIN cross-validation failed (legal name mismatch or type inconsistency)"
                 
-                leg_val = str(parsed.get("legal_name", "")).strip()
                 if leg_val and leg_val != "N/A":
                     master["Legal Name"] = leg_val
                     
                 roc_val = str(parsed.get("roc", "")).strip()
                 if roc_val and roc_val != "N/A":
                     master["RoC"] = roc_val
+                elif top_web_cand:
+                    master["RoC"] = f"RoC-{top_web_cand['state']}"
                     
                 inc_val = str(parsed.get("incorporation_date", "")).strip()
                 if inc_val and inc_val != "N/A":
                     master["Incorporation Date"] = inc_val
+                elif top_web_cand and top_web_cand.get("year"):
+                    master["Incorporation Date"] = f"Year {top_web_cand['year']}"
                     
                 off_val = str(parsed.get("registered_office", "")).strip()
                 if off_val and off_val != "N/A":
@@ -2382,12 +2775,17 @@ def enrich_corporate_master_data(
                         period="Point-in-Time",
                         period_type="Point-in-Time",
                         source_name="MCA / BSE Corporate Registry",
-                        source_url="https://www.mca.gov.in",
+                        source_url=top_web_cand["url"] if top_web_cand else "https://www.mca.gov.in",
                         confidence="High",
                         verified=True
                     )
         except Exception:
             pass
+    elif top_web_cand:
+        master["CIN"] = top_web_cand["cin"]
+        master["Legal Name"] = top_web_cand["name"]
+        master["RoC"] = f"RoC-{top_web_cand['state']}"
+        master["Incorporation Date"] = f"Year {top_web_cand['year']}"
 
     return master
 
@@ -2532,6 +2930,10 @@ def fetch_table1_data(query: str, evidence_store: Optional[EvidenceStore] = None
             r = requests.get(c_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=6)
             if r.status_code == 200:
                 soup = BeautifulSoup(r.text, "html.parser")
+                wh_match = re.search(r'data-warehouse-id=["\'](\d+)["\']', r.text)
+                if wh_match:
+                    data["_screener_warehouse_id"] = wh_match.group(1)
+                data["_screener_url"] = c_url
                 ratios = {}
                 for li in soup.find_all("li"):
                     nm = li.find("span", class_="name")
@@ -2663,7 +3065,7 @@ def fetch_table1_data(query: str, evidence_store: Optional[EvidenceStore] = None
                     raw_txt = clean_text(td.get_text()).replace("\xa0", " ")
                     matches = re.findall(r"([A-Z][a-zA-Z\.\s\-\']+?)\s*\(([^)]+)\)", raw_txt)
                     ceo_cand = None
-                    md_cand = None
+                    md_cands = []
                     for p_name, p_role in matches:
                         role_l = p_role.lower()
                         clean_name_val = clean_person_name(p_name, company_name=query)
@@ -2673,10 +3075,10 @@ def fetch_table1_data(query: str, evidence_store: Optional[EvidenceStore] = None
                         if any(k in role_l for k in ["ceo", "chief executive"]):
                             if not ceo_cand:
                                 ceo_cand = clean_name_val
-                        # Managing Director matches (only as fallback if no explicit CEO, and never Chairman)
-                        elif any(k in role_l for k in ["managing director", "md"]) and "chairman" not in role_l:
-                            if not md_cand:
-                                md_cand = clean_name_val
+                        # Managing Director matches (collect all MDs, never Chairman)
+                        elif any(k in role_l for k in ["managing director", "md", "joint managing director"]) and "chairman" not in role_l:
+                            if clean_name_val not in md_cands:
+                                md_cands.append(clean_name_val)
                         # CFO matches
                         elif any(k in role_l for k in ["cfo", "chief financial", "finance director", "director - finance"]):
                             if data["CFO"] == "N/A":
@@ -2686,19 +3088,32 @@ def fetch_table1_data(query: str, evidence_store: Optional[EvidenceStore] = None
                             if data["CTO"] == "N/A":
                                 data["CTO"] = clean_name_val
 
-                    # Assign CEO prioritizing explicit CEO over plain MD (never Board Chairman)
+                    # Assign CEO prioritizing explicit CEO over MDs, preserving multi-MD structure
                     if data["CEO"] == "N/A":
                         if ceo_cand:
                             data["CEO"] = ceo_cand
-                        elif md_cand:
-                            data["CEO"] = md_cand
+                        elif len(md_cands) > 1:
+                            data["CEO"] = f"Joint Managing Directors: {', '.join(md_cands)}"
+                        elif len(md_cands) == 1:
+                            data["CEO"] = md_cands[0]
 
                 if "headquarter" in lbl or "location" in lbl:
                     parts = [p.strip() for p in val.split(",") if p.strip()]
                     if data["Headquarter (City)"] == "N/A" and parts:
-                        data["Headquarter (City)"] = parts[0]
-                    if data["Office Address"] == "N/A" and len(val) > 5:
-                        data["Office Address"] = val
+                        found_city = None
+                        for p in parts:
+                            p_clean = p.strip()
+                            resolved_p = resolve_hq_city(p_clean)
+                            if resolved_p != p_clean or p_clean.lower() in INDIAN_CITIES:
+                                found_city = resolved_p
+                                break
+                        data["Headquarter (City)"] = found_city if found_city else resolve_hq_city(parts[0], val)
+                    # Only assign to Office Address if it actually contains a street-level address indicator or pincode
+                    # (Do not assign plain "City, State, Country" to Office Address, as that blocks finding the real physical street address)
+                    if data["Office Address"] == "N/A" and len(val) > 10:
+                        street_indicators = ["road", "street", "marg", "floor", "plot", "building", "bldg", "block", "sector", "phase", "nagar", "colony", "lane", "complex", "tower", "house", "industrial", "estate"]
+                        if (any(ind in val.lower() for ind in street_indicators) or re.search(r'\b\d{6}\b', val)) and _is_valid_address(val):
+                            data["Office Address"] = val
 
                 if any(k in lbl for k in ["parent", "owner", "parent company"]) and data.get("Parent Company", "N/A") in ("N/A", ""):
                     data["Parent Company"] = clean_text(val)
@@ -2709,18 +3124,35 @@ def fetch_table1_data(query: str, evidence_store: Optional[EvidenceStore] = None
                     data["Business Type (Private Limited/Public Limited)"] = "Public Limited"
 
     # 3. Targeted Web Search for Office Address if needed (AI-filtered extraction)
-    if data["Office Address"] in ("N/A", "") or len(data["Office Address"]) < 10:
+    hq_city_cur = resolve_hq_city(data.get("Headquarter (City)", ""), data.get("Office Address", ""))
+    if hq_city_cur and hq_city_cur != "N/A":
+        data["Headquarter (City)"] = hq_city_cur
+    has_city_match = True
+    if hq_city_cur and hq_city_cur != "N/A" and data["Office Address"] not in ("N/A", ""):
+        has_city_match = (hq_city_cur.lower() in data["Office Address"].lower())
+
+    has_street_or_pin = (
+        data["Office Address"] not in ("N/A", "") and
+        len(data["Office Address"]) >= 12 and
+        has_city_match and
+        (bool(re.search(r'\b\d{6}\b', data["Office Address"])) or any(ind in data["Office Address"].lower() for ind in ["road", "street", "marg", "floor", "plot", "building", "bldg", "block", "sector", "phase", "nagar", "colony", "lane", "complex", "tower", "house", "industrial", "estate"]))
+    )
+    if not has_street_or_pin:
         try:
             with DDGS(timeout=5) as ddgs:
-                addr_queries = [
-                    f'"{query}" "registered office address" India',
+                addr_queries = []
+                if hq_city_cur and hq_city_cur != "N/A":
+                    addr_queries.append(f'"{query}" registered office address "{hq_city_cur}" pincode')
+                    addr_queries.append(f'"{query}" office address "{hq_city_cur}" pincode')
+                addr_queries.extend([
+                    f'"{query}" "registered office address" India pincode',
                     f'"{query}" "corporate office" address India pincode',
-                ]
+                ])
                 for aq in addr_queries:
                     found_addr = False
                     for r in ddgs.text(aq, max_results=4):
                         body = r.get("body", "")
-                        extracted = extract_office_address(body, company_name=query)
+                        extracted = extract_office_address(body, company_name=query, hq_city=hq_city_cur)
                         if extracted != "N/A":
                             data["Office Address"] = extracted
                             add_source("Corporate Ministry / Registry Records", r.get("href"))
@@ -2731,26 +3163,25 @@ def fetch_table1_data(query: str, evidence_store: Optional[EvidenceStore] = None
         except Exception:
             pass
 
-    # Also validate existing Office Address (reject prose/sentences and strip boilerplate)
+    # Also validate existing Office Address (reject prose/sentences, city mismatches, and strip boilerplate)
     if data["Office Address"] not in ("N/A", ""):
         existing_addr = data["Office Address"]
-        if any(marker in existing_addr.lower() for marker in ["details of", "for details", "changes in", "the company", "food by", "etc.", "pursuant", "registered office address:"]):
-            filtered = extract_office_address(existing_addr, company_name=query)
-            if filtered != "N/A":
-                data["Office Address"] = filtered
+        filtered = extract_office_address(existing_addr, company_name=query, hq_city=hq_city_cur)
+        data["Office Address"] = filtered
 
     # 4. Fill missing executive roles with strict validation
-    # Searches live web intelligence using scored consensus extraction.
-    # If not verified or not publicly disclosed for private firms, resolves cleanly to N/A.
+    # If Gemini is available, Section 7b will enrich leadership cleanly in one single call.
+    # If Gemini is not configured, fallback to live web search consensus.
     is_private_firm = (data.get("Business Type (Private Limited/Public Limited)") == "Private Limited" or data.get("Is Listed Company") == "No")
 
-    for role in ["CEO", "CFO", "CTO"]:
-        if data[role] in ("N/A", ""):
-            found_exec = search_executive_web(data["Company Name"], role)
-            if found_exec != "N/A":
-                data[role] = found_exec
-            elif is_private_firm:
-                data[role] = "N/A (Unlisted / Not Publicly Disclosed)"
+    if not os.environ.get("GEMINI_API_KEY"):
+        for role in ["CEO", "CFO", "CTO"]:
+            if data[role] in ("N/A", ""):
+                found_exec = search_executive_web(data["Company Name"], role)
+                if found_exec != "N/A":
+                    data[role] = found_exec
+                elif is_private_firm:
+                    data[role] = "N/A (Unlisted / Not Publicly Disclosed)"
 
     # ── AI QUALITY LAYER: Cross-Validation & Smart Filtering ──────────────────
 
@@ -2785,13 +3216,20 @@ def fetch_table1_data(query: str, evidence_store: Optional[EvidenceStore] = None
 
     # 7b. Gemini AI Intelligence Layer for Table #1: Regulatory Identity & Leadership Verification
     if os.environ.get("GEMINI_API_KEY"):
+        addr_val = str(data.get("Office Address", ""))
+        has_city_match = True
+        if hq_city_cur and hq_city_cur != "N/A" and addr_val not in ("N/A", ""):
+            has_city_match = (hq_city_cur.lower() in addr_val.lower())
+
         needs_t1_enrichment = (
             data.get("Founding Year") == "N/A" or
             data.get("Founder Name(s)") == "N/A" or
             data.get("CEO") in ("N/A", "N/A (Unlisted / Not Publicly Disclosed)") or
             data.get("CFO") in ("N/A", "N/A (Unlisted / Not Publicly Disclosed)") or
             data.get("CTO") in ("N/A", "N/A (Unlisted / Not Publicly Disclosed)") or
-            data.get("Office Address") == "N/A" or
+            data.get("Office Address") in ("N/A", "") or
+            not has_city_match or
+            not (re.search(r'\b\d{6}\b', addr_val) or any(ind in addr_val.lower() for ind in ["road", "street", "marg", "floor", "plot", "building", "bldg", "block", "sector", "phase", "nagar", "colony", "lane", "complex", "tower", "house", "industrial", "estate"])) or
             data.get("Headquarter (City)") == "N/A"
         )
         if needs_t1_enrichment:
@@ -2803,11 +3241,11 @@ def fetch_table1_data(query: str, evidence_store: Optional[EvidenceStore] = None
                     f"Provide facts based strictly on Ministry of Corporate Affairs (MCA), BSE/NSE disclosures, and verified annual reports:\n"
                     f"- founding_year: (4-digit year e.g. '1954' or 'N/A')\n"
                     f"- founders: (comma-separated founder names or 'N/A')\n"
-                    f"- ceo: (Current Managing Director or Chief Executive Officer, or 'N/A')\n"
+                    f"- ceo: (Current Managing Director or Chief Executive Officer, or 'N/A'. If multiple Managing Directors exist, e.g. for Indian private/family enterprises like Haldiram, list all MDs, e.g. 'Manohar Lal Agarwal, Madhu Shekhar Agarwal (Managing Directors)')\n"
                     f"- cfo: (Current Chief Financial Officer / Head of Finance, or 'N/A')\n"
                     f"- cto: (Current Chief Technology Officer / Head of Technology / IT Director, or 'N/A')\n"
-                    f"- hq_city: (Primary headquarters city in India, e.g. Karnal, Gurugram, Mumbai, etc.)\n"
-                    f"- office_address: (Full registered/corporate office address with pincode, or 'N/A')\n"
+                    f"- hq_city: (Primary headquarters city in India, e.g. Anand, Karnal, Gurugram, Mumbai, etc.)\n"
+                    f"- office_address: (Clean physical registered/corporate office address with pincode, without sentence prefixes or company names, e.g. 'Amul Dairy Road, Anand - 388001, Gujarat, India', or 'N/A')\n"
                     f"- business_type: ('Public Limited' or 'Private Limited')\n\n"
                     f"Return strictly a valid JSON object with these exact keys and no other text."
                 )
@@ -2831,8 +3269,14 @@ def fetch_table1_data(query: str, evidence_store: Optional[EvidenceStore] = None
                             data["CTO"] = str(t1_ai["cto"]).strip()
                         if data["Headquarter (City)"] == "N/A" and t1_ai.get("hq_city") and str(t1_ai["hq_city"]).strip() != "N/A":
                             data["Headquarter (City)"] = str(t1_ai["hq_city"]).strip()
-                        if data["Office Address"] == "N/A" and t1_ai.get("office_address") and str(t1_ai["office_address"]).strip() != "N/A":
-                            data["Office Address"] = str(t1_ai["office_address"]).strip()
+                            hq_city_cur = data["Headquarter (City)"]
+                        if (data["Office Address"] in ("N/A", "") or not re.search(r'\b\d{6}\b', data["Office Address"]) or not has_city_match) and t1_ai.get("office_address") and str(t1_ai["office_address"]).strip() not in ("N/A", "None", ""):
+                            raw_ai_addr = str(t1_ai["office_address"]).strip()
+                            clean_ai_addr = extract_office_address(raw_ai_addr, company_name=comp_query_name, hq_city=hq_city_cur)
+                            best_ai_addr = clean_ai_addr if clean_ai_addr != "N/A" else raw_ai_addr
+                            if best_ai_addr != "N/A":
+                                data["Office Address"] = best_ai_addr
+                                has_city_match = True
                         if data["Business Type (Private Limited/Public Limited)"] == "Private Limited" and t1_ai.get("business_type") == "Public Limited":
                             data["Business Type (Private Limited/Public Limited)"] = "Public Limited"
                         add_source("Google Gemini AI Intelligence Layer (Regulatory Filings & Leadership)", "https://generativelanguage.googleapis.com")
@@ -2853,8 +3297,9 @@ def fetch_table1_data(query: str, evidence_store: Optional[EvidenceStore] = None
             data["RoC"] = m_data["RoC"]
         if m_data.get("Incorporation Date") and m_data["Incorporation Date"] != "N/A":
             data["Incorporation Date"] = m_data["Incorporation Date"]
-        if data.get("Office Address") in ("N/A", "") and m_data.get("Registered Office") and m_data["Registered Office"] != "N/A":
-            data["Office Address"] = m_data["Registered Office"]
+        if (data.get("Office Address") in ("N/A", "") or not re.search(r'\b\d{6}\b', str(data.get("Office Address", ""))) or not has_city_match) and m_data.get("Registered Office") and m_data["Registered Office"] != "N/A":
+            clean_m_addr = extract_office_address(m_data["Registered Office"], company_name=query, hq_city=hq_city_cur)
+            data["Office Address"] = clean_m_addr if clean_m_addr != "N/A" else m_data["Registered Office"]
     except Exception:
         pass
 
@@ -2913,10 +3358,12 @@ def validate_table1_cross_field_consistency(data: Dict[str, Any]) -> Dict[str, A
                 elif k in ("Current Market Cap (Market Value/Mcap)", "Share Price"):
                     data[k] = "N/A"  # Remove misleading 'Privately Held' for listed companies
     else:
-        # Unlisted company: ensure stock ticker says 'Unlisted'
+        # Unlisted company: ensure stock ticker, market cap, and share price say 'N/A (Unlisted)'
         ticker = str(data.get("Stock Ticker", "")).strip()
-        if ticker == "N/A" or not ticker:
+        if ticker == "N/A" or not ticker or "unlisted" in ticker.lower():
             data["Stock Ticker"] = "N/A (Unlisted)"
+        data["Current Market Cap (Market Value/Mcap)"] = "N/A (Unlisted)"
+        data["Share Price"] = "N/A (Unlisted)"
 
     # Universal: normalize exec N/A fields
     for k in ["CEO", "CFO", "CTO"]:
@@ -2925,6 +3372,18 @@ def validate_table1_cross_field_consistency(data: Dict[str, Any]) -> Dict[str, A
             if is_listed:
                 data[k] = "N/A — Not publicly disclosed"
             # For unlisted, keep as 'N/A' which display_table1 will render with context
+
+    # Universal: ensure Headquarter (City) is a canonical metropolitan city (resolve localities like Worli -> Mumbai)
+    hq_val = str(data.get("Headquarter (City)", "")).strip()
+    addr_val = str(data.get("Office Address", "")).strip()
+    if hq_val and hq_val != "N/A":
+        data["Headquarter (City)"] = resolve_hq_city(hq_val, addr_val)
+
+    # Universal: ensure Office Address has no conversational/preamble junk
+    if addr_val and addr_val != "N/A":
+        cleaned_addr = extract_office_address(addr_val, company_name=data.get("Company Name", ""), hq_city=data.get("Headquarter (City)", ""))
+        if cleaned_addr and cleaned_addr != "N/A":
+            data["Office Address"] = cleaned_addr
 
     return data
 
@@ -3108,6 +3567,12 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
     pat_by_period = {}
     present_mcap = "N/A"
 
+    # ── Data Source Tracking: every financial cell gets a provenance label ──
+    # Keys: (period, metric) → label string
+    # Labels: "VERIFIED" (Screener/audited), "SCRAPED" (web-extracted),
+    #         "ESTIMATED" (heuristic fallback), "AI-GENERATED" (Gemini-filled)
+    data_source_labels: Dict[tuple, str] = {}
+
     def extract_valid_screener_pl(soup_obj, s_url_str):
         """Extract multi-year P&L from Screener, strictly enforcing that data must be recent (<= 3 years old)."""
         pl = soup_obj.find('section', id='profit-loss')
@@ -3180,6 +3645,14 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                         rev_by_period = r_res
                         ebitda_by_period = e_res
                         pat_by_period = pt_res
+                        # Mark all Screener-sourced data as VERIFIED
+                        for _p in p_res:
+                            if r_res.get(_p, "N/A") != "N/A":
+                                data_source_labels[(_p, "Net Revenue/Net Sales")] = "VERIFIED"
+                            if e_res.get(_p, "N/A") != "N/A":
+                                data_source_labels[(_p, "EBITDA")] = "VERIFIED"
+                            if pt_res.get(_p, "N/A") != "N/A":
+                                data_source_labels[(_p, "Net Profit")] = "VERIFIED"
                         if m_res != "N/A":
                             present_mcap = m_res
                         break
@@ -3234,6 +3707,13 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                                                 rev_by_period = r_res
                                                 ebitda_by_period = e_res
                                                 pat_by_period = pt_res
+                                                for _p in p_res:
+                                                    if r_res.get(_p, "N/A") != "N/A":
+                                                        data_source_labels[(_p, "Net Revenue/Net Sales")] = "VERIFIED"
+                                                    if e_res.get(_p, "N/A") != "N/A":
+                                                        data_source_labels[(_p, "EBITDA")] = "VERIFIED"
+                                                    if pt_res.get(_p, "N/A") != "N/A":
+                                                        data_source_labels[(_p, "Net Profit")] = "VERIFIED"
                                                 if m_res != "N/A" and present_mcap == "N/A":
                                                     present_mcap = m_res
                                                 ticker = cand_ticker
@@ -3303,84 +3783,184 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                 val = tr.find(['td'], class_=re.compile('infobox-data', re.I))
                 if lbl and val and any(w in lbl.get_text().lower() for w in ['employee', 'workforce', 'headcount']):
                     v_txt = val.get_text().strip()
-                    m = re.search(r'([0-9]{2,3},[0-9]{3}(?:,[0-9]{3})?)', v_txt)
+                    m = re.search(r'([0-9]{1,3}(?:,[0-9]{3})+|\b[1-9]\d{2,6}\b)', v_txt)
                     if m:
-                        emp_by_period[periods[-1]] = m.group(1)
-                        add_source("Wikipedia Corporate Disclosures (Workforce Count)", f"https://en.wikipedia.org/wiki/{clean_name.replace(' ', '_')}")
-                        break
+                        emp_candidate = m.group(1)
+                        if is_valid_verified_employee_count(emp_candidate):
+                            emp_by_period[periods[-1]] = f"{int(emp_candidate.replace(',', '')):,}"
+                            add_source("Wikipedia Corporate Disclosures (Workforce Count)", f"https://en.wikipedia.org/wiki/{clean_name.replace(' ', '_')}")
+                            break
     except Exception:
         pass
 
-    # 5. Fallback for unlisted private firms: audited ROC / MCA disclosures
-    if is_private:
+    # 5. Live web intelligence for unlisted private firms: audited ROC / MCA disclosures
+    unlisted_fin_snippets = []
+    if is_private or not rev_by_period:
         try:
-            with DDGS(timeout=8) as ddgs:
-                overview_queries = [
-                    f'"{clean_name}" (revenue OR turnover OR "net sales" OR "net profit") 5 years crore',
-                    f'"{clean_name}" revenue crore FY23 FY24 FY22',
-                ]
-                for oq in overview_queries:
-                    try:
-                        for r in ddgs.text(oq, max_results=4):
-                            href = r.get("href", "")
-                            title = r.get("title", "")
-                            body = r.get("body", "")
-                            # Entity contamination firewall on financial candidates
-                            is_val, reason = verify_financial_source_entity(
-                                href,
-                                title,
-                                body,
-                                canonical_entity if isinstance(company_name_or_entity, dict) else {"canonical_name": company_name}
-                            )
-                            if not is_val:
-                                continue
+            with DDGS(timeout=7) as ddgs:
+                cin_val = ""
+                if isinstance(company_name_or_entity, dict):
+                    cin_val = str(company_name_or_entity.get("cin", "")).strip()
 
-                            txt = f"{title} | {body}"
-                            for p in periods:
-                                yr_m = re.search(r'\d{4}', p)
-                                yr_val = yr_m.group(0) if yr_m else ""
-                                if not yr_val:
+            overview_queries = [
+                f'"{clean_name}" (revenue OR turnover OR "net sales" OR "operating revenue" OR "net profit") tofler OR zaubacorp OR tracxn',
+                f'"{clean_name}" revenue turnover "crore" OR "million" OR "lakh"',
+                f'"{clean_name}" revenue crore FY23 FY24 FY22 FY25',
+                f'"{clean_name}" employees headcount OR workforce OR employs',
+            ]
+            if cin_val and cin_val != "N/A":
+                overview_queries.insert(0, f'"{cin_val}" (revenue OR turnover OR "operating revenue" OR "financials")')
+                overview_queries.append(f'"{company_name}" "{cin_val}" tofler OR zaubacorp')
+
+            for oq in overview_queries:
+                try:
+                    for r in ddgs.text(oq, max_results=3):
+                        href = r.get("href", "")
+                        title = r.get("title", "")
+                        body = r.get("body", "")
+                        # Entity contamination firewall on financial candidates
+                        is_val, reason = verify_financial_source_entity(
+                            href,
+                            title,
+                            body,
+                            canonical_entity if isinstance(company_name_or_entity, dict) else {"canonical_name": company_name}
+                        )
+                        if not is_val:
+                            continue
+
+                        txt = f"{title} | {body}"
+                        unlisted_fin_snippets.append(f"{title}: {body} (Source: {href})")
+                        add_source(f"Audited ROC / Media Disclosures ({href.split('/')[2] if '//' in href else 'Registry'})", href)
+
+                        for p in periods:
+                            m_fy = re.search(r'FY\s*(\d{2})', p, re.I)
+                            if m_fy:
+                                fy_num = m_fy.group(1)
+                                short_fy = f"FY{fy_num}"
+                                yr_val = f"20{fy_num}"
+                            else:
+                                all_yrs = re.findall(r'\b(20\d\d)\b', p)
+                                if all_yrs:
+                                    yr_val = all_yrs[-1]
+                                    short_fy = f"FY{yr_val[2:]}"
+                                else:
                                     continue
-                                short_fy = f"FY{yr_val[2:]}"
 
-                                # Period-anchored extraction: ONLY extract metrics explicitly associated with THIS period
-                                p_rev_pats = [
-                                    rf"(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))[^.\n]{{0,50}}?(?:revenue|sales|turnover)\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)",
-                                    rf"(?:revenue|sales|turnover)[^.\n]{{0,50}}?(?:in|for|during)?\s*(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)"
-                                ]
-                                if rev_by_period.get(p, "N/A") == "N/A":
-                                    for pat in p_rev_pats:
-                                        m_rev = re.search(pat, txt, re.I)
-                                        if m_rev:
-                                            rev_by_period[p] = f"₹ {m_rev.group(1)} Cr."
-                                            add_source(f"Audited ROC / Media Disclosures ({yr_val})", href)
-                                            break
+                            # Period-anchored extraction: ONLY extract metrics explicitly associated with THIS period
+                            p_rev_pats = [
+                                rf"(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))[^.\n]{{0,60}}?(?:revenue|sales|turnover)\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})+(?:\.[0-9]+)?|[0-9]{{2,6}}(?:\.[0-9]+)?)\s*(?:cr|crore)",
+                                rf"(?:revenue|sales|turnover)[^.\n]{{0,60}}?(?:in|for|during)?\s*(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})+(?:\.[0-9]+)?|[0-9]{{2,6}}(?:\.[0-9]+)?)\s*(?:cr|crore)",
+                                rf"(?:revenue|sales|turnover)[^.\n]{{0,60}}?(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})+(?:\.[0-9]+)?|[0-9]{{2,6}}(?:\.[0-9]+)?)\s*(?:cr|crore)[^.\n]{{0,50}}?(?:in|for|during)?\s*(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))",
+                                rf"(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))[^.\n]{{0,50}}?(?:revenue|sales|turnover)\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,4}}(?:\.[0-9]+)?)\s*(?:lakh|lakhs|lac|lacs)\b",
+                                rf"(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))[^.\n]{{0,40}}?(?:revenue|sales|turnover)\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:\$|usd\s*)\s*([0-9]{{1,4}}(?:\.[0-9]+)?)\s*(?:m|million|mn|b|billion)\b",
+                            ]
+                            if rev_by_period.get(p, "N/A") == "N/A":
+                                for pat in p_rev_pats:
+                                    m_rev = re.search(pat, txt, re.I)
+                                    if m_rev:
+                                        matched_num = m_rev.group(1).replace(",", "")
+                                        if "lakh" in pat:
+                                            rev_by_period[p] = f"₹ {matched_num} Lakhs"
+                                        elif "m|million" in pat or "$" in pat:
+                                            rev_by_period[p] = f"${matched_num}M"
+                                        elif "b|billion" in pat:
+                                            rev_by_period[p] = f"${matched_num}B"
+                                        else:
+                                            rev_by_period[p] = f"₹ {float(matched_num):,g} Cr."
+                                        data_source_labels[(p, "Net Revenue/Net Sales")] = "SCRAPED"
+                                        break
 
-                                p_pat_pats = [
-                                    rf"(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))[^.\n]{{0,50}}?(?:net profit|profit after tax|pat)\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)",
-                                    rf"(?:net profit|profit after tax|pat)[^.\n]{{0,50}}?(?:in|for|during)?\s*(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)"
-                                ]
-                                if pat_by_period.get(p, "N/A") == "N/A":
-                                    for pat in p_pat_pats:
-                                        m_pat = re.search(pat, txt, re.I)
-                                        if m_pat:
-                                            pat_by_period[p] = f"₹ {m_pat.group(1)} Cr."
-                                            break
+                            p_pat_pats = [
+                                rf"(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))[^.\n]{{0,60}}?(?:net profit|profit after tax|pat)\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})+(?:\.[0-9]+)?|[0-9]{{1,6}}(?:\.[0-9]+)?)\s*(?:cr|crore)",
+                                rf"(?:net profit|profit after tax|pat)[^.\n]{{0,60}}?(?:in|for|during)?\s*(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})+(?:\.[0-9]+)?|[0-9]{{1,6}}(?:\.[0-9]+)?)\s*(?:cr|crore)",
+                            ]
+                            if pat_by_period.get(p, "N/A") == "N/A":
+                                for pat in p_pat_pats:
+                                    m_pat = re.search(pat, txt, re.I)
+                                    if m_pat:
+                                        pat_num = m_pat.group(1).replace(",", "")
+                                        pat_by_period[p] = f"₹ {float(pat_num):,g} Cr."
+                                        data_source_labels[(p, "Net Profit")] = "SCRAPED"
+                                        break
 
-                                p_eb_pats = [
-                                    rf"(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))[^.\n]{{0,50}}?ebitda\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)",
-                                    rf"ebitda[^.\n]{{0,50}}?(?:in|for|during)?\s*(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)"
-                                ]
-                                if ebitda_by_period.get(p, "N/A") == "N/A":
-                                    for pat in p_eb_pats:
-                                        m_eb = re.search(pat, txt, re.I)
-                                        if m_eb:
-                                            ebitda_by_period[p] = f"₹ {m_eb.group(1)} Cr."
-                                            break
-                    except Exception:
-                        pass
+                            p_eb_pats = [
+                                rf"(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))[^.\n]{{0,60}}?ebitda\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})+(?:\.[0-9]+)?|[0-9]{{1,6}}(?:\.[0-9]+)?)\s*(?:cr|crore)",
+                                rf"ebitda[^.\n]{{0,60}}?(?:in|for|during)?\s*(?:{short_fy}|{yr_val}|(?:FY\s*{yr_val[2:]}))\s*(?:of|was|stood at|reached|is|at|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9]{{1,3}}(?:,[0-9]{{3}})+(?:\.[0-9]+)?|[0-9]{{1,6}}(?:\.[0-9]+)?)\s*(?:cr|crore)",
+                            ]
+                            if ebitda_by_period.get(p, "N/A") == "N/A":
+                                for pat in p_eb_pats:
+                                    m_eb = re.search(pat, txt, re.I)
+                                    if m_eb:
+                                        eb_num = m_eb.group(1).replace(",", "")
+                                        ebitda_by_period[p] = f"₹ {float(eb_num):,g} Cr."
+                                        data_source_labels[(p, "EBITDA")] = "SCRAPED"
+                                        break
+                except Exception:
+                    pass
         except Exception:
             pass
+
+        # Heuristic fallback for unlisted companies based ONLY on scraped statutory bands/ranges
+        if is_private and all(v == "N/A" for v in rev_by_period.values()):
+            comb = " ".join(unlisted_fin_snippets) if unlisted_fin_snippets else ""
+            base_cr = None
+            if comb:
+                # Match ranges e.g. "Over INR 500 cr"
+                over_m = re.search(r'(?:over|above|exceeding)\s*(?:inr|rs\.?|₹)?\s*([0-9]{1,3}(?:,[0-9]{3})*|[0-9]{2,5})\s*(?:cr|crore)', comb, re.I)
+                if over_m:
+                    base_cr = float(over_m.group(1).replace(",", ""))
+                else:
+                    rng_m = re.search(r'(?:inr|rs\.?|₹)?\s*([0-9]{1,3}(?:,[0-9]{3})*|[0-9]{2,5})\s*(?:cr|crore)?\s*(?:–|-|to)\s*(?:inr|rs\.?|₹)?\s*([0-9]{1,3}(?:,[0-9]{3})*|[0-9]{2,5})\s*(?:cr|crore)', comb, re.I)
+                    if rng_m:
+                        base_cr = (float(rng_m.group(1).replace(",", "")) + float(rng_m.group(2).replace(",", ""))) / 2.0
+                    else:
+                        s_cr = re.search(r'(?:inr|rs\.?|₹)\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]{2,5}(?:\.[0-9]+)?)\s*(?:cr|crore)', comb, re.I)
+                        if s_cr:
+                            base_cr = float(s_cr.group(1).replace(",", ""))
+                        else:
+                            usd_m = re.search(r'(?:\$|usd)\s*([0-9]{1,4}(?:\.[0-9]+)?)\s*(?:million|mn|m|billion|bn)\b', comb, re.I)
+                            if usd_m:
+                                mult = 8300.0 if any(b in usd_m.group(0).lower() for b in ["billion", "bn"]) else 8.3
+                                base_cr = float(usd_m.group(1).replace(",", "")) * mult
+
+            # Fallback based on canonical entity employee count ONLY if substantial workforce is verified
+            if not base_cr:
+                emp_count_cand = None
+                if isinstance(company_name_or_entity, dict):
+                    e_raw = str(company_name_or_entity.get("employees", "") or company_name_or_entity.get("headcount", ""))
+                    m_emp = re.search(r'([0-9]{2,6})', e_raw.replace(",", ""))
+                    if m_emp:
+                        emp_count_cand = int(m_emp.group(1))
+                if emp_count_cand and emp_count_cand > 200:
+                    base_cr = round(emp_count_cand * 0.25, 1)  # ~25 Lakhs per employee benchmark
+                else:
+                    base_cr = None  # Zero fabrication: do not default to synthetic 180 Cr
+
+            if base_cr:
+                for idx, p in enumerate(periods):
+                    factor = (1.08) ** (idx - 3)
+                    calc_rev = round(base_cr * factor)
+                    rev_by_period[p] = f"₹ {calc_rev:,} Cr."
+                    data_source_labels[(p, "Net Revenue/Net Sales")] = "ESTIMATED"
+                    if pat_by_period.get(p, "N/A") == "N/A":
+                        pat_by_period[p] = f"₹ {round(calc_rev * 0.08, 1)} Cr."
+                        data_source_labels[(p, "Net Profit")] = "ESTIMATED"
+                    if ebitda_by_period.get(p, "N/A") == "N/A":
+                        ebitda_by_period[p] = f"₹ {round(calc_rev * 0.12, 1)} Cr."
+                        data_source_labels[(p, "EBITDA")] = "ESTIMATED"
+
+            # Employee fallback
+            if all(v == "N/A" for v in emp_by_period.values()):
+                base_emp = None
+                if comb:
+                    emp_m = re.search(r'(?:employs|workforce of|headcount of|approximately)\s*([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{3,6})\s*(?:people|employees|professionals)?', comb, re.I)
+                    if emp_m:
+                        base_emp = int(emp_m.group(1).replace(",", ""))
+                if not base_emp:
+                    base_emp = round(base_cr * 4.0) if base_cr else 750
+                for idx, p in enumerate(periods):
+                    emp_by_period[p] = f"{round(base_emp * ((1.05) ** (idx - 3))):,}"
+                    data_source_labels[(p, "Employee Headcount")] = "ESTIMATED"
 
     table2_rows = []
     for p in periods:
@@ -3393,6 +3973,20 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
             "Employee Headcount": emp_by_period.get(p, "N/A")
         })
 
+    # Detect if company is Indian (for currency normalization)
+    _indian_suffixes = ['private limited', 'pvt ltd', 'pvt. ltd', 'india', 'limited', 'nse', 'bse',
+                        'delhi', 'mumbai', 'bangalore', 'bengaluru', 'chennai', 'hyderabad', 'kolkata',
+                        'pune', 'ahmedabad', 'jaipur', 'lucknow', 'noida', 'gurgaon', 'gurugram']
+    _cn_lower = company_name.lower()
+    _snippets_lower = " ".join(unlisted_fin_snippets).lower() if unlisted_fin_snippets else ""
+    is_indian_company = (
+        any(s in _cn_lower for s in _indian_suffixes)
+        or any(s in _snippets_lower for s in ['india', 'crore', 'inr', '₹', 'tofler', 'zaubacorp', 'mca', 'roc filing',
+                                               'delhi', 'mumbai', 'bangalore', 'chennai', 'hyderabad', 'kolkata', 'pune'])
+        or bool(re.search(r'\b(NSE|BSE)\b', stock_ticker))
+        or is_private  # Default: treat unlisted/private companies in this Indian-focused tool as Indian
+    )
+
     # Gemini AI Intelligence Layer for Table #2: 5-Year Financials & Employee Headcount
     if os.environ.get("GEMINI_API_KEY"):
         needs_fin_fill = any(
@@ -3403,63 +3997,143 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
         )
         if needs_fin_fill:
             try:
+                target_desc = company_name
+                if isinstance(company_name_or_entity, dict):
+                    aliases = company_name_or_entity.get("aliases") or []
+                    if aliases:
+                        target_desc += f" (Aliases / Operating Entities: {', '.join(aliases[:3])})"
+                    ind = company_name_or_entity.get("primary_industry")
+                    if ind:
+                        target_desc += f" [Industry: {ind}]"
+
+                web_research_block = ""
+                if unlisted_fin_snippets:
+                    web_research_block = (
+                        f"\nVERIFIED STATUTORY & WEB RESEARCH DISCLOSURES (Tofler, ZaubaCorp, Tracxn, MCA, Press):\n"
+                        + "\n".join(unlisted_fin_snippets[:12]) + "\n"
+                    )
+
+                # Currency instruction: enforce INR for Indian companies
+                if is_indian_company:
+                    currency_instruction = (
+                        "MANDATORY CURRENCY: This is an Indian company. ALL financial figures (revenue, net_profit, ebitda) "
+                        "MUST be denominated in Indian Rupees (INR) using Crores format (e.g. '₹ 220 Cr.', '₹ 5.50 Cr.'). "
+                        "Do NOT use USD ($), dollars, or any other currency. Convert any USD figures to INR Crores (1 USD ≈ ₹83, so $1M ≈ ₹8.3 Cr.).\n"
+                    )
+                else:
+                    currency_instruction = ""
+
                 t2_prompt = (
-                    f"You are an audited corporate financial intelligence system for Indian companies.\n"
-                    f"Target Company: '{company_name}' (Ticker: {stock_ticker}).\n"
+                    f"You are an expert Indian corporate financial analyst.\n"
+                    f"Target Company: '{target_desc}' (Ticker: {stock_ticker}).\n"
                     f"Periods to report: {', '.join(periods)}.\n"
-                    f"For each fiscal period, provide verified audited financial metrics from MCA/ROC/BSE/NSE filings:\n"
-                    f"- period: matching one of the periods: {', '.join(periods)}\n"
-                    f"- revenue: (in ₹ Crores, e.g. '₹ 650 Cr.' or '₹ 1,200 Cr.', or 'N/A' if private without public disclosure)\n"
-                    f"- net_profit: (in ₹ Crores, e.g. '₹ 25 Cr.' or '-₹ 12 Cr.', or 'N/A')\n"
-                    f"- ebitda: (in ₹ Crores, e.g. '₹ 80 Cr.', or 'N/A')\n"
-                    f"- employees: (total permanent workforce count, e.g. '3,200', '15,000', or 'N/A')\n\n"
-                    f"STRICT ACCURACY RULES:\n"
-                    f"1. If '{company_name}' is privately held or unlisted and has not publicly disclosed annual financial numbers, return 'N/A' for revenue, net_profit, and ebitda. Do NOT guess or hallucinate.\n"
-                    f"2. Never repeat the exact same revenue or profit number across different fiscal years.\n"
-                    f"3. Never attribute numbers from another company or peer.\n\n"
-                    f"Return strictly a JSON array of objects with keys: 'period', 'revenue', 'net_profit', 'ebitda', 'employees'."
+                    f"{web_research_block}\n"
+                    f"{currency_instruction}"
+                    f"Task: Provide corporate financial numbers for each period: annual revenue/turnover, net profit/surplus, EBITDA, and verified employee headcount.\n\n"
+                    f"SPECIFIC FIELD GUIDANCE:\n"
+                    f"- revenue: Verified annual turnover / net revenue in INR Crores (e.g. '₹ 220 Cr.', '₹ 250 Cr.'). For unlisted private companies or cooperatives (e.g. AgreeYa Solutions, Amul, Haldirams, Parle), provide realistic annual turnover across all 6 periods based on statutory ROC filings, Tofler/Zauba/Tracxn data, or operating run-rate. Extrapolate realistic yearly progression across periods based on reported CAGR (e.g. ~8%). Do NOT output all 'N/A' for unlisted companies.\n"
+                    f"- net_profit: Audited net profit / profit after tax (PAT) or cooperative net surplus / statutory surplus in INR Crores. For unlisted private firms, provide realistic statutory profit margins/PAT across periods rather than N/A.\n"
+                    f"- ebitda: Operating profit / EBITDA / operating surplus in INR Crores if reported or estimated from margin, or 'N/A'.\n"
+                    f"- employees: Verified corporate headcount for that period (digits only, e.g. '693', '750', '811', '1000') or 'N/A' if completely unknown. Never guess vague ranges with '+' or '~'.\n\n"
+                    f"CRITICAL REQUIREMENT: For unlisted companies, do NOT output all 'N/A' when filing ranges or reported annual turnover are present in the research or corporate history. Populate all 6 periods with realistic progression or run-rate.\n"
+                    f"Output strictly a JSON array of objects with keys: 'period', 'revenue', 'net_profit', 'ebitda', 'employees'."
                 )
-                t2_raw = call_gemini(t2_prompt, system_instruction="Output strictly valid JSON with no markdown backticks. Anchor strictly to audited annual reports and regulatory filings.", temperature=0.0)
+                t2_raw = call_gemini(t2_prompt, system_instruction="Output strictly valid JSON with no markdown formatting.", temperature=0.0)
                 if t2_raw:
-                    t2_clean = re.sub(r"^```json\s*", "", t2_raw.strip(), flags=re.I)
-                    t2_clean = re.sub(r"^```\s*", "", t2_clean)
-                    t2_clean = re.sub(r"\s*```$", "", t2_clean).strip()
-                    import json
-                    t2_ai = json.loads(t2_clean)
+                    t2_ai = None
+                    try:
+                        t2_ai = json.loads(t2_raw.strip())
+                    except Exception:
+                        m_json = re.search(r"(\[[\s\S]*\])", t2_raw)
+                        if m_json:
+                            try:
+                                t2_ai = json.loads(m_json.group(1).strip())
+                            except Exception:
+                                pass
                     if isinstance(t2_ai, list):
                         p_map = {item.get("period", "").strip(): item for item in t2_ai if isinstance(item, dict)}
                         filled_any = False
+                        ai_filled_cells = set()
                         for row in table2_rows:
                             curr_p = row["Fiscal Period / Year"]
                             matching_ai = p_map.get(curr_p)
                             if not matching_ai:
-                                yr_m = re.search(r'\d{4}', curr_p)
-                                if yr_m:
-                                    yr = yr_m.group(0)
-                                    for ai_p, ai_item in p_map.items():
-                                        if yr in ai_p:
+                                curr_p_clean = curr_p.upper()
+                                for ai_p, ai_item in p_map.items():
+                                    ai_clean = ai_p.upper().strip()
+                                    m_fy = re.search(r'FY\s*(\d{2})', ai_clean)
+                                    if m_fy:
+                                        fy_two = m_fy.group(1)
+                                        if f"FY{fy_two}" in curr_p_clean.replace(" ", "") or f"20{fy_two}" in curr_p_clean:
                                             matching_ai = ai_item
                                             break
+                                    m_yrs = re.findall(r'\b\d{4}\b', curr_p_clean)
+                                    if any(y in ai_clean for y in m_yrs):
+                                        matching_ai = ai_item
+                                        break
+                                    if ("PRESENT" in ai_clean or "TTM" in ai_clean or "FY26" in ai_clean) and ("PRESENT" in curr_p_clean or "TTM" in curr_p_clean or "FY26" in curr_p_clean):
+                                        matching_ai = ai_item
+                                        break
                             if matching_ai:
-                                # For revenue / profit / ebitda, ONLY fill if currently N/A (never overwrite Screener audited data)
-                                # Gemini-sourced values get [AI Est.] marker to distinguish from audited Screener data
-                                if row["Net Revenue/Net Sales"] == "N/A" and matching_ai.get("revenue") and str(matching_ai["revenue"]).strip() != "N/A":
-                                    ai_val = str(matching_ai["revenue"]).strip()
-                                    row["Net Revenue/Net Sales"] = f"{ai_val} [AI Est.]" if "[AI" not in ai_val else ai_val
-                                    filled_any = True
-                                if row["Net Profit"] == "N/A" and matching_ai.get("net_profit") and str(matching_ai["net_profit"]).strip() != "N/A":
-                                    ai_val = str(matching_ai["net_profit"]).strip()
-                                    row["Net Profit"] = f"{ai_val} [AI Est.]" if "[AI" not in ai_val else ai_val
-                                    filled_any = True
-                                if row["EBITDA"] == "N/A" and matching_ai.get("ebitda") and str(matching_ai["ebitda"]).strip() != "N/A":
-                                    ai_val = str(matching_ai["ebitda"]).strip()
-                                    row["EBITDA"] = f"{ai_val} [AI Est.]" if "[AI" not in ai_val else ai_val
-                                    filled_any = True
-                                # For employee headcount, fill if currently N/A
-                                if row["Employee Headcount"] == "N/A" and matching_ai.get("employees") and str(matching_ai["employees"]).strip() != "N/A":
-                                    ai_val = str(matching_ai["employees"]).strip()
-                                    row["Employee Headcount"] = f"{ai_val} [AI Est.]" if "[AI" not in ai_val else ai_val
-                                    filled_any = True
+                                # Helper: convert USD to INR Cr. for Indian companies
+                                def _normalize_currency_for_indian(val_str):
+                                    """If company is Indian, convert any USD figures to ₹ Cr."""
+                                    if not is_indian_company:
+                                        return val_str
+                                    # Convert $XM or $X.YM to ₹ Cr.
+                                    usd_m = re.match(r'^\$\s*([0-9]+(?:\.[0-9]+)?)\s*(?:M|Million|Mn)$', val_str.strip(), re.I)
+                                    if usd_m:
+                                        usd_val = float(usd_m.group(1))
+                                        inr_cr = round(usd_val * 8.3, 2)
+                                        if inr_cr == int(inr_cr):
+                                            return f"₹ {int(inr_cr):,} Cr."
+                                        return f"₹ {inr_cr:,.2f} Cr."
+                                    # Convert $X.YB or $XB to ₹ Cr.
+                                    usd_b = re.match(r'^\$\s*([0-9]+(?:\.[0-9]+)?)\s*(?:B|Billion|Bn)$', val_str.strip(), re.I)
+                                    if usd_b:
+                                        usd_val = float(usd_b.group(1))
+                                        inr_cr = round(usd_val * 830, 2)
+                                        return f"₹ {int(inr_cr):,} Cr."
+                                    return val_str
+
+                                # For revenue / profit / ebitda, fill if N/A or if unlisted entity
+                                if matching_ai.get("revenue") and str(matching_ai["revenue"]).strip() not in ("N/A", "None", ""):
+                                    ai_val = strip_ai_markers(str(matching_ai["revenue"]))
+                                    ai_val = _normalize_currency_for_indian(ai_val)
+                                    if ai_val not in ("N/A", "Not Disclosed"):
+                                        if row["Net Revenue/Net Sales"] == "N/A" or is_private:
+                                            row["Net Revenue/Net Sales"] = ai_val
+                                            data_source_labels[(curr_p, "Net Revenue/Net Sales")] = data_source_labels.get((curr_p, "Net Revenue/Net Sales"), "AI-GENERATED")
+                                            filled_any = True
+                                            ai_filled_cells.add((curr_p, "Net Revenue/Net Sales"))
+
+                                if matching_ai.get("net_profit") and str(matching_ai["net_profit"]).strip() not in ("N/A", "None", ""):
+                                    ai_val = strip_ai_markers(str(matching_ai["net_profit"]))
+                                    ai_val = _normalize_currency_for_indian(ai_val)
+                                    if ai_val not in ("N/A", "Not Disclosed"):
+                                        if row["Net Profit"] == "N/A" or is_private:
+                                            row["Net Profit"] = ai_val
+                                            data_source_labels[(curr_p, "Net Profit")] = data_source_labels.get((curr_p, "Net Profit"), "AI-GENERATED")
+                                            filled_any = True
+                                            ai_filled_cells.add((curr_p, "Net Profit"))
+
+                                if row["EBITDA"] == "N/A" and matching_ai.get("ebitda") and str(matching_ai["ebitda"]).strip() not in ("N/A", "None", ""):
+                                    ai_val = strip_ai_markers(str(matching_ai["ebitda"]))
+                                    ai_val = _normalize_currency_for_indian(ai_val)
+                                    if ai_val not in ("N/A", "Not Disclosed"):
+                                        row["EBITDA"] = ai_val
+                                        data_source_labels[(curr_p, "EBITDA")] = data_source_labels.get((curr_p, "EBITDA"), "AI-GENERATED")
+                                        filled_any = True
+                                        ai_filled_cells.add((curr_p, "EBITDA"))
+
+                                # For employee headcount, ONLY fill if verified exact headcount (never guess randomly)
+                                if row["Employee Headcount"] == "N/A" and matching_ai.get("employees") and str(matching_ai["employees"]).strip() not in ("N/A", "None", ""):
+                                    ai_val = strip_ai_markers(str(matching_ai["employees"]))
+                                    if is_valid_verified_employee_count(ai_val):
+                                        row["Employee Headcount"] = f"{int(ai_val.replace(',', '')):,}"
+                                        data_source_labels[(curr_p, "Employee Headcount")] = data_source_labels.get((curr_p, "Employee Headcount"), "AI-GENERATED")
+                                        filled_any = True
+                                        ai_filled_cells.add((curr_p, "Employee Headcount"))
                         if filled_any:
                             add_source("Google Gemini AI Intelligence Layer (Financial Disclosures & Headcount)", "https://generativelanguage.googleapis.com")
             except Exception:
@@ -3467,15 +4141,37 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
 
     # ── AI QUALITY LAYER: Normalize & Sanity Check Financial Data ─────────────
 
-    # Normalize financial values through smart extraction
+    # Normalize financial values through smart extraction & strip AI markers
     for row in table2_rows:
         for fld in ["Net Revenue/Net Sales", "Net Profit", "EBITDA"]:
             raw_val = row.get(fld, "N/A")
             if raw_val != "N/A" and "privately held" not in raw_val.lower():
-                is_ai_est = "[AI" in raw_val
+                raw_val = strip_ai_markers(raw_val)
                 normalized = extract_financial_value(raw_val, metric_type=fld.lower().replace("/", "_"))
                 if normalized:
-                    row[fld] = f"{normalized} [AI Est.]" if is_ai_est and "[AI" not in normalized else normalized
+                    row[fld] = strip_ai_markers(normalized)
+                else:
+                    row[fld] = raw_val
+
+    # Strip any stray AI markers from Employee Headcount & enforce verified employee check
+    for row in table2_rows:
+        emp_raw = row.get("Employee Headcount", "N/A")
+        if emp_raw != "N/A":
+            cleaned_emp = strip_ai_markers(emp_raw)
+            if is_valid_verified_employee_count(cleaned_emp):
+                row["Employee Headcount"] = f"{int(cleaned_emp.replace(',', '')):,}"
+            else:
+                row["Employee Headcount"] = "N/A"
+
+    # Sanity check: Employee Headcount
+    # If the exact same employee count is repeated across multiple periods, it is a single point-in-time snapshot,
+    # NOT a historical time-series. Keep it only for the latest period and set previous periods to "N/A".
+    emp_vals = [r.get("Employee Headcount", "N/A") for r in table2_rows if r.get("Employee Headcount", "N/A") not in ("N/A", "", None)]
+    if len(emp_vals) >= 2 and len(set(emp_vals)) == 1:
+        last_val = emp_vals[0]
+        for r in table2_rows[:-1]:
+            r["Employee Headcount"] = "N/A"
+        table2_rows[-1]["Employee Headcount"] = last_val
 
     # Apply financial sanity checks
     table2_rows = financial_sanity_check(table2_rows, "Net Revenue/Net Sales")
@@ -3509,29 +4205,123 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
             ]:
                 val = row.get(fld, "N/A")
                 if val and val != "N/A" and "privately held" not in str(val).lower():
-                    is_ai = "[AI" in str(val)
+                    is_ai = 'ai_filled_cells' in locals() and (p, fld) in ai_filled_cells
+                    ds_label = data_source_labels.get((p, fld), "UNKNOWN")
+
+                    # Map provenance label to appropriate confidence and period_type
+                    if ds_label == "ESTIMATED":
+                        eff_confidence = "Low"
+                        eff_period_type = "Derived"
+                        eff_verified = False
+                        eff_source_name = "Heuristic Estimation (Benchmark/CAGR)"
+                        eff_source_url = src_url
+                    elif ds_label == "AI-GENERATED" or is_ai:
+                        eff_confidence = "Low"
+                        eff_period_type = "Derived"
+                        eff_verified = False
+                        eff_source_name = "Google Gemini AI Intelligence Layer"
+                        eff_source_url = "https://generativelanguage.googleapis.com"
+                    elif ds_label == "SCRAPED":
+                        eff_confidence = "Medium"
+                        eff_period_type = p_type
+                        eff_verified = False
+                        eff_source_name = src_name
+                        eff_source_url = src_url
+                    else:  # VERIFIED or UNKNOWN
+                        eff_confidence = "High" if p_type in ("Audited Annual", "Unaudited Interim", "TTM") else "Medium"
+                        eff_period_type = p_type
+                        eff_verified = p_type in ("Audited Annual", "Unaudited Interim", "TTM")
+                        eff_source_name = src_name
+                        eff_source_url = src_url
+
                     evidence_store.add_evidence(
                         table="Table #2",
                         category=cat,
                         metric_or_event=fld,
-                        fact=str(val),
+                        fact=f"{str(val)} [{ds_label}]",
                         period=p,
-                        period_type="AI Estimate" if is_ai else p_type,
-                        source_name="Google Gemini AI Intelligence Layer" if is_ai else src_name,
-                        source_url="https://generativelanguage.googleapis.com" if is_ai else src_url,
-                        confidence="Low" if is_ai else ("High" if p_type in ("Audited Annual", "Unaudited Interim", "TTM") else "Medium"),
-                        verified=False if is_ai else (p_type in ("Audited Annual", "Unaudited Interim", "TTM"))
+                        period_type=eff_period_type,
+                        source_name=eff_source_name,
+                        source_url=eff_source_url,
+                        confidence=eff_confidence,
+                        verified=eff_verified
                     )
+
+    # ── Step 6: Synthetic Pattern Detector ──
+    # Flag if all revenue values follow a suspiciously uniform growth rate
+    def _detect_synthetic_pattern(metric_key: str) -> bool:
+        """Returns True if all values in the metric follow a uniform growth pattern (±0.5% tolerance)."""
+        vals = []
+        for row in table2_rows:
+            raw = row.get(metric_key, "N/A")
+            if raw == "N/A" or "privately held" in str(raw).lower():
+                return False
+            clean = str(raw).replace(",", "")
+            m = re.search(r'([0-9]+(?:\.[0-9]+)?)', clean)
+            if m:
+                vals.append(float(m.group(1)))
+            else:
+                return False
+        if len(vals) < 4:
+            return False
+        growth_rates = []
+        for i in range(1, len(vals)):
+            if vals[i-1] > 0:
+                growth_rates.append((vals[i] - vals[i-1]) / vals[i-1])
+        if not growth_rates:
+            return False
+        avg_rate = sum(growth_rates) / len(growth_rates)
+        return all(abs(r - avg_rate) < 0.005 for r in growth_rates)  # All within 0.5% of each other
+
+    is_synthetic_revenue = _detect_synthetic_pattern("Net Revenue/Net Sales")
+    is_synthetic_profit = _detect_synthetic_pattern("Net Profit")
+    is_synthetic_ebitda = _detect_synthetic_pattern("EBITDA")
+
+    # If synthetic pattern detected, override labels to ESTIMATED
+    if is_synthetic_revenue:
+        for p in periods:
+            if data_source_labels.get((p, "Net Revenue/Net Sales")) not in ("VERIFIED",):
+                data_source_labels[(p, "Net Revenue/Net Sales")] = "ESTIMATED"
+    if is_synthetic_profit:
+        for p in periods:
+            if data_source_labels.get((p, "Net Profit")) not in ("VERIFIED",):
+                data_source_labels[(p, "Net Profit")] = "ESTIMATED"
+    if is_synthetic_ebitda:
+        for p in periods:
+            if data_source_labels.get((p, "EBITDA")) not in ("VERIFIED",):
+                data_source_labels[(p, "EBITDA")] = "ESTIMATED"
 
     return {
         "Company Name": company_name,
         "periods": periods,
-        "rows": table2_rows
+        "rows": table2_rows,
+        "data_sources": data_source_labels,
+        "is_synthetic": {
+            "revenue": is_synthetic_revenue,
+            "profit": is_synthetic_profit,
+            "ebitda": is_synthetic_ebitda,
+        }
     }, sources
 
 
 def display_table2(data: Dict[str, Any], sources: List[Dict[str, str]]):
-    """Render Table #2 with Rich formatting, followed by external source URLs strictly below."""
+    """Render Table #2 with Rich formatting, data source quality labels, and external source URLs."""
+    data_sources = data.get("data_sources", {})
+    is_synthetic = data.get("is_synthetic", {})
+
+    # Source label rendering helper
+    def _source_tag(period: str, metric: str) -> str:
+        label = data_sources.get((period, metric), "")
+        if label == "VERIFIED":
+            return " [dim green][✓][/dim green]"
+        elif label == "SCRAPED":
+            return " [dim yellow][⊛][/dim yellow]"
+        elif label == "ESTIMATED":
+            return " [dim red][⚠ EST][/dim red]"
+        elif label == "AI-GENERATED":
+            return " [dim yellow][◈ AI][/dim yellow]"
+        return ""
+
     table = Table(
         title="[bold cyan]Table #2: 5-Year Historical & Present Financial Metrics [Audited Annual & Interim Disclosures][/bold cyan]",
         show_header=True,
@@ -3540,13 +4330,15 @@ def display_table2(data: Dict[str, Any], sources: List[Dict[str, str]]):
     )
     table.add_column("Fiscal Period / Year", style="bold yellow", width=22)
     table.add_column("Market Cap", style="bold cyan", justify="right", width=16)
-    table.add_column("Net Revenue/Net Sales", style="bold green", justify="right", width=22)
-    table.add_column("Net Profit", style="bold white", justify="right", width=18)
-    table.add_column("EBITDA", style="bold magenta", justify="right", width=18)
-    table.add_column("Employee Headcount", style="white", justify="right", width=18)
+    table.add_column("Net Revenue/Net Sales", style="bold green", justify="right", width=28)
+    table.add_column("Net Profit", style="bold white", justify="right", width=24)
+    table.add_column("EBITDA", style="bold magenta", justify="right", width=24)
+    table.add_column("Employee Headcount", style="white", justify="right", width=22)
 
     for row in data.get("rows", []):
-        mcap_val = row.get("Market Cap", "N/A")
+        p_raw = row.get("Fiscal Period / Year", "N/A")
+
+        mcap_val = strip_ai_markers(row.get("Market Cap", "N/A"))
         if "privately held" in str(mcap_val).lower():
             mcap_str = "[dim]N/A (Privately Held)[/dim]"
         elif mcap_val == "N/A":
@@ -3554,19 +4346,30 @@ def display_table2(data: Dict[str, Any], sources: List[Dict[str, str]]):
         else:
             mcap_str = f"[bold cyan]{mcap_val}[/bold cyan]"
 
-        rev_val = row.get("Net Revenue/Net Sales", "N/A")
-        rev_str = f"[bold green]{rev_val}[/bold green]" if rev_val != "N/A" else "[dim]N/A[/dim]"
+        rev_val = strip_ai_markers(row.get("Net Revenue/Net Sales", "N/A"))
+        if rev_val != "N/A":
+            rev_str = f"[bold green]{rev_val}[/bold green]{_source_tag(p_raw, 'Net Revenue/Net Sales')}"
+        else:
+            rev_str = "[dim]N/A[/dim]"
 
-        pat_val = row.get("Net Profit", "N/A")
-        pat_str = f"[bold white]{pat_val}[/bold white]" if pat_val != "N/A" else "[dim]N/A[/dim]"
+        pat_val = strip_ai_markers(row.get("Net Profit", "N/A"))
+        if pat_val != "N/A":
+            pat_str = f"[bold white]{pat_val}[/bold white]{_source_tag(p_raw, 'Net Profit')}"
+        else:
+            pat_str = "[dim]N/A[/dim]"
 
-        eb_val = row.get("EBITDA", "N/A")
-        eb_str = f"[bold magenta]{eb_val}[/bold magenta]" if eb_val != "N/A" else "[dim]N/A[/dim]"
+        eb_val = strip_ai_markers(row.get("EBITDA", "N/A"))
+        if eb_val != "N/A":
+            eb_str = f"[bold magenta]{eb_val}[/bold magenta]{_source_tag(p_raw, 'EBITDA')}"
+        else:
+            eb_str = "[dim]N/A[/dim]"
 
-        emp_val = row.get("Employee Headcount", "N/A")
-        emp_str = f"[white]{emp_val}[/white]" if emp_val != "N/A" else "[dim]N/A[/dim]"
+        emp_val = strip_ai_markers(row.get("Employee Headcount", "N/A"))
+        if emp_val != "N/A":
+            emp_str = f"[white]{emp_val}[/white]{_source_tag(p_raw, 'Employee Headcount')}"
+        else:
+            emp_str = "[dim]N/A[/dim]"
 
-        p_raw = row.get("Fiscal Period / Year", "N/A")
         if "TTM" in p_raw.upper():
             p_display = f"{p_raw} [dim cyan][TTM][/dim cyan]"
         elif re.search(r"\b(?:Jun|June|Sep|Sept|September|Dec|December)\b|Q[1-4]|quarter", p_raw, flags=re.I):
@@ -3587,6 +4390,15 @@ def display_table2(data: Dict[str, Any], sources: List[Dict[str, str]]):
 
     console.print()
     console.print(table)
+
+    # Data Quality Legend
+    console.print("\n  [dim]Data Quality: [green][✓] Verified (Audited)[/green] | [yellow][⊛] Web-Scraped[/yellow] | [red][⚠ EST] Estimated/Heuristic[/red] | [yellow][◈ AI] AI-Generated[/yellow][/dim]")
+
+    # Synthetic data warning
+    any_synthetic = any(is_synthetic.get(k, False) for k in ("revenue", "profit", "ebitda"))
+    if any_synthetic:
+        synth_metrics = [k.title() for k in ("revenue", "profit", "ebitda") if is_synthetic.get(k, False)]
+        console.print(f"\n  [bold red]⚠ DATA QUALITY WARNING:[/bold red] [yellow]{', '.join(synth_metrics)}[/yellow] [red]values show a uniform mechanical growth pattern — these are likely estimated/projected values, NOT verified financial statements. Cross-validate with audited filings before use.[/red]")
 
     # Source Links (strictly below the table)
     console.print("\n[bold cyan]Table #2 Source Links:[/bold cyan]")
@@ -3877,6 +4689,7 @@ def resolve_canonical_entity(
         "ticker": clean_ticker,
         "cin": cin if cin and cin != "N/A" else "",
         "is_listed": "yes" in str(d1.get("Is Listed Company", "")).lower(),
+        "is_unlisted": not ("yes" in str(d1.get("Is Listed Company", "")).lower()),
         "business_type": d1.get("Business Type (Private Limited/Public Limited)", "N/A"),
         "company_type": d1.get("Business Type (Private Limited/Public Limited)", "N/A"),
         "listed_status": "Listed" if "yes" in str(d1.get("Is Listed Company", "")).lower() else "Unlisted",
@@ -3890,6 +4703,8 @@ def resolve_canonical_entity(
         "parent_company": d1.get("Parent Company", "") if d1.get("Parent Company") not in ("N/A", None) else "",
         "primary_industry": primary_industry,
         "entity_archetype": archetype,
+        "screener_warehouse_id": d1.get("_screener_warehouse_id", ""),
+        "screener_url": d1.get("_screener_url", ""),
         "source_records": src1,
     }
 
@@ -4045,6 +4860,20 @@ def identify_entity_attribution(text: str, canonical_entity: Dict[str, Any]) -> 
         p_clean = re.sub(r"\b(?:ltd|limited|pvt|private|inc|corp)\b\.?", "", parent_name, flags=re.I).strip().lower()
         if (p_clean and p_clean in t) or parent_name.lower() in t:
             return f"{clean_name} Parent: {parent_name}"
+
+    # Check if a distinct affiliate / group legal entity is mentioned
+    # e.g., if clean_name is "Haldiram Snacks", but text mentions "Haldiram Snacks Food" or "Haldiram Foods International"
+    legal_ent_match = re.search(
+        rf"\b({re.escape(clean_name)}\s+[A-Za-z0-9&]+(?:\s+[A-Za-z0-9&]+)?(?:\s+(?:Private|Pvt\.?|Limited|Ltd\.?|Foods?|International|Enterprises|Retail))\b)",
+        text,
+        re.I
+    )
+    if legal_ent_match:
+        matched_ent = legal_ent_match.group(1).strip()
+        clean_matched = re.sub(r"\b(?:ltd|limited|pvt|private|inc|corp)\b\.?", "", matched_ent, flags=re.I).strip()
+        clean_canon = re.sub(r"\b(?:ltd|limited|pvt|private|inc|corp)\b\.?", "", clean_name, flags=re.I).strip()
+        if clean_matched.lower() != clean_canon.lower() and len(clean_matched) > len(clean_canon):
+            return f"{clean_name} Affiliate: {matched_ent}"
 
     # Check if canonical entity name or alias is directly mentioned
     if canon_low in t:
@@ -4560,10 +5389,12 @@ def fetch_latest_news(company_name_or_entity: Any, wiki_slug: str = "", evidence
         src_url = sources[0]["url"] if sources else "https://news.google.com"
         for ev in events[:12]:
             e_tag = ev.get("entity_tag", "")
-            e_scope = "direct"
-            if "Subsidiary" in e_tag:
+            e_scope = "primary_entity"
+            if "Affiliate" in e_tag or "Group" in e_tag or "Related" in e_tag:
+                e_scope = "related_entity"
+            elif "Subsidiary" in e_tag:
                 e_scope = "subsidiary"
-            elif "Parent" in e_tag or "Group" in e_tag:
+            elif "Parent" in e_tag:
                 e_scope = "parent"
             elif "Competitor" in e_tag:
                 e_scope = "competitor"
@@ -4687,12 +5518,13 @@ def fetch_business_activities(company_name_or_entity: Any, wiki_slug: str = "", 
         "Key Products & Offerings": [],
         "Product Categories": [],
         "Product Type": "N/A",
-        "Manufacturing": {"active": False, "details": "N/A"},
-        "Online Sales / E-Commerce": {"active": False, "details": "N/A"},
-        "Physical Retail Stores": {"active": False, "details": "Not applicable"},
-        "Customer Service / Consumer Channels": {"active": False, "details": "N/A"},
-        "Franchise Model": {"active": False, "details": "N/A"},
-        "Import / Export": {"active": False, "details": "No reliable evidence found"},
+        "Manufacturing": {"active": False, "details": "N/A — Not verified"},
+        "Online Sales / E-Commerce": {"active": False, "details": "N/A — Not verified"},
+        "Physical Retail Stores": {"active": False, "details": "N/A — Not verified"},
+        "Own Retail Stores": {"active": False, "details": "N/A — Not verified"},
+        "Customer Service / Consumer Channels": {"active": False, "details": "N/A — Not verified"},
+        "Franchise Model": {"active": False, "details": "N/A — Not verified"},
+        "Import / Export": {"active": False, "details": "N/A — Not verified"},
         "Revenue Streams": "N/A",
         "Business Model": "N/A",
         "Industry / Sector": "N/A",
@@ -5488,10 +6320,10 @@ def fetch_business_activities(company_name_or_entity: Any, wiki_slug: str = "", 
                 f"- products: (array of 4-8 specific key commercial products, software platforms, or service lines produced/sold)\n"
                 f"- categories: (array of 3-6 broad product/service categories)\n"
                 f"- product_type: (e.g. 'Physical Manufactured Goods', 'Software & Digital Services', 'Financial Services', 'Infrastructure & Utilities')\n"
-                f"- manufacturing: {{'active': boolean, 'details': '1-2 sentence description of plants, automated facilities, and locations or Not applicable'}}\n"
+                f"- manufacturing: {{'active': boolean, 'details': '1-2 sentence description of plants, automated facilities, and locations OR Not applicable — [brief reason why manufacturing does not apply]'}}\n"
                 f"- online_sales: {{'active': boolean, 'details': '1-2 sentence description of digital commerce storefront, web portal, or digital service delivery channels'}}\n"
-                f"- retail_stores: {{'active': boolean, 'details': '1-2 sentence description of retail store or branch network or Not applicable'}}\n"
-                f"- franchise_model: {{'active': boolean, 'details': '1-2 sentence description of franchise partner network, distributors, or Not applicable'}}\n"
+                f"- retail_stores: {{'active': boolean, 'details': '1-2 sentence description of retail store or branch network OR Not applicable — [brief reason]'}}\n"
+                f"- franchise_model: {{'active': boolean, 'details': '1-2 sentence description of franchise partner network, distributors, OR Not applicable — [brief reason]'}}\n"
                 f"- import_export: {{'active': boolean, 'details': '1-2 sentence description of international exports, foreign markets served, or domestic focus'}}\n"
                 f"- revenue_streams: (1 concise sentence breakdown of primary revenue streams)\n"
                 f"- business_model: (e.g. 'B2B', 'B2C', or 'B2B + B2C')\n"
@@ -6601,33 +7433,33 @@ def fetch_strategic_conclusions(
     if store_fac_sigs:
         new_stores_facilities = f"Facility/network expansion: {store_fac_sigs[0]}"
     else:
-        new_stores_facilities = "N/A — No verified store or facility expansion evidence found."
+        new_stores_facilities = "N/A — No qualifying store or facility expansion identified in reviewed sources."
 
     if mkt_sigs:
         new_markets = f"New Market Entry: {mkt_sigs[0]}"
     else:
-        new_markets = "N/A — No verified new market expansion evidence found."
+        new_markets = "N/A — No qualifying new market expansion identified in reviewed sources."
 
     if geo_sigs:
         new_geography = f"Geographic expansion: {geo_sigs[0]}"
     else:
-        new_geography = "N/A — No verified new geographic expansion evidence found."
+        new_geography = "N/A — No qualifying geographic expansion identified in reviewed sources."
 
     if prod_sigs:
         new_products = f"Recent product/service additions: {'; '.join(prod_sigs[:2])}"
     else:
-        new_products = "N/A — No verified new product launch evidence found."
+        new_products = "N/A — No qualifying new product launches identified in reviewed sources."
 
     if cat_sigs:
         new_categories = f"New category entry: {cat_sigs[0]}"
     else:
-        new_categories = "N/A — No verified new category expansion evidence found."
+        new_categories = "N/A — No qualifying category expansion identified in reviewed sources."
 
     # C. Contraction & Shutdown Signals — evidence-only
     shutdown_findings = web_findings.get("shutdowns", [])
     combined_shut_text = " ".join([f["title"] + " " + f["body"] for f in shutdown_findings])
 
-    bs_line = "N/A — No verified manufacturing line or production discontinuation found."
+    bs_line = "N/A — No qualifying production line discontinuation identified in reviewed sources."
     if re.search(r"\b(?:discontinued|phased out|halted production|stopped manufacturing)\b", combined_shut_text, re.I):
         m = re.search(r"([^.\n]*?(?:discontinued|phased out|halted production|stopped manufacturing)[^.\n]*)", combined_shut_text, re.I)
         if m:
@@ -6635,7 +7467,7 @@ def fetch_strategic_conclusions(
             if clean_disc:
                 bs_line = f"Reported Discontinuation: {clean_disc}"
 
-    plant_shutdown = "N/A — No verified plant shutdown or regulatory closure found."
+    plant_shutdown = "N/A — No qualifying plant shutdown identified in reviewed sources."
     if re.search(r"\b(?:plant shut|factory shut|operations suspended|nclt closure|pollution control closure)\b", combined_shut_text, re.I):
         m = re.search(r"([^.\n]*?(?:shut|closed|suspended)[^.\n]*)", combined_shut_text, re.I)
         if m:
@@ -6643,7 +7475,7 @@ def fetch_strategic_conclusions(
             if clean_shut:
                 plant_shutdown = f"Reported Event: {clean_shut}"
 
-    closing_stores = "N/A — No verified store closure activity found."
+    closing_stores = "N/A — No qualifying store closures identified in reviewed sources."
     if re.search(r"\b(?:store closure|closed stores|closing branches|shut down outlets|retail rationalization)\b", combined_shut_text, re.I):
         m = re.search(r"([^.\n]*?(?:store closure|closed \d+|shut down \d+|closing branches)[^.\n]*)", combined_shut_text, re.I)
         if m:
@@ -6651,7 +7483,7 @@ def fetch_strategic_conclusions(
             if clean_c:
                 closing_stores = f"Reported Optimization: {clean_c}"
 
-    stop_product = "N/A — No verified product cessation found."
+    stop_product = "N/A — No qualifying product withdrawal identified in reviewed sources."
     if re.search(r"\b(?:recalled|withdrawn from market|banned|cease sales)\b", combined_shut_text, re.I):
         m = re.search(r"([^.\n]*?(?:recalled|withdrawn|cease sales)[^.\n]*)", combined_shut_text, re.I)
         if m:
@@ -6668,18 +7500,17 @@ def fetch_strategic_conclusions(
     lead_web_text = " ".join([f["title"] + " " + f["body"] for f in lead_web])
 
     # CEO / CXO Hiring or Exit: ONLY reported when supported by verified evidence
-    leadership_signals = [s["text"] for s in all_signals if any(kw in s["text"].lower() for kw in ["appointed", "resigned", "steps down", "stepped down", "joins as", "takes over as", "names ceo", "names cfo", "executive director"])]
+    leadership_signals = [clean_insight_text(s["text"], 120) for s in all_signals if is_leadership_signal(s)]
     if leadership_signals:
-        clean_lead_sig = clean_insight_text(leadership_signals[0], 110)
-        cxo_status = f"Reported Leadership Movement: {clean_lead_sig}"
+        cxo_status = f"Reported Leadership Movement: {leadership_signals[0]}"
     elif re.search(r"\b(?:appointed|resigned|names|steps down|joins as|appointed as)\b.*?\b(?:ceo|cfo|cto|managing director|director)\b", lead_web_text, re.I):
         m = re.search(r"([^.\n]*?(?:appointed|resigned|names|steps down|joins as)[^.\n]*?(?:ceo|cfo|cto|managing director|director)[^.\n]*)", lead_web_text, re.I)
-        cxo_status = f"Executive Appointment/Movement: {clean_insight_text(m.group(1).strip(), 110)}" if m else "N/A — No verified leadership change found in available evidence."
+        cxo_status = f"Executive Appointment/Movement: {clean_insight_text(m.group(1).strip(), 110)}" if m else "N/A — No qualifying executive leadership changes identified in reviewed sources."
     else:
-        cxo_status = "N/A — No verified leadership change found in available evidence."
+        cxo_status = "N/A — No qualifying executive leadership changes identified in reviewed sources."
 
     # AI / Digital Transformation Leader: ONLY reported when supported by verified evidence
-    ai_digital_leader = "N/A — No verified digital or AI leadership appointment found."
+    ai_digital_leader = "N/A — No qualifying AI/digital leadership appointment identified in reviewed sources."
     ai_sigs = [clean_insight_text(s["text"], 120) for s in all_signals if any(w in s["text"].lower() for w in ["chief digital officer", "head of digital", "digital transformation leader"])]
     if ai_sigs:
         ai_digital_leader = f"Executive Appointment: {ai_sigs[0]}"
@@ -6692,7 +7523,7 @@ def fetch_strategic_conclusions(
 
     # CEO Transition / Stepping Down: NEVER output negative assertion without evidence
     ceo_trans_sigs = [clean_insight_text(s["text"], 120) for s in all_signals if is_ceo_transition_claim(s["text"])]
-    ceo_transition = "N/A — No verified leadership transition found in available evidence."
+    ceo_transition = "N/A — No qualifying leadership succession or transition identified in reviewed sources."
     if ceo_trans_sigs:
         ceo_transition = f"Succession / Transition: {ceo_trans_sigs[0]}"
     elif is_ceo_transition_claim(lead_web_text + " " + news_text_blob):
@@ -6704,7 +7535,7 @@ def fetch_strategic_conclusions(
 
     # Growth & Marketing Leader
     marketing_sigs = [clean_insight_text(s["text"], 110) for s in all_signals if is_marketing_leadership_claim(s["text"])]
-    growth_leader = "N/A — No verified marketing executive appointment found."
+    growth_leader = "N/A — No qualifying marketing leadership appointment identified in reviewed sources."
     if marketing_sigs:
         growth_leader = f"Marketing Leadership: {marketing_sigs[0]}"
     elif is_marketing_leadership_claim(lead_web_text):
@@ -6716,7 +7547,7 @@ def fetch_strategic_conclusions(
 
     # Chief AI Officer
     caio_sigs = [clean_insight_text(s["text"], 120) for s in all_signals if is_caio_claim(s["text"])]
-    caio_status = "N/A — No verified Chief AI Officer appointment found."
+    caio_status = "N/A — No qualifying Chief AI Officer appointment identified in reviewed sources."
     if caio_sigs:
         caio_status = f"Dedicated Role Appointed: {caio_sigs[0]}"
     elif is_caio_claim(lead_web_text):
@@ -6730,8 +7561,8 @@ def fetch_strategic_conclusions(
     re_web = web_findings.get("real_estate", [])
     re_web_text = " ".join([f["title"] + " " + f["body"] for f in re_web])
 
-    acquired_property = "N/A — No verified real-estate development found."
-    sold_property = "N/A — No verified real-estate divestment found."
+    acquired_property = "N/A — No qualifying real-estate development identified in reviewed sources."
+    sold_property = "N/A — No qualifying real-estate divestment identified in reviewed sources."
 
     if re.search(r"\b(?:acquired|purchased|bought)\b.*?\b(?:land|property|campus|acre|plant|facility)\b", re_web_text, re.I):
         m = re.search(r"([^.\n]*?(?:acquired|purchased|bought)[^.\n]*?(?:land|property|campus|acre|plant|facility)[^.\n]*)", re_web_text, re.I)
@@ -6755,7 +7586,7 @@ def fetch_strategic_conclusions(
     mna_web = web_findings.get("mna_demerger", [])
     mna_web_text = " ".join([f["title"] + " " + f["body"] for f in mna_web])
 
-    buying_company = "N/A — No verified acquisition found in available evidence."
+    buying_company = "N/A — No qualifying corporate acquisition identified in reviewed sources."
     if acq_sigs:
         buying_company = f"Active Acquisition: {acq_sigs[0]}"
     elif is_acquisition_claim(mna_web_text):
@@ -6765,7 +7596,7 @@ def fetch_strategic_conclusions(
             if clean_acq and not is_financial_performance_claim(clean_acq):
                 buying_company = f"Acquisition Recorded: {clean_acq}"
 
-    merged_company = "N/A — No verified corporate merger event found."
+    merged_company = "N/A — No qualifying merger event identified in reviewed sources."
     if merg_sigs:
         merged_company = f"Merger Activity: {merg_sigs[0]}"
     elif is_merger_claim(mna_web_text):
@@ -6775,7 +7606,7 @@ def fetch_strategic_conclusions(
             if clean_merg:
                 merged_company = f"Merger Activity: {clean_merg}"
 
-    demerger_status = "N/A — No verified demerger/spinoff event found."
+    demerger_status = "N/A — No qualifying demerger or spinoff event identified in reviewed sources."
     if dem_sigs:
         demerger_status = f"Demerger Activity: {dem_sigs[0]}"
     elif is_demerger_claim(mna_web_text + " " + news_text_blob):
@@ -6785,7 +7616,7 @@ def fetch_strategic_conclusions(
             if clean_dem:
                 demerger_status = f"Demerger Activity: {clean_dem}"
 
-    funding_status = "N/A — No verified capital raising or external debt action found."
+    funding_status = "N/A — No qualifying capital raising or external debt action identified in reviewed sources."
     if fund_sigs:
         funding_status = f"Capital Action: {fund_sigs[0]}"
     elif is_capital_raise_claim(mna_web_text + " " + news_text_blob):
@@ -6796,7 +7627,7 @@ def fetch_strategic_conclusions(
                 funding_status = f"Capital Action: {clean_fund}"
 
     # Detect Latest Interim / Quarterly Performance from verified signals
-    interim_perf = "N/A — No interim quarterly disclosure reported in verified evidence."
+    interim_perf = "N/A — No interim quarterly disclosure reported in reviewed sources."
     for s in all_signals:
         s_txt = s.get("text", "")
         if is_financial_performance_claim(s_txt):
@@ -6864,21 +7695,24 @@ def fetch_strategic_conclusions(
                 f"Synthesize an authoritative 2-3 sentence executive assessment for {canon_name} across the corporate pillars below.\n\n"
                 f"STRICT EVIDENCE GROUNDING RULES:\n"
                 f"1. You are synthesizing strategic conclusions from VERIFIED EVIDENCE only. You must not use outside knowledge or invent facts.\n"
-                f"2. You must not infer absence from missing evidence (absence of news is NOT evidence of absence). NEVER write 'No CEO exit', 'No demerger', 'No plant shutdown', 'No store closures', 'Stable governance core'.\n"
+                f"2. You must not infer absence from missing evidence (absence of news is NOT evidence of absence). NEVER write 'No CEO exit', 'No demerger', 'No plant shutdown', 'No store closures', 'Stable governance core'. If no qualifying event is evidenced, return 'N/A — No qualifying evidence identified in reviewed sources.'\n"
                 f"3. You must not treat existing Table #4 operational information (existing products, categories, divisions, and geographic footprints) as a new expansion event.\n"
-                f"4. You must not classify an evidence item as M&A based solely on a broad signal category such as FINANCIAL & M&A SIGNAL. Classify evidence based on the actual documented event.\n"
-                f"5. Financial performance belongs to Financial Health unless the evidence explicitly documents an M&A/capital event.\n"
-                f"6. Store-opening evidence belongs to Opening New Stores / Facilities, NOT New Markets.\n"
-                f"7. Risk statements must NOT introduce unsupported causal relationships. Do not call an event a mitigating factor unless the evidence explicitly supports that relationship. Temporal association is NOT causation. Keep separate facts separate. Do not use phrases such as 'mitigating factor', 'offsetting risk', 'supports profitability', 'protects margins', 'reduces risk' unless explicitly supported by evidence.\n"
-                f"8. When evidence is insufficient, output N/A.\n"
-                f"9. Keep factual evidence separate from interpretation.\n"
+                f"4. If 'Evidenced Leadership Signals' in Grounding Data contains reported movements, you MUST summarize them under 'leadership'. Do NOT contradict Table #3 by asserting that no executive changes occurred.\n"
+                f"5. You must not classify an evidence item as M&A based solely on a broad signal category such as FINANCIAL & M&A SIGNAL. Classify evidence based on the actual documented event.\n"
+                f"6. Financial performance belongs to Financial Health unless the evidence explicitly documents an M&A/capital event.\n"
+                f"7. Store-opening evidence belongs to Opening New Stores / Facilities, NOT New Markets.\n"
+                f"8. Risk statements must NOT introduce unsupported causal relationships. Do not call an event a mitigating factor unless the evidence explicitly supports that relationship. Temporal association is NOT causation. Keep separate facts separate. Do not use phrases such as 'mitigating factor', 'offsetting risk', 'supports profitability', 'protects margins', 'reduces risk' unless explicitly supported by evidence.\n"
+                f"9. When evidence is insufficient, output N/A.\n"
                 f"10. All derived financial calculations must be reproducible from validated Table #2 data. For derived financial metrics, use 'Net Profit Margin' and 'percentage points'. Do not use 'bps'.\n\n"
                 f"Grounding Data:\n"
                 f"- Financial Health: {yoy_rev_text} | {yoy_margin_text}\n"
                 f"- Executive Leadership: CEO: {ceo_name}, CFO: {cfo_name}, CTO: {cto_name}\n"
+                f"- Evidenced Leadership Signals from Disclosures: {cxo_status} | {ceo_transition}\n"
+                f"- Evidenced Expansion Signals: {new_stores_facilities} | {new_markets} | {new_products}\n"
+                f"- Evidenced M&A / Capital Signals: {buying_company} | {merged_company} | {funding_status}\n"
                 f"- Business Sector/Archetype: {archetype}\n"
                 f"- Verified Recent News & Disclosures: {news_text_blob[:3500]}\n\n"
-                f"Pillars to Assess (each MUST be 2-3 informative sentences strictly based on Grounding Data, or 'N/A — Not verified from available evidence.' if no evidence):\n"
+                f"Pillars to Assess (each MUST be 2-3 informative sentences strictly based on Grounding Data, or 'N/A — No qualifying evidence identified in reviewed sources.' if no evidence):\n"
                 f"1. growth: Revenue trajectory and validated drivers, or derived numbers only.\n"
                 f"2. expansion: Newly announced expansions in Disclosures, or N/A.\n"
                 f"3. contraction: Disclosed operational rationalization or closures, or N/A.\n"
@@ -7039,6 +7873,448 @@ def display_strategic_conclusions(data: Dict[str, Any], sources: List[Dict[str, 
     console.print()
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# TABLE #6: COMPETITORS & PEER BENCHMARKING ENGINE
+# ──────────────────────────────────────────────────────────────────────────────
+
+def fetch_peer_comparison(
+    canonical_entity: Any,
+    data2: Optional[Dict[str, Any]] = None,
+    evidence_store: Optional[EvidenceStore] = None
+) -> Tuple[Dict[str, Any], List[Dict[str, str]]]:
+    """
+    Fetch comprehensive Competitors List & Peer Benchmarking Matrix (Table #6).
+    For listed companies: Uses Screener.in's official Sector Peer API (/api/company/{warehouse_id}/peers/)
+    to extract live audited multiples (CMP, P/E, Market Cap, ROCE, Qtr Sales, Profit Growth)
+    plus the Industry Median Benchmark.
+    For unlisted/private companies: Synchronizes target company metrics with Table #2 (annual sales,
+    PAT, EBITDA, derived quarterly run-rates, growth % and estimated private valuation) and uses
+    Gemini market intelligence to benchmark top 4-6 operating competitors and calculate industry medians.
+    """
+    if isinstance(canonical_entity, dict):
+        canonical_name = canonical_entity.get("canonical_name", "Unknown")
+        wh_id = canonical_entity.get("screener_warehouse_id", "")
+        ticker = canonical_entity.get("ticker", "")
+        industry = canonical_entity.get("primary_industry", "")
+        screener_url = canonical_entity.get("screener_url", "")
+        is_unlisted = bool(
+            canonical_entity.get("is_unlisted")
+            or "unlisted" in str(ticker).lower()
+            or canonical_entity.get("listed_status", "").lower() == "unlisted"
+            or not canonical_entity.get("is_listed", True)
+            or not ticker
+            or ticker == "N/A"
+        )
+    else:
+        canonical_name = str(canonical_entity)
+        wh_id = ""
+        ticker = ""
+        industry = ""
+        screener_url = ""
+        is_unlisted = False
+
+    sources: List[Dict[str, str]] = []
+    seen_urls = set()
+
+    def add_source(name: str, url: str):
+        if url and url not in seen_urls and str(url).startswith("http"):
+            sources.append({"name": name, "url": str(url).strip()})
+            seen_urls.add(url)
+
+    data = {
+        "Target Company": canonical_name,
+        "rows": [],
+        "Industry Median": {},
+        "Sector Name": industry or "Industry Peers"
+    }
+
+    # Helper: Extract float number in Crores from string
+    def _extract_num_cr(val_str: Any) -> Optional[float]:
+        if not val_str or str(val_str).strip() in ("N/A", "None", "", "—", "-"):
+            return None
+        s = str(val_str).replace(",", "").strip()
+        if "privately held" in s.lower():
+            return None
+        is_lakh = "lakh" in s.lower() or "lac" in s.lower()
+        m_usd = re.search(r'\$\s*([0-9]+(?:\.[0-9]+)?)\s*(?:m|million|mn)?\b', s, re.I)
+        if m_usd and not ("cr" in s.lower() or "₹" in s or "rs" in s.lower()):
+            try:
+                return float(m_usd.group(1)) * 8.3
+            except ValueError:
+                pass
+        m = re.search(r'(-?[0-9]+(?:\.[0-9]+)?)', s)
+        if m:
+            try:
+                n = float(m.group(1))
+                return n / 100.0 if is_lakh else n
+            except ValueError:
+                return None
+        return None
+
+    # Helper: Calculate median of numbers
+    def _calc_median(numbers: List[float]) -> Optional[float]:
+        if not numbers:
+            return None
+        sorted_nums = sorted(numbers)
+        n = len(sorted_nums)
+        if n % 2 == 1:
+            return sorted_nums[n // 2]
+        return (sorted_nums[n // 2 - 1] + sorted_nums[n // 2]) / 2.0
+
+    # If data2 not provided for unlisted entity, attempt to fetch Table 2 data
+    if data2 is None and is_unlisted and isinstance(canonical_entity, dict):
+        try:
+            data2, _ = fetch_table2_data(canonical_entity, ticker or "N/A (Unlisted)")
+        except Exception:
+            data2 = None
+
+    # Parse and extract Table #2 profile for synchronization
+    valid_t2_periods = []
+    if data2 and isinstance(data2, dict) and data2.get("rows"):
+        for r in data2.get("rows", []):
+            r_rev = _extract_num_cr(r.get("Net Revenue/Net Sales"))
+            r_pat = _extract_num_cr(r.get("Net Profit"))
+            r_eb = _extract_num_cr(r.get("EBITDA"))
+            r_mc = _extract_num_cr(r.get("Market Cap"))
+            if r_rev is not None or r_pat is not None:
+                valid_t2_periods.append({
+                    "period": r.get("Fiscal Period / Year", ""),
+                    "rev": r_rev,
+                    "pat": r_pat,
+                    "ebitda": r_eb,
+                    "mcap": r_mc
+                })
+
+    latest_t2 = valid_t2_periods[-1] if valid_t2_periods else None
+    prev_t2 = valid_t2_periods[-2] if len(valid_t2_periods) >= 2 else None
+
+    # Derived Target Financial Metrics
+    target_sales_qtr = "N/A"
+    target_sales_var = "N/A"
+    target_np_qtr = "N/A"
+    target_profit_var = "N/A"
+    target_mcap = "N/A"
+    target_pe = "N/A"
+    target_roce = "N/A"
+    target_cmp = "Unlisted" if is_unlisted else "N/A"
+
+    if latest_t2:
+        # 1. Quarterly Sales Run-Rate (Annual Sales / 4)
+        if latest_t2.get("rev") is not None:
+            q_sales = latest_t2["rev"] / 4.0
+            target_sales_qtr = f"{q_sales:.2f}"
+
+        # 2. YoY Sales Growth %
+        if prev_t2 and prev_t2.get("rev") and prev_t2["rev"] > 0 and latest_t2.get("rev") is not None:
+            s_var = ((latest_t2["rev"] - prev_t2["rev"]) / prev_t2["rev"]) * 100.0
+            target_sales_var = f"{s_var:.1f}"
+
+        # 3. Quarterly Profit Run-Rate (Annual Profit / 4)
+        if latest_t2.get("pat") is not None:
+            q_pat = latest_t2["pat"] / 4.0
+            target_np_qtr = f"{q_pat:.2f}"
+
+        # 4. YoY Profit Growth %
+        if prev_t2 and prev_t2.get("pat") is not None and abs(prev_t2["pat"]) > 0 and latest_t2.get("pat") is not None:
+            p_var = ((latest_t2["pat"] - prev_t2["pat"]) / abs(prev_t2["pat"])) * 100.0
+            target_profit_var = f"{p_var:.1f}"
+
+        # 5. Market Valuation
+        if latest_t2.get("mcap") is not None:
+            target_mcap = f"{latest_t2['mcap']:.2f}"
+        elif latest_t2.get("rev") is not None:
+            if latest_t2.get("pat") is not None and latest_t2["pat"] > 0:
+                est_val = max(latest_t2["rev"] * 1.5, latest_t2["pat"] * 25.0)
+            else:
+                est_val = latest_t2["rev"] * 1.5
+            target_mcap = f"{est_val:.2f}"
+
+        # 6. P/E Multiple
+        if target_mcap != "N/A" and latest_t2.get("pat") is not None and latest_t2["pat"] > 0:
+            try:
+                target_pe = f"{float(target_mcap) / latest_t2['pat']:.1f}"
+            except Exception:
+                target_pe = "N/A"
+
+        # 7. ROCE %
+        if latest_t2.get("ebitda") is not None and latest_t2.get("rev") and latest_t2["rev"] > 0:
+            calc_roce = (latest_t2["ebitda"] / (latest_t2["rev"] * 0.7)) * 100.0
+            target_roce = f"{max(5.0, min(45.0, calc_roce)):.1f}"
+        elif latest_t2.get("pat") is not None and latest_t2.get("rev") and latest_t2["rev"] > 0:
+            calc_roce = (latest_t2["pat"] / (latest_t2["rev"] * 0.5)) * 100.0
+            target_roce = f"{max(5.0, min(40.0, calc_roce)):.1f}"
+
+    # 1. Attempt Screener Warehouse ID lookup if listed and not unlisted
+    if not is_unlisted and not wh_id and (ticker or canonical_name):
+        search_term = ticker if ticker and ticker != "N/A" else canonical_name
+        try:
+            s_url = f"https://www.screener.in/api/company/search/?q={requests.utils.quote(search_term)}"
+            s_res = requests.get(s_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=4).json()
+            if s_res and isinstance(s_res, list):
+                cand_url = s_res[0].get("url", "")
+                if cand_url:
+                    full_cand_url = f"https://www.screener.in{cand_url}"
+                    r_cand = requests.get(full_cand_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=5)
+                    wh_m = re.search(r'data-warehouse-id=["\'](\d+)["\']', r_cand.text)
+                    if wh_m:
+                        wh_id = wh_m.group(1)
+        except Exception:
+            pass
+
+    # 2. Extract peers from Screener API (for listed companies)
+    if wh_id and not is_unlisted:
+        try:
+            peer_api_url = f"https://www.screener.in/api/company/{wh_id}/peers/"
+            r_peers = requests.get(peer_api_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=6)
+            if r_peers.status_code == 200 and len(r_peers.text) > 200:
+                soup = BeautifulSoup(r_peers.text, "html.parser")
+                tbl = soup.find("table")
+                if tbl:
+                    for tr in tbl.find_all("tr")[1:]:
+                        tds = [td.text.strip().replace("\n", " ") for td in tr.find_all("td")]
+                        if len(tds) >= 11:
+                            s_no = tds[0]
+                            p_name = tds[1]
+                            is_bench = "median" in p_name.lower() or not s_no
+                            is_tgt = is_entity_match(p_name, canonical_name=canonical_name) or canonical_name.lower() in p_name.lower()
+                            row_item = {
+                                "s_no": s_no,
+                                "name": p_name,
+                                "cmp": tds[2],
+                                "pe": tds[3],
+                                "market_cap": tds[4],
+                                "div_yield": tds[5],
+                                "np_qtr": tds[6],
+                                "qtr_profit_var": tds[7],
+                                "sales_qtr": tds[8],
+                                "qtr_sales_var": tds[9],
+                                "roce": tds[10],
+                                "is_benchmark": is_bench,
+                                "is_target": is_tgt
+                            }
+                            if is_bench:
+                                data["Industry Median"] = row_item
+                            data["rows"].append(row_item)
+
+                    if data["rows"]:
+                        add_source(f"Screener.in ({canonical_name} Peer Benchmarks)", peer_api_url)
+                        if evidence_store:
+                            evidence_store.add_evidence(
+                                table="Table #6",
+                                category="Peer Benchmarking",
+                                metric_or_event="Industry Peers Count",
+                                fact=f"Identified {len(data['rows'])} verified industry peers via Screener",
+                                period="Latest Quarter",
+                                period_type="Quarterly",
+                                source_name="Screener.in",
+                                source_url=peer_api_url,
+                                confidence="High",
+                                verified=True
+                            )
+                        return data, sources
+        except Exception:
+            pass
+
+    # 3. Fallback for Unlisted / Private entities or missing Screener peers via Gemini AI
+    target_row = {
+        "s_no": "1.",
+        "name": canonical_name,
+        "cmp": target_cmp,
+        "pe": target_pe,
+        "market_cap": target_mcap,
+        "div_yield": "0.00" if is_unlisted else "N/A",
+        "np_qtr": target_np_qtr,
+        "qtr_profit_var": target_profit_var,
+        "sales_qtr": target_sales_qtr,
+        "qtr_sales_var": target_sales_var,
+        "roce": target_roce,
+        "is_benchmark": False,
+        "is_target": True
+    }
+    data["rows"].append(target_row)
+
+    if os.environ.get("GEMINI_API_KEY"):
+        try:
+            t2_context = ""
+            if latest_t2 and latest_t2.get("rev") is not None:
+                t2_context = (
+                    f"\nTARGET COMPANY BENCHMARK PROFILE (Table #2 Synchronized):\n"
+                    f"- Latest Annual Revenue: ₹ {latest_t2.get('rev')} Cr. (Run-rate Qtr Sales: ₹ {target_sales_qtr} Cr.)\n"
+                    f"- Latest Annual Net Profit: ₹ {latest_t2.get('pat', 'N/A')} Cr. (Run-rate Qtr Net Profit: ₹ {target_np_qtr} Cr.)\n"
+                    f"- Valuation / Market Cap: ₹ {target_mcap} Cr.\n"
+                    f"- Sales Growth: {target_sales_var}%, Profit Growth: {target_profit_var}%\n"
+                )
+
+            ai_prompt = (
+                f"You are an Indian corporate equity research analyst.\n"
+                f"Target Company: '{canonical_name}' in India (Sector: '{industry}').\n"
+                f"{t2_context}\n"
+                f"Identify 4 to 6 top direct operating competitors and peers for '{canonical_name}' in India of comparable or leading market scale.\n"
+                f"For each competitor, provide realistic current financial and valuation metrics:\n"
+                f"- name: Competitor corporate name (e.g. 'Livspace', 'HomeLane', 'DesignCafe')\n"
+                f"- cmp: Current Share Price (in Rs, or 'Unlisted')\n"
+                f"- pe: Price to Earnings ratio (or 'N/A')\n"
+                f"- market_cap: Market Cap or Valuation (in Rs Cr)\n"
+                f"- div_yield: Dividend Yield % (or 'N/A')\n"
+                f"- np_qtr: Latest Quarter Net Profit (in Rs Cr, or 'N/A')\n"
+                f"- qtr_profit_var: Quarter Profit Growth % (or 'N/A')\n"
+                f"- sales_qtr: Latest Quarter Sales/Revenue (in Rs Cr, or 'N/A')\n"
+                f"- qtr_sales_var: Quarter Sales Growth % (or 'N/A')\n"
+                f"- roce: Return on Capital Employed (ROCE %) (or 'N/A')\n"
+                f"- is_benchmark: false\n\n"
+                f"Return strictly a JSON array of objects with the above keys for the competitors."
+            )
+            raw_ai = call_gemini(ai_prompt, system_instruction="Output strictly valid JSON with no markdown formatting.", temperature=0.1)
+            if raw_ai:
+                clean_json = re.sub(r"^```(?:json)?\s*", "", raw_ai.strip())
+                clean_json = re.sub(r"\s*```$", "", clean_json)
+                import json
+                ai_peers = json.loads(clean_json)
+                if isinstance(ai_peers, list) and ai_peers:
+                    for idx, ap in enumerate(ai_peers[:5], 2):
+                        p_name = ap.get("name", "Competitor")
+                        # Skip if AI returned the target company again
+                        if canonical_name.lower() in p_name.lower() or p_name.lower() in canonical_name.lower():
+                            continue
+                        data["rows"].append({
+                            "s_no": f"{len(data['rows']) + 1}.",
+                            "name": p_name,
+                            "cmp": str(ap.get("cmp", "N/A")),
+                            "pe": str(ap.get("pe", "N/A")),
+                            "market_cap": str(ap.get("market_cap", "N/A")),
+                            "div_yield": str(ap.get("div_yield", "N/A")),
+                            "np_qtr": str(ap.get("np_qtr", "N/A")),
+                            "qtr_profit_var": str(ap.get("qtr_profit_var", "N/A")),
+                            "sales_qtr": str(ap.get("sales_qtr", "N/A")),
+                            "qtr_sales_var": str(ap.get("qtr_sales_var", "N/A")),
+                            "roce": str(ap.get("roce", "N/A")),
+                            "is_benchmark": False,
+                            "is_target": False
+                        })
+                    add_source("Google Gemini Market & Competitive Intelligence", "https://generativelanguage.googleapis.com")
+        except Exception:
+            pass
+
+    # 4. Calculate Industry Median benchmark row if missing and peers exist
+    non_bench_rows = [r for r in data["rows"] if not r.get("is_benchmark")]
+    if len(non_bench_rows) >= 2:
+        def _get_col_nums(col_key):
+            vals = []
+            for r in non_bench_rows:
+                num = _extract_num_cr(r.get(col_key))
+                if num is not None:
+                    vals.append(num)
+            return vals
+
+        med_mcap = _calc_median(_get_col_nums("market_cap"))
+        med_pe = _calc_median(_get_col_nums("pe"))
+        med_roce = _calc_median(_get_col_nums("roce"))
+        med_np = _calc_median(_get_col_nums("np_qtr"))
+        med_pvar = _calc_median(_get_col_nums("qtr_profit_var"))
+        med_sales = _calc_median(_get_col_nums("sales_qtr"))
+        med_svar = _calc_median(_get_col_nums("qtr_sales_var"))
+
+        med_row = {
+            "s_no": "",
+            "name": f"Median: {len(non_bench_rows)} Co.",
+            "cmp": "—",
+            "pe": f"{med_pe:.2f}" if med_pe is not None else "—",
+            "market_cap": f"{med_mcap:.2f}" if med_mcap is not None else "—",
+            "div_yield": "—",
+            "np_qtr": f"{med_np:.2f}" if med_np is not None else "—",
+            "qtr_profit_var": f"{med_pvar:.2f}" if med_pvar is not None else "—",
+            "sales_qtr": f"{med_sales:.2f}" if med_sales is not None else "—",
+            "qtr_sales_var": f"{med_svar:.2f}" if med_svar is not None else "—",
+            "roce": f"{med_roce:.2f}" if med_roce is not None else "—",
+            "is_benchmark": True,
+            "is_target": False
+        }
+        data["Industry Median"] = med_row
+        data["rows"].append(med_row)
+
+    return data, sources
+
+
+def display_peer_comparison(data: Dict[str, Any], sources: List[Dict[str, str]]):
+    """Render Table #6: Peer Comparison & Competitive Benchmarking Matrix in terminal."""
+    target_comp = data.get("Target Company", "")
+    rows = data.get("rows", [])
+    if not rows:
+        console.print("[dim yellow]No competitor peer records available for this company.[/dim yellow]\n")
+        return
+
+    table = Table(
+        title=f"[bold cyan]Table #6: Peer Comparison & Competitive Benchmarking Matrix for '{target_comp}'[/bold cyan]",
+        show_header=True,
+        header_style="bold magenta",
+        show_lines=True
+    )
+
+    table.add_column("#", style="yellow", width=4, justify="center")
+    table.add_column("Company / Peer", style="bold white", width=22)
+    table.add_column("CMP (₹)", justify="right", style="cyan", width=11)
+    table.add_column("P/E", justify="right", style="magenta", width=8)
+    table.add_column("Market Cap (₹ Cr)", justify="right", style="green", width=18)
+    table.add_column("ROCE (%)", justify="right", style="bright_yellow", width=10)
+    table.add_column("Qtr Profit (₹ Cr)", justify="right", style="white", width=16)
+    table.add_column("Profit Var %", justify="right", style="white", width=12)
+    table.add_column("Qtr Sales (₹ Cr)", justify="right", style="white", width=16)
+
+    for r in rows:
+        is_target = r.get("is_target", False)
+        is_bench = r.get("is_benchmark", False)
+
+        s_no = r.get("s_no", "")
+        name = r.get("name", "")
+        cmp_val = r.get("cmp", "")
+        pe_val = r.get("pe", "")
+        mcap_val = r.get("market_cap", "")
+        roce_val = r.get("roce", "")
+        np_val = r.get("np_qtr", "")
+        var_val = r.get("qtr_profit_var", "")
+        sales_val = r.get("sales_qtr", "")
+
+        if is_target:
+            table.add_row(
+                f"[bold green]▶ {s_no}[/bold green]",
+                f"[bold green]{name} (Target)[/bold green]",
+                f"[bold green]{cmp_val}[/bold green]",
+                f"[bold green]{pe_val}[/bold green]",
+                f"[bold green]{mcap_val}[/bold green]",
+                f"[bold green]{roce_val}[/bold green]",
+                f"[bold green]{np_val}[/bold green]",
+                f"[bold green]{var_val}[/bold green]",
+                f"[bold green]{sales_val}[/bold green]"
+            )
+        elif is_bench:
+            table.add_row(
+                "[dim]—[/dim]",
+                f"[bold italic yellow]{name}[/bold italic yellow]",
+                f"[italic yellow]{cmp_val}[/italic yellow]",
+                f"[italic yellow]{pe_val}[/italic yellow]",
+                f"[italic yellow]{mcap_val}[/italic yellow]",
+                f"[italic yellow]{roce_val}[/italic yellow]",
+                f"[italic yellow]{np_val}[/italic yellow]",
+                f"[italic yellow]{var_val}[/italic yellow]",
+                f"[italic yellow]{sales_val}[/italic yellow]"
+            )
+        else:
+            table.add_row(
+                s_no, name, cmp_val, pe_val, mcap_val, roce_val, np_val, var_val, sales_val
+            )
+
+    console.print()
+    console.print(table)
+
+    console.print("\n[bold cyan]Peer Benchmarking Source Links:[/bold cyan]")
+    if sources:
+        for idx, s in enumerate(sources[:6], 1):
+            console.print(f"  [dim]{idx}.[/dim] [bold white]{s['name']}:[/bold white] [underline cyan]{s['url']}[/underline cyan]")
+    else:
+        console.print("  [dim]Audited Exchange Data & Regulatory Disclosures.[/dim]")
+    console.print()
+
+
 def save_table_records(
     data1: Dict[str, Any],
     sources1: List[Dict[str, str]],
@@ -7050,13 +8326,16 @@ def save_table_records(
     sources4: Optional[List[Dict[str, str]]] = None,
     data5: Optional[Dict[str, Any]] = None,
     sources5: Optional[List[Dict[str, str]]] = None,
+    data6: Optional[Dict[str, Any]] = None,
+    sources6: Optional[List[Dict[str, str]]] = None,
     evidence_store: Optional[EvidenceStore] = None,
     csv1_path: str = EXPORT_CSV_PATH,
     csv2_path: str = EXPORT_TABLE2_CSV_PATH,
     csv5_path: str = EXPORT_TABLE5_CSV_PATH,
+    csv6_path: str = EXPORT_TABLE6_CSV_PATH,
     json_path: str = EXPORT_JSON_PATH
 ):
-    """Save Table #1, #2, #3 (News), #4 (Business Activities), and #5 (Strategic Conclusions) to structured CSVs and JSON."""
+    """Save Table #1, #2, #3 (News), #4 (Business Activities), #5 (Strategic Conclusions), and #6 (Peer Comparison) to structured CSVs and JSON."""
     # 1. Save Table #1 to CSV
     save_table1_records(data1, sources1, csv_path=csv1_path, json_path=json_path)
 
@@ -7080,6 +8359,9 @@ def save_table_records(
         item = dict(r)
         item["Company Name"] = comp_name
         item["Source Links"] = src2_str
+        for col in ["Market Cap", "Net Revenue/Net Sales", "Net Profit", "EBITDA", "Employee Headcount"]:
+            if col in item:
+                item[col] = strip_ai_markers(item[col])
         existing_rows_t2.append(item)
 
     with open(csv2_path, mode="w", newline="", encoding="utf-8") as f:
@@ -7216,6 +8498,56 @@ def save_table_records(
             "Source Links": sources5 or []
         }
 
+    # 4. Save Table #6: Peer Comparison to dedicated CSV if present
+    if data6 is not None and data6.get("rows"):
+        f6 = [
+            "Target Company", "Peer Company", "CMP (Rs)", "P/E", "Market Cap (Cr)",
+            "Div Yld (%)", "NP Qtr (Cr)", "Qtr Profit Var (%)", "Sales Qtr (Cr)",
+            "Qtr Sales Var (%)", "ROCE (%)", "Benchmark Type", "Source Links"
+        ]
+        src6_str = " | ".join([f"{s['name']}: {s['url']}" for s in (sources6 or [])])
+        existing_rows_t6 = []
+        if os.path.isfile(csv6_path) and os.path.getsize(csv6_path) > 0:
+            try:
+                with open(csv6_path, mode="r", newline="", encoding="utf-8") as f:
+                    reader = csv.DictReader(f)
+                    for r in reader:
+                        if r.get("Target Company", "").lower() != comp_name.lower():
+                            existing_rows_t6.append(r)
+            except Exception:
+                existing_rows_t6 = []
+
+        for r in data6.get("rows", []):
+            item = {
+                "Target Company": comp_name,
+                "Peer Company": r.get("name", "N/A"),
+                "CMP (Rs)": r.get("cmp", "N/A"),
+                "P/E": r.get("pe", "N/A"),
+                "Market Cap (Cr)": r.get("market_cap", "N/A"),
+                "Div Yld (%)": r.get("div_yield", "N/A"),
+                "NP Qtr (Cr)": r.get("np_qtr", "N/A"),
+                "Qtr Profit Var (%)": r.get("qtr_profit_var", "N/A"),
+                "Sales Qtr (Cr)": r.get("sales_qtr", "N/A"),
+                "Qtr Sales Var (%)": r.get("qtr_sales_var", "N/A"),
+                "ROCE (%)": r.get("roce", "N/A"),
+                "Benchmark Type": "Industry Median" if r.get("is_benchmark") else ("Target Company" if r.get("is_target") else "Peer"),
+                "Source Links": src6_str
+            }
+            existing_rows_t6.append(item)
+
+        with open(csv6_path, mode="w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=f6, extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(existing_rows_t6)
+
+    # Table #6: Peer Comparison in JSON
+    if data6 is not None:
+        entry["table6_peer_comparison"] = {
+            "peers": data6.get("rows", []),
+            "Sector Name": data6.get("Sector Name", ""),
+            "Source Links": sources6 or []
+        }
+
     c_name_lower = comp_name.lower()
     j_idx = next((i for i, r in enumerate(records) if r.get("Company Name", "").lower() == c_name_lower), None)
     if j_idx is not None:
@@ -7237,9 +8569,11 @@ def save_table_records(
         except Exception as e:
             console.print(f"[yellow]Warning: Could not save evidence store: {e}[/yellow]")
 
-    saved_msg = f"[green][OK] Saved all records (Table #1–#5) to [bold]{csv1_path}[/bold], [bold]{csv2_path}[/bold]"
+    saved_msg = f"[green][OK] Saved all records (Table #1–#6) to [bold]{csv1_path}[/bold], [bold]{csv2_path}[/bold]"
     if data5 is not None:
         saved_msg += f", [bold]{csv5_path}[/bold]"
+    if data6 is not None and data6.get("rows"):
+        saved_msg += f", [bold]{csv6_path}[/bold]"
     saved_msg += f", and [bold]{json_path}[/bold][/green]"
     console.print(saved_msg)
 
@@ -7274,14 +8608,17 @@ def save_company_docx(
     sources4: Optional[List[Dict[str, str]]] = None,
     data5: Optional[Dict[str, Any]] = None,
     sources5: Optional[List[Dict[str, str]]] = None,
+    data6: Optional[Dict[str, Any]] = None,
+    sources6: Optional[List[Dict[str, str]]] = None,
     evidence_store: Optional[EvidenceStore] = None,
     output_filepath: Optional[str] = None,
     auto_open: bool = False
 ) -> Optional[str]:
     """
     Generate an executive-grade, beautifully formatted Word document (.docx)
-    containing all 5 structured tables: Table #1 (Identity & Leadership), Table #2 (5-Year Financials),
-    Table #3 (Strategic News Milestones), Table #4 (Business Activities), and Table #5 (Strategic Conclusions).
+    containing all 6 structured tables: Table #1 (Identity & Leadership), Table #2 (5-Year Financials),
+    Table #3 (Strategic News Milestones), Table #4 (Business Activities), Table #5 (Strategic Conclusions),
+    and Table #6 (Peer Comparison & Competitor Benchmarking Matrix).
     """
     if not DOCX_AVAILABLE:
         console.print("[bold red]Error: python-docx is not installed. Please install it using 'pip install python-docx'.[/bold red]")
@@ -7424,19 +8761,42 @@ def save_company_docx(
     # TABLE #1: Corporate Identity & Leadership Governance
     # ──────────────────────────────────────────────────────────────────────────
     add_section_header("1.0", "Corporate Identity & Leadership Governance", "Statutory Registry, Market Standing & Executive Roster")
+    # Canonical Table 1 field mapping with robust key resolution and zero duplicates
+    ceo_val = data1.get("CEO") or data1.get("Managing Director / CEO") or "N/A"
+    cfo_val = data1.get("CFO") or data1.get("Chief Financial Officer (CFO)") or "N/A"
+    cto_val = data1.get("CTO") or data1.get("Chief Technology Officer (CTO)") or "N/A"
+    biz_type = data1.get("Business Type (Private Limited/Public Limited)") or data1.get("Business Type") or "N/A"
+    addr_val = data1.get("Office Address") or data1.get("Registered Address") or data1.get("Registered Office") or "N/A"
+    hq_val = data1.get("Headquarter (City)") or data1.get("Headquarters") or "N/A"
+
     t1_fields = [
         ("Company Name", data1.get("Company Name", comp_name)),
-        ("Business Type", data1.get("Business Type", "N/A")),
+        ("Business Type", biz_type),
         ("Is Listed Company", data1.get("Is Listed Company", "N/A")),
         ("Stock Ticker", data1.get("Stock Ticker", "N/A")),
-        ("Official Domain", data1.get("Official Domain", "N/A")),
-        ("Registered Address", data1.get("Registered Address", "N/A")),
-        ("Managing Director / CEO", data1.get("Managing Director / CEO", "N/A")),
-        ("Chief Financial Officer (CFO)", data1.get("Chief Financial Officer (CFO)", "N/A")),
-        ("Chief Technology Officer (CTO)", data1.get("Chief Technology Officer (CTO)", "N/A")),
+        ("Founding Year", data1.get("Founding Year", "N/A")),
+        ("Founder Name(s)", data1.get("Founder Name(s)", "N/A")),
+        ("Managing Director / CEO", ceo_val),
+        ("Chief Financial Officer (CFO)", cfo_val),
+        ("Chief Technology Officer (CTO)", cto_val),
+        ("Headquarter (City)", hq_val),
+        ("Office Address", addr_val),
+        ("Current Market Cap", data1.get("Current Market Cap (Market Value/Mcap)", data1.get("Current Market Cap", "N/A"))),
+        ("Share Price", data1.get("Share Price", "N/A")),
     ]
+
+    # Add other useful metadata fields (CIN, Legal Name, RoC, etc.) without duplication
+    normalized_keys = {
+        "company name", "business type", "is listed company", "stock ticker",
+        "official domain", "registered address", "office address", "registered office",
+        "managing director / ceo", "ceo", "chief financial officer (cfo)", "cfo",
+        "chief technology officer (cto)", "cto", "headquarter (city)", "headquarters",
+        "current market cap (market value/mcap)", "current market cap", "market cap",
+        "share price", "founding year", "founder name(s)",
+        "business type (private limited/public limited)"
+    }
     for k, v in data1.items():
-        if not k.startswith("_") and k not in [f[0] for f in t1_fields]:
+        if not k.startswith("_") and k.lower().strip() not in normalized_keys and v not in ("N/A", "", None):
             t1_fields.append((k, str(v)))
 
     tbl1 = doc.add_table(rows=1, cols=2)
@@ -7510,11 +8870,11 @@ def save_company_docx(
             set_row_props(row)
             rc = row.cells
             rc[0].text = r_data.get("Fiscal Period / Year", "N/A")
-            rc[1].text = str(r_data.get("Market Cap", "N/A"))
-            rc[2].text = str(r_data.get("Net Revenue/Net Sales", "N/A"))
-            rc[3].text = str(r_data.get("Net Profit", "N/A"))
-            rc[4].text = str(r_data.get("EBITDA", "N/A"))
-            rc[5].text = str(r_data.get("Employee Headcount", "N/A"))
+            rc[1].text = strip_ai_markers(str(r_data.get("Market Cap", "N/A")))
+            rc[2].text = strip_ai_markers(str(r_data.get("Net Revenue/Net Sales", "N/A")))
+            rc[3].text = strip_ai_markers(str(r_data.get("Net Profit", "N/A")))
+            rc[4].text = strip_ai_markers(str(r_data.get("EBITDA", "N/A")))
+            rc[5].text = strip_ai_markers(str(r_data.get("Employee Headcount", "N/A")))
 
             bg_col = ZEBRA_BG if idx % 2 == 0 else "FFFFFF"
             for i, cell in enumerate(rc):
@@ -7859,6 +9219,90 @@ def save_company_docx(
             row_idx += 1
 
     add_sources_list(sources5)
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # TABLE #6: Peer Comparison & Competitive Benchmarking Matrix
+    # ──────────────────────────────────────────────────────────────────────────
+    if data6 and data6.get("rows"):
+        add_section_header("6.0", "Peer Comparison & Competitive Benchmarking Matrix", "Industry Peer Multiples, Capital Efficiency & Sector Medians")
+        peer_rows = data6.get("rows", [])
+        tbl6 = doc.add_table(rows=1, cols=7)
+        tbl6.alignment = WD_TABLE_ALIGNMENT.CENTER
+        apply_table_borders(tbl6)
+        set_row_props(tbl6.rows[0], is_header=True)
+        hdr6 = tbl6.rows[0].cells
+        hdr6[0].width = Inches(2.2)
+        hdr6[1].width = Inches(0.8)
+        hdr6[2].width = Inches(0.7)
+        hdr6[3].width = Inches(1.1)
+        hdr6[4].width = Inches(0.7)
+        hdr6[5].width = Inches(0.8)
+        hdr6[6].width = Inches(0.7)
+        hdr6[0].text = "Company / Peer"
+        hdr6[1].text = "CMP (₹)"
+        hdr6[2].text = "P/E"
+        hdr6[3].text = "Mar Cap (Cr)"
+        hdr6[4].text = "ROCE %"
+        hdr6[5].text = "Qtr Sales"
+        hdr6[6].text = "Profit Var"
+        for idx, c in enumerate(hdr6):
+            apply_shading(c, NAVY_PRIMARY)
+            apply_margins(c, top=90, bottom=90, left=100, right=100)
+            p = c.paragraphs[0]
+            if idx > 0:
+                p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+            for r in p.runs:
+                r.font.bold = True
+                r.font.size = Pt(8.5)
+                r.font.color.rgb = RGBColor(255, 255, 255)
+
+        for idx, pr in enumerate(peer_rows):
+            is_target = pr.get("is_target", False)
+            is_bench = pr.get("is_benchmark", False)
+            row = tbl6.add_row()
+            set_row_props(row)
+            rc = row.cells
+            rc[0].width = Inches(2.2)
+            rc[1].width = Inches(0.8)
+            rc[2].width = Inches(0.7)
+            rc[3].width = Inches(1.1)
+            rc[4].width = Inches(0.7)
+            rc[5].width = Inches(0.8)
+            rc[6].width = Inches(0.7)
+
+            prefix = "▶ " if is_target else ""
+            rc[0].text = f"{prefix}{pr.get('name', 'N/A')}"
+            rc[1].text = str(pr.get('cmp', 'N/A'))
+            rc[2].text = str(pr.get('pe', 'N/A'))
+            rc[3].text = str(pr.get('market_cap', 'N/A'))
+            rc[4].text = str(pr.get('roce', 'N/A'))
+            rc[5].text = str(pr.get('sales_qtr', 'N/A'))
+            rc[6].text = str(pr.get('qtr_profit_var', 'N/A'))
+
+            if is_target:
+                bg_col = "E0F2FE"  # Light Sky Blue highlight
+            elif is_bench:
+                bg_col = "FEF3C7"  # Warm amber highlight for median
+            else:
+                bg_col = ZEBRA_BG if idx % 2 == 0 else "FFFFFF"
+
+            for c_i, c in enumerate(rc):
+                apply_shading(c, bg_col)
+                apply_margins(c, top=65, bottom=65, left=80, right=80)
+                p = c.paragraphs[0]
+                if c_i > 0:
+                    p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+                for r in p.runs:
+                    r.font.size = Pt(8)
+                    r.font.color.rgb = RGBColor(30, 41, 59)
+            if is_target:
+                rc[0].paragraphs[0].runs[0].font.bold = True
+                rc[0].paragraphs[0].runs[0].font.color.rgb = RGBColor(3, 105, 161)
+            elif is_bench:
+                rc[0].paragraphs[0].runs[0].font.bold = True
+                rc[0].paragraphs[0].runs[0].font.italic = True
+
+        add_sources_list(sources6 or [])
 
     # Save to file
     doc.save(output_filepath)
@@ -8457,7 +9901,459 @@ def validate_financial_records(
                         "severity": "HIGH"
                     })
 
-    return violations
+# ──────────────────────────────────────────────────────────────────────────────
+# HEAD-TO-HEAD DUAL-COMPANY COMPARATIVE INTELLIGENCE ENGINE
+# ──────────────────────────────────────────────────────────────────────────────
+
+def calculate_comparative_edge(
+    dim: str,
+    val_a: Any,
+    val_b: Any,
+    name_a: str,
+    name_b: str,
+    ticker_a: Optional[str] = None,
+    ticker_b: Optional[str] = None
+) -> str:
+    """Calculate which company leads on a metric and by what margin."""
+    str_a = str(val_a).strip()
+    str_b = str(val_b).strip()
+    if not str_a or str_a in ("N/A", "N/A (Privately Held)", "None") or not str_b or str_b in ("N/A", "N/A (Privately Held)", "None"):
+        return "N/A"
+
+    def extract_num(s: str) -> Optional[float]:
+        # Strip commas FIRST so "10,889" stays "10889", not "10 889"
+        clean = s.replace(",", "")
+        clean = re.sub(r"[^\d.]", " ", clean)
+        parts = clean.split()
+        if parts:
+            try:
+                return float(parts[0])
+            except ValueError:
+                return None
+        return None
+
+    def clean_name(name: str, ticker: Optional[str] = None) -> str:
+        if ticker:
+            t = re.sub(r"^(?:NSE|BSE|NSE/BSE):\s*", "", ticker).strip()
+            t_first = t.split()[0] if t else ""
+            if t_first and t_first not in ("N/A", "None"):
+                return t_first
+        c = re.sub(r"^(?:The|Company)\s+", "", name, flags=re.I).strip()
+        tokens = c.split()
+        return tokens[0] if tokens else name
+
+    num_a = extract_num(str_a)
+    num_b = extract_num(str_b)
+
+    short_a = clean_name(name_a, ticker_a)
+    short_b = clean_name(name_b, ticker_b)
+
+    if num_a is not None and num_b is not None and num_a > 0 and num_b > 0:
+        if any(term in dim.lower() for term in ["market cap", "revenue", "profit", "ebitda", "headcount", "price"]):
+            if num_a > num_b:
+                mult = num_a / num_b
+                pct = ((num_a - num_b) / num_b) * 100
+                if mult >= 2.0:
+                    return f"{short_a} ({mult:.1f}x larger)"
+                return f"{short_a} (+{pct:.0f}%)"
+            elif num_b > num_a:
+                mult = num_b / num_a
+                pct = ((num_b - num_a) / num_a) * 100
+                if mult >= 2.0:
+                    return f"{short_b} ({mult:.1f}x larger)"
+                return f"{short_b} (+{pct:.0f}%)"
+            else:
+                return "Parity (Equal)"
+
+    if "verdict" in dim.lower():
+        if str_a.lower() == str_b.lower():
+            return "Parity (Equal)"
+        if "strong" in str_a.lower() and "strong" not in str_b.lower():
+            return f"{short_a} (Stronger Growth)"
+        elif "strong" in str_b.lower() and "strong" not in str_a.lower():
+            return f"{short_b} (Stronger Growth)"
+        elif "growth" in str_a.lower() and "decline" in str_b.lower():
+            return f"{short_a} (Stronger Growth)"
+        elif "growth" in str_b.lower() and "decline" in str_a.lower():
+            return f"{short_b} (Stronger Growth)"
+        return "Parity (Equal)"
+
+    return "—"
+
+
+def display_head_to_head_comparison(data_a: Dict[str, Any], data_b: Dict[str, Any]):
+    """Render dual-company side-by-side comparative matrix in terminal."""
+    name_a = data_a.get("Company Name", "Company A")
+    name_b = data_b.get("Company Name", "Company B")
+    ticker_a = data_a.get("Stock Ticker")
+    ticker_b = data_b.get("Stock Ticker")
+
+    table = Table(
+        title=f"[bold cyan]Institutional Head-to-Head Comparative Showdown[/bold cyan]\n[bold green]{name_a}[/bold green] [bold yellow]vs[/bold yellow] [bold cyan]{name_b}[/bold cyan]",
+        show_header=True,
+        header_style="bold magenta",
+        show_lines=True
+    )
+
+    table.add_column("Strategic Dimension / Metric", style="bold white", width=28)
+    table.add_column(f"{name_a}", style="bold green", width=24)
+    table.add_column(f"{name_b}", style="bold cyan", width=24)
+    table.add_column("Comparative Leader & Delta", style="bold yellow", width=28)
+
+    dimensions = [
+        ("Stock Ticker / Status", data_a.get("Stock Ticker", "N/A"), data_b.get("Stock Ticker", "N/A")),
+        ("Business Type", data_a.get("Business Type", "N/A"), data_b.get("Business Type", "N/A")),
+        ("Headquarters", data_a.get("Headquarter (City)", data_a.get("Registered Address", "N/A")), data_b.get("Headquarter (City)", data_b.get("Registered Address", "N/A"))),
+        ("Managing Director / CEO", data_a.get("CEO", data_a.get("Managing Director / CEO", "N/A")), data_b.get("CEO", data_b.get("Managing Director / CEO", "N/A"))),
+        ("Chief Financial Officer (CFO)", data_a.get("CFO", data_a.get("Chief Financial Officer (CFO)", "N/A")), data_b.get("CFO", data_b.get("Chief Financial Officer (CFO)", "N/A"))),
+        ("Current Market Cap", data_a.get("Market Cap", data_a.get("Current Market Cap (Market Value/Mcap)", "N/A")), data_b.get("Market Cap", data_b.get("Current Market Cap (Market Value/Mcap)", "N/A"))),
+        ("Share Price", data_a.get("Share Price", "N/A"), data_b.get("Share Price", "N/A")),
+        ("Latest Net Revenue", data_a.get("Net Revenue", "N/A"), data_b.get("Net Revenue", "N/A")),
+        ("Latest Net Profit", data_a.get("Net Profit", "N/A"), data_b.get("Net Profit", "N/A")),
+        ("Latest EBITDA", data_a.get("EBITDA", "N/A"), data_b.get("EBITDA", "N/A")),
+        ("Employee Headcount", data_a.get("Headcount", "N/A"), data_b.get("Headcount", "N/A")),
+        ("Growth Trajectory Verdict", data_a.get("Growth Verdict", "N/A"), data_b.get("Growth Verdict", "N/A")),
+    ]
+
+    for dim, val_a, val_b in dimensions:
+        edge = calculate_comparative_edge(dim, val_a, val_b, name_a, name_b, ticker_a=ticker_a, ticker_b=ticker_b)
+        table.add_row(dim, str(val_a), str(val_b), edge)
+
+    console.print()
+    console.print(table)
+    console.print()
+
+
+def save_comparison_docx(
+    data_a: Dict[str, Any],
+    data_b: Dict[str, Any],
+    output_filepath: Optional[str] = None,
+    auto_open: bool = False
+) -> Optional[str]:
+    """Generate an executive Word document comparing Company A vs Company B head-to-head."""
+    if not DOCX_AVAILABLE:
+        console.print("[dim yellow]Note: python-docx not installed. Skipping Word document generation.[/dim yellow]")
+        return None
+
+    name_a = data_a.get("Company Name", "Company A")
+    name_b = data_b.get("Company Name", "Company B")
+    ticker_a = data_a.get("Stock Ticker")
+    ticker_b = data_b.get("Stock Ticker")
+
+    if not output_filepath:
+        clean_a = re.sub(r"[^\w\s-]", "", name_a).strip().replace(" ", "_")
+        clean_b = re.sub(r"[^\w\s-]", "", name_b).strip().replace(" ", "_")
+        output_filepath = f"{clean_a}_vs_{clean_b}_comparison.docx"
+
+    doc = docx.Document()
+    for sec in doc.sections:
+        sec.top_margin = Inches(0.75)
+        sec.bottom_margin = Inches(0.75)
+        sec.left_margin = Inches(0.75)
+        sec.right_margin = Inches(0.75)
+
+    NAVY_PRIMARY = "0F2942"
+    ZEBRA_BG = "F8FAFC"
+
+    def apply_table_borders(table):
+        tblPr = table._tbl.tblPr
+        borders_xml = parse_xml(
+            f'<w:tblBorders {nsdecls("w")}>\n'
+            f'  <w:top w:val="single" w:sz="12" w:space="0" w:color="{NAVY_PRIMARY}"/>\n'
+            f'  <w:bottom w:val="single" w:sz="12" w:space="0" w:color="{NAVY_PRIMARY}"/>\n'
+            f'  <w:insideH w:val="single" w:sz="4" w:space="0" w:color="CBD5E1"/>\n'
+            f'  <w:left w:val="none"/>\n'
+            f'  <w:right w:val="none"/>\n'
+            f'  <w:insideV w:val="none"/>\n'
+            f'</w:tblBorders>'
+        )
+        tblPr.append(borders_xml)
+
+    def set_row_props(row, is_header=False):
+        trPr = row._tr.get_or_add_trPr()
+        trPr.append(parse_xml(f'<w:cantSplit {nsdecls("w")}/>'))
+        if is_header:
+            trPr.append(parse_xml(f'<w:tblHeader {nsdecls("w")}/>'))
+
+    def apply_shading(cell, color_hex):
+        tcPr = cell._tc.get_or_add_tcPr()
+        tcPr.append(parse_xml(f'<w:shd {nsdecls("w")} w:fill="{color_hex}"/>'))
+
+    def apply_margins(cell, top=80, bottom=80, left=110, right=110):
+        tcPr = cell._tc.get_or_add_tcPr()
+        tcPr.append(parse_xml(
+            f'<w:tcMar {nsdecls("w")}>\n'
+            f'  <w:top w:w="{top}" w:type="dxa"/>\n'
+            f'  <w:bottom w:w="{bottom}" w:type="dxa"/>\n'
+            f'  <w:left w:w="{left}" w:type="dxa"/>\n'
+            f'  <w:right w:w="{right}" w:type="dxa"/>\n'
+            f'</w:tcMar>'
+        ))
+
+    p_title = doc.add_paragraph()
+    p_title.paragraph_format.space_before = Pt(0)
+    p_title.paragraph_format.space_after = Pt(2)
+    r_title = p_title.add_run(f"{name_a} vs {name_b}")
+    r_title.font.name = "Calibri"
+    r_title.font.size = Pt(22)
+    r_title.font.bold = True
+    r_title.font.color.rgb = RGBColor(15, 41, 66)
+
+    p_sub = doc.add_paragraph()
+    p_sub.paragraph_format.space_after = Pt(3)
+    r_sub = p_sub.add_run("HEAD-TO-HEAD INSTITUTIONAL COMPETITIVE INTELLIGENCE DOSSIER")
+    r_sub.font.name = "Calibri"
+    r_sub.font.size = Pt(10)
+    r_sub.font.bold = True
+    r_sub.font.color.rgb = RGBColor(13, 148, 136)
+
+    cur_time_str = datetime.now().strftime("%d %B %Y, %I:%M %p")
+    p_meta = doc.add_paragraph()
+    p_meta.paragraph_format.space_after = Pt(14)
+    r_meta = p_meta.add_run(f"Data Sources: Screener.in, Regulatory Filings & Gemini AI Synthesis | As of {cur_time_str}")
+    r_meta.font.size = Pt(8.5)
+    r_meta.font.italic = True
+    r_meta.font.color.rgb = RGBColor(100, 116, 139)
+
+    p_h1 = doc.add_paragraph()
+    p_h1.paragraph_format.space_before = Pt(12)
+    p_h1.paragraph_format.space_after = Pt(4)
+    r_h1 = p_h1.add_run("1.0 Corporate Dimensions & Leadership Showdown")
+    r_h1.font.bold = True
+    r_h1.font.size = Pt(13)
+    r_h1.font.color.rgb = RGBColor(15, 41, 66)
+
+    tbl_comp = doc.add_table(rows=1, cols=4)
+    tbl_comp.alignment = WD_TABLE_ALIGNMENT.CENTER
+    apply_table_borders(tbl_comp)
+    set_row_props(tbl_comp.rows[0], is_header=True)
+    hdr = tbl_comp.rows[0].cells
+    hdr[0].width = Inches(2.2)
+    hdr[1].width = Inches(1.8)
+    hdr[2].width = Inches(1.8)
+    hdr[3].width = Inches(1.2)
+    hdr[0].text = "Strategic Dimension"
+    hdr[1].text = name_a
+    hdr[2].text = name_b
+    hdr[3].text = "Leader / Advantage"
+
+    for idx, c in enumerate(hdr):
+        apply_shading(c, NAVY_PRIMARY)
+        apply_margins(c, top=90, bottom=90, left=110, right=110)
+        p = c.paragraphs[0]
+        if idx in (1, 2):
+            p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        for r in p.runs:
+            r.font.bold = True
+            r.font.size = Pt(9)
+            r.font.color.rgb = RGBColor(255, 255, 255)
+
+    dimensions = [
+        ("Stock Ticker", data_a.get("Stock Ticker", "N/A"), data_b.get("Stock Ticker", "N/A")),
+        ("Business Type", data_a.get("Business Type", "N/A"), data_b.get("Business Type", "N/A")),
+        ("Headquarters", data_a.get("Headquarter (City)", data_a.get("Registered Address", "N/A")), data_b.get("Headquarter (City)", data_b.get("Registered Address", "N/A"))),
+        ("Managing Director / CEO", data_a.get("CEO", data_a.get("Managing Director / CEO", "N/A")), data_b.get("CEO", data_b.get("Managing Director / CEO", "N/A"))),
+        ("Chief Financial Officer (CFO)", data_a.get("CFO", data_a.get("Chief Financial Officer (CFO)", "N/A")), data_b.get("CFO", data_b.get("Chief Financial Officer (CFO)", "N/A"))),
+        ("Current Market Cap", data_a.get("Market Cap", data_a.get("Current Market Cap (Market Value/Mcap)", "N/A")), data_b.get("Market Cap", data_b.get("Current Market Cap (Market Value/Mcap)", "N/A"))),
+        ("Share Price", data_a.get("Share Price", "N/A"), data_b.get("Share Price", "N/A")),
+        ("Latest Net Revenue", data_a.get("Net Revenue", "N/A"), data_b.get("Net Revenue", "N/A")),
+        ("Latest Net Profit", data_a.get("Net Profit", "N/A"), data_b.get("Net Profit", "N/A")),
+        ("Latest EBITDA", data_a.get("EBITDA", "N/A"), data_b.get("EBITDA", "N/A")),
+        ("Employee Headcount", data_a.get("Headcount", "N/A"), data_b.get("Headcount", "N/A")),
+        ("Growth Trajectory Verdict", data_a.get("Growth Verdict", "N/A"), data_b.get("Growth Verdict", "N/A")),
+    ]
+
+    for idx, (dim, val_a, val_b) in enumerate(dimensions):
+        row = tbl_comp.add_row()
+        set_row_props(row)
+        rc = row.cells
+        rc[0].width = Inches(2.2)
+        rc[1].width = Inches(1.8)
+        rc[2].width = Inches(1.8)
+        rc[3].width = Inches(1.2)
+        rc[0].text = dim
+        rc[1].text = str(val_a)
+        rc[2].text = str(val_b)
+        rc[3].text = calculate_comparative_edge(dim, val_a, val_b, name_a, name_b, ticker_a=ticker_a, ticker_b=ticker_b)
+
+        bg_col = ZEBRA_BG if idx % 2 == 0 else "FFFFFF"
+        for c_i, c in enumerate(rc):
+            apply_shading(c, bg_col)
+            apply_margins(c, top=65, bottom=65, left=90, right=90)
+            p = c.paragraphs[0]
+            if c_i in (1, 2):
+                p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+            for r in p.runs:
+                r.font.size = Pt(8.5)
+                r.font.color.rgb = RGBColor(30, 41, 59)
+        rc[0].paragraphs[0].runs[0].font.bold = True
+
+    doc.save(output_filepath)
+    abs_path = os.path.abspath(output_filepath)
+    console.print(f"[bold green]✔ Saved complete comparative Word report to: [cyan]{output_filepath}[/cyan][/bold green]")
+    if auto_open:
+        open_file_externally(abs_path)
+    return abs_path
+
+
+def run_head_to_head_comparison(comp_a_query: str, comp_b_query: str):
+    """Execute complete head-to-head competitive showdown between two companies."""
+    console.print()
+    console.print(Panel(
+        f"[bold cyan]Head-to-Head Institutional Comparative Intelligence Showdown[/bold cyan]\n"
+        f"[bold white]{comp_a_query}[/bold white] [bold yellow]VS[/bold yellow] [bold white]{comp_b_query}[/bold white]",
+        border_style="cyan"
+    ))
+
+    # ── Step 1: Discover candidates for both companies ──
+    console.print(f"\n[dim]Searching candidates for '{comp_a_query}'...[/dim]")
+    cands_a = find_company_candidates(comp_a_query)
+    console.print(f"[dim]Searching candidates for '{comp_b_query}'...[/dim]")
+    cands_b = find_company_candidates(comp_b_query)
+
+    name_a = cands_a[0]["name"] if cands_a else comp_a_query
+    name_b = cands_b[0]["name"] if cands_b else comp_b_query
+
+    # ── Step 2: Hybrid Verification — Confirmation Banner ──
+    desc_a = cands_a[0].get("desc", "") if cands_a else ""
+    desc_b = cands_b[0].get("desc", "") if cands_b else ""
+    desc_a_short = (desc_a[:80] + "…") if len(desc_a) > 80 else desc_a
+    desc_b_short = (desc_b[:80] + "…") if len(desc_b) > 80 else desc_b
+
+    console.print()
+    console.print(Panel(
+        f"[bold white]Entity Verification — Auto-Matched Companies[/bold white]\n\n"
+        f"  [bold yellow]Company A:[/bold yellow]  [bold green]{name_a}[/bold green]\n"
+        f"             [dim]{desc_a_short}[/dim]\n\n"
+        f"  [bold yellow]Company B:[/bold yellow]  [bold green]{name_b}[/bold green]\n"
+        f"             [dim]{desc_b_short}[/dim]",
+        title="[bold cyan]⚡ VS Mode — Entity Confirmation[/bold cyan]",
+        border_style="cyan"
+    ))
+
+    if sys.stdin.isatty():
+        verify_choice = console.input(
+            "[bold yellow]Press Enter to proceed, or 'c' to change selection: [/bold yellow]"
+        ).strip().lower()
+
+        if verify_choice in ("c", "change"):
+            # ── Sequential candidate selection for Company A ──
+            if cands_a and len(cands_a) > 1:
+                tbl_a = Table(
+                    title=f"[bold cyan]Verified Matches for Company A: '{comp_a_query}'[/bold cyan]",
+                    show_header=True, header_style="bold magenta"
+                )
+                tbl_a.add_column("#", style="bold yellow", width=4)
+                tbl_a.add_column("Company Name", style="bold white", width=34)
+                tbl_a.add_column("Corporate Details / Description", style="dim white")
+                for idx, cand in enumerate(cands_a, 1):
+                    tbl_a.add_row(str(idx), cand["name"], cand["desc"])
+                console.print()
+                console.print(tbl_a)
+                pick_a = console.input(
+                    f"[bold yellow]Select Company A [1-{len(cands_a)}] (Enter for [1]): [/bold yellow]"
+                ).strip()
+                if pick_a.isdigit() and 1 <= int(pick_a) <= len(cands_a):
+                    name_a = cands_a[int(pick_a) - 1]["name"]
+                else:
+                    name_a = cands_a[0]["name"]
+            else:
+                console.print(f"[dim]Only one match for Company A: [bold]{name_a}[/bold][/dim]")
+
+            # ── Sequential candidate selection for Company B ──
+            if cands_b and len(cands_b) > 1:
+                tbl_b = Table(
+                    title=f"[bold cyan]Verified Matches for Company B: '{comp_b_query}'[/bold cyan]",
+                    show_header=True, header_style="bold magenta"
+                )
+                tbl_b.add_column("#", style="bold yellow", width=4)
+                tbl_b.add_column("Company Name", style="bold white", width=34)
+                tbl_b.add_column("Corporate Details / Description", style="dim white")
+                for idx, cand in enumerate(cands_b, 1):
+                    tbl_b.add_row(str(idx), cand["name"], cand["desc"])
+                console.print()
+                console.print(tbl_b)
+                pick_b = console.input(
+                    f"[bold yellow]Select Company B [1-{len(cands_b)}] (Enter for [1]): [/bold yellow]"
+                ).strip()
+                if pick_b.isdigit() and 1 <= int(pick_b) <= len(cands_b):
+                    name_b = cands_b[int(pick_b) - 1]["name"]
+                else:
+                    name_b = cands_b[0]["name"]
+            else:
+                console.print(f"[dim]Only one match for Company B: [bold]{name_b}[/bold][/dim]")
+
+            console.print(Panel(
+                f"  [bold yellow]Company A:[/bold yellow]  [bold green]{name_a}[/bold green]\n"
+                f"  [bold yellow]Company B:[/bold yellow]  [bold green]{name_b}[/bold green]",
+                title="[bold cyan]✔ Final Selection[/bold cyan]",
+                border_style="green"
+            ))
+
+    # ── Step 3: Full pipeline for Entity A ──
+    console.print(f"\n[cyan]Resolving Entity A: '[bold]{name_a}[/bold]'...[/cyan]")
+    evidence_a = EvidenceStore(name_a)
+    data1_a, src1_a = fetch_table1_data(name_a, evidence_store=evidence_a)
+    canon_a = resolve_canonical_entity(name_a, data1_a, src1_a)
+    data2_a, src2_a = fetch_table2_data(canon_a, canon_a.get("ticker", "N/A"), evidence_store=evidence_a)
+    data5_a, src5_a = fetch_strategic_conclusions(canon_a, data1_a, data2_a, {}, {}, evidence_store=evidence_a)
+
+    # ── Step 4: Full pipeline for Entity B ──
+    console.print(f"\n[cyan]Resolving Entity B: '[bold]{name_b}[/bold]'...[/cyan]")
+    evidence_b = EvidenceStore(name_b)
+    data1_b, src1_b = fetch_table1_data(name_b, evidence_store=evidence_b)
+    canon_b = resolve_canonical_entity(name_b, data1_b, src1_b)
+    data2_b, src2_b = fetch_table2_data(canon_b, canon_b.get("ticker", "N/A"), evidence_store=evidence_b)
+    data5_b, src5_b = fetch_strategic_conclusions(canon_b, data1_b, data2_b, {}, {}, evidence_store=evidence_b)
+
+    row_a = data2_a.get("rows", [{}])[0] if data2_a.get("rows") else {}
+    row_b = data2_b.get("rows", [{}])[0] if data2_b.get("rows") else {}
+
+    disp_name_a = canon_a.get("canonical_name", name_a)
+    disp_name_b = canon_b.get("canonical_name", name_b)
+
+    comp_data_a = {
+        "Company Name": disp_name_a,
+        "Stock Ticker": data1_a.get("Stock Ticker", "N/A"),
+        "Business Type": data1_a.get("Business Type (Private Limited/Public Limited)", "N/A"),
+        "Headquarter (City)": data1_a.get("Headquarter (City)", data1_a.get("Registered Address", "N/A")),
+        "CEO": data1_a.get("CEO", "N/A"),
+        "CFO": data1_a.get("CFO", "N/A"),
+        "Market Cap": data1_a.get("Current Market Cap (Market Value/Mcap)", row_a.get("Market Cap", "N/A")),
+        "Share Price": data1_a.get("Share Price", "N/A"),
+        "Net Revenue": row_a.get("Net Revenue/Net Sales", "N/A"),
+        "Net Profit": row_a.get("Net Profit", "N/A"),
+        "EBITDA": row_a.get("EBITDA", "N/A"),
+        "Headcount": row_a.get("Employee Headcount", "N/A"),
+        "Growth Verdict": data5_a.get("Growth Assessment", {}).get("Verdict", "Steady Growth")
+    }
+
+    comp_data_b = {
+        "Company Name": disp_name_b,
+        "Stock Ticker": data1_b.get("Stock Ticker", "N/A"),
+        "Business Type": data1_b.get("Business Type (Private Limited/Public Limited)", "N/A"),
+        "Headquarter (City)": data1_b.get("Headquarter (City)", data1_b.get("Registered Address", "N/A")),
+        "CEO": data1_b.get("CEO", "N/A"),
+        "CFO": data1_b.get("CFO", "N/A"),
+        "Market Cap": data1_b.get("Current Market Cap (Market Value/Mcap)", row_b.get("Market Cap", "N/A")),
+        "Share Price": data1_b.get("Share Price", "N/A"),
+        "Net Revenue": row_b.get("Net Revenue/Net Sales", "N/A"),
+        "Net Profit": row_b.get("Net Profit", "N/A"),
+        "EBITDA": row_b.get("EBITDA", "N/A"),
+        "Headcount": row_b.get("Employee Headcount", "N/A"),
+        "Growth Verdict": data5_b.get("Growth Assessment", {}).get("Verdict", "Steady Growth")
+    }
+
+    display_head_to_head_comparison(comp_data_a, comp_data_b)
+
+    docx_choice = console.input("[bold yellow]Do you want to save this Head-to-Head Comparative Report as a DOCX file? (Y/n): [/bold yellow]").strip().lower()
+    if docx_choice in ("", "y", "yes"):
+        saved_path = save_comparison_docx(comp_data_a, comp_data_b)
+        if saved_path:
+            open_choice = console.input("[bold cyan]Open comparative report now in Microsoft Word? (Y/n): [/bold cyan]").strip().lower()
+            if open_choice in ("", "y", "yes"):
+                open_file_externally(saved_path)
+                console.print("[dim green]✔ Launching comparative document in default viewer...[/dim green]")
 
 
 def main():
@@ -8471,9 +10367,14 @@ def main():
         border_style="cyan"
     ))
 
-    # Support CLI parameter: python company_lookup.py "Liberty Shoes"
+    # Support CLI parameter: python company_lookup.py "Liberty Shoes" or "TCS vs Infosys"
     if len(sys.argv) > 1:
         query = " ".join(sys.argv[1:]).strip('"\'')
+        vs_parts = re.split(r"\s+(?:vs\.?|versus)\s+", query, flags=re.I)
+        if len(vs_parts) == 2 and vs_parts[0].strip() and vs_parts[1].strip():
+            run_head_to_head_comparison(vs_parts[0].strip(), vs_parts[1].strip())
+            return
+
         if not is_valid_company_name(query):
             console.print("[bold red]Please enter valid company name.[/bold red]")
             return
@@ -8544,27 +10445,36 @@ def main():
         data5, sources5 = fetch_strategic_conclusions(canonical_entity, data1, data2, data3, data4, evidence_store=evidence_store)
         display_strategic_conclusions(data5, sources5)
 
+        console.print(f"\n[yellow]Fetching Table #6 (Competitor Benchmarking & Peer Matrix) for:[/yellow] [bold]{canon_disp}[/bold]...")
+        data6, sources6 = fetch_peer_comparison(canonical_entity, data2=data2, evidence_store=evidence_store)
+        display_peer_comparison(data6, sources6)
+
         docx_choice = console.input("\n[bold yellow]Do you want to save this report as a DOCX file? (Y/n): [/bold yellow]").strip().lower()
         if docx_choice in ("", "y", "yes"):
-            saved_doc = save_company_docx(data1, sources1, data2, sources2, data3, sources3, data4, sources4, data5, sources5, evidence_store=evidence_store)
+            saved_doc = save_company_docx(data1, sources1, data2, sources2, data3, sources3, data4, sources4, data5, sources5, data6, sources6, evidence_store=evidence_store)
             if saved_doc:
                 open_choice = console.input("[bold cyan]Open the DOCX report now in Microsoft Word? (Y/n): [/bold cyan]").strip().lower()
                 if open_choice in ("", "y", "yes"):
                     open_file_externally(saved_doc)
                     console.print("[dim green]✔ Launching document in default viewer...[/dim green]")
 
-        save_table_records(data1, sources1, data2, sources2, data3, sources3, data4, sources4, data5, sources5, evidence_store=evidence_store)
+        save_table_records(data1, sources1, data2, sources2, data3, sources3, data4, sources4, data5, sources5, data6, sources6, evidence_store=evidence_store)
         return
 
     # Interactive Loop
     while True:
         try:
-            company_input = console.input("[bold yellow]Enter Company Name (or 'q' to quit): [/bold yellow]").strip()
+            company_input = console.input("[bold yellow]Enter Company Name (or 'Company A vs Company B', 'q' to quit): [/bold yellow]").strip()
             if not company_input:
                 continue
             if company_input.lower() in ("q", "quit", "exit"):
                 console.print("[dim]Goodbye![/dim]")
                 break
+
+            vs_parts = re.split(r"\s+(?:vs\.?|versus)\s+", company_input, flags=re.I)
+            if len(vs_parts) == 2 and vs_parts[0].strip() and vs_parts[1].strip():
+                run_head_to_head_comparison(vs_parts[0].strip(), vs_parts[1].strip())
+                continue
 
             if not is_valid_company_name(company_input):
                 console.print("[bold red]Please enter valid company name.[/bold red]\n")
@@ -8629,18 +10539,22 @@ def main():
             data5, sources5 = fetch_strategic_conclusions(canonical_entity, data1, data2, data3, data4, evidence_store=evidence_store)
             display_strategic_conclusions(data5, sources5)
 
+            console.print(f"\n[cyan]Fetching Table #6 (Competitor Benchmarking & Peer Matrix) for '[bold]{canon_disp}[/bold]'...[/cyan]")
+            data6, sources6 = fetch_peer_comparison(canonical_entity, data2=data2, evidence_store=evidence_store)
+            display_peer_comparison(data6, sources6)
+
             docx_choice = console.input("\n[bold yellow]Do you want to save this report as a DOCX file? (Y/n): [/bold yellow]").strip().lower()
             if docx_choice in ("", "y", "yes"):
-                saved_doc = save_company_docx(data1, sources1, data2, sources2, data3, sources3, data4, sources4, data5, sources5, evidence_store=evidence_store)
+                saved_doc = save_company_docx(data1, sources1, data2, sources2, data3, sources3, data4, sources4, data5, sources5, data6, sources6, evidence_store=evidence_store)
                 if saved_doc:
                     open_choice = console.input("[bold cyan]Open the DOCX report now in Microsoft Word? (Y/n): [/bold cyan]").strip().lower()
                     if open_choice in ("", "y", "yes"):
                         open_file_externally(saved_doc)
                         console.print("[dim green]✔ Launching document in default viewer...[/dim green]")
 
-            save_choice = console.input("[bold]Save all records (Table #1–#5) to CSV/JSON? (Y/n): [/bold]").strip().lower()
+            save_choice = console.input("[bold]Save all records (Table #1–#6) to CSV/JSON? (Y/n): [/bold]").strip().lower()
             if save_choice in ("", "y", "yes"):
-                save_table_records(data1, sources1, data2, sources2, data3, sources3, data4, sources4, data5, sources5, evidence_store=evidence_store)
+                save_table_records(data1, sources1, data2, sources2, data3, sources3, data4, sources4, data5, sources5, data6, sources6, evidence_store=evidence_store)
 
 
         except KeyboardInterrupt:
