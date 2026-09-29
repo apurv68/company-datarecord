@@ -683,6 +683,12 @@ def resolve_hq_city(raw_hq: str, addr: str = "") -> str:
     # If raw_hq is not in INDIAN_CITIES, check if addr has a recognized city
     if addr:
         addr_low = addr.lower()
+        # Check Gurugram / Gurgaon pincodes or landmark roads
+        if any(k in addr_low for k in ["122001", "122002", "122003", "122004", "122018", "kherki daula", "basai road", "gurugram", "gurgaon"]):
+            if raw_lower in ("noida", "new delhi", "delhi"):
+                return f"{raw_clean.title()} / Gurugram"
+            if raw_lower not in INDIAN_CITIES:
+                return "Gurugram"
         for c in INDIAN_CITIES:
             if re.search(r'\b' + re.escape(c) + r'\b', addr_low):
                 return c.title()
@@ -1831,6 +1837,43 @@ def is_relevant_result(item: Dict[str, str], company_name: str, category: str = 
     return False
 
 
+def query_tavily_search(
+    query: str,
+    max_results: int = 5
+) -> List[Dict[str, str]]:
+    """Query Tavily AI Search API for high-precision, unblocked web research."""
+    tavily_key = os.environ.get("TAVILY_API_KEY", "").strip()
+    if not tavily_key:
+        return []
+    try:
+        url = "https://api.tavily.com/search"
+        payload = {
+            "api_key": tavily_key,
+            "query": query,
+            "max_results": max_results,
+            "search_depth": "advanced",
+            "include_answer": False
+        }
+        resp = requests.post(url, json=payload, timeout=8)
+        if resp.status_code == 200:
+            data = resp.json()
+            items = []
+            for r in data.get("results", []):
+                snippet = clean_text(r.get("content", ""))
+                title = clean_text(r.get("title", ""))
+                href = r.get("url", "")
+                if snippet and snippet != "N/A":
+                    items.append({
+                        "title": title,
+                        "snippet": snippet,
+                        "source": href
+                    })
+            return items
+    except Exception:
+        pass
+    return []
+
+
 def search_ddgs_category(
     queries: List[str],
     company_name: str,
@@ -1838,12 +1881,33 @@ def search_ddgs_category(
     max_results: int = 3
 ) -> List[Dict[str, str]]:
     """
-    Perform targeted multi-engine web search across DuckDuckGo, Brave, Yahoo, Google.
-    Tries primary queries first; if few or zero results, cascades to relaxed fallback queries.
+    Perform targeted multi-engine web search across Tavily, DuckDuckGo, Brave, Yahoo, Google.
+    Prioritizes Tavily AI search when available; cascades to DDGS and relaxed fallback queries.
     """
     results = []
     seen_urls = set()
 
+    # Step 1: Tavily AI search if configured (highest precision, unblocked)
+    if os.environ.get("TAVILY_API_KEY"):
+        for q in queries[:2]:
+            try:
+                tav_items = query_tavily_search(q, max_results=max_results)
+                for item in tav_items:
+                    href = item.get("source", "")
+                    if href in seen_urls:
+                        continue
+                    if is_relevant_result(item, company_name, category):
+                        seen_urls.add(href)
+                        results.append(item)
+                    if len(results) >= max_results:
+                        return results
+            except Exception:
+                pass
+
+    if len(results) >= max_results:
+        return results
+
+    # Step 2: Cascade to DuckDuckGo search
     for q in queries:
         try:
             with DDGS(timeout=8) as ddgs:
@@ -2562,6 +2626,59 @@ COMMON_INDIAN_ACRONYMS = {
 
 
 
+def fetch_zaubacorp_profile(url_or_cin: str) -> Optional[Dict[str, Any]]:
+    """
+    Direct Web Registry Extractor for ZaubaCorp/MCA pages.
+    Extracts official CIN, Incorporation Date, Registered Office Address, and Directors.
+    """
+    if not url_or_cin:
+        return None
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+    url = url_or_cin if url_or_cin.startswith('http') else f'https://www.zaubacorp.com/company-cin/{url_or_cin}'
+    try:
+        r = requests.get(url, headers=headers, timeout=6)
+        if r.status_code != 200:
+            return None
+        text = r.text
+        # CIN
+        m_cin = re.search(r'\b([LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6})\b', text)
+        cin = m_cin.group(1) if m_cin else ''
+
+        # Incorporation Date: e.g. incorporated on 18 Sep 1989
+        m_inc = re.search(r'incorporated\s+on\s+([0-9]{1,2}\s+[A-Za-z]+\s+[0-9]{4})', text, re.I)
+        inc_date = m_inc.group(1).strip() if m_inc else ''
+
+        # Address
+        addrs = []
+        for line in text.splitlines():
+            if re.search(r'\b\d{6}\b', line):
+                clean = re.sub(r'<[^>]+>', ' ', line).strip()
+                clean = re.sub(r'\s+', ' ', clean)
+                if any(ind in clean.lower() for ind in ['road', 'highway', 'street', 'marg', 'nagar', 'industrial', 'estate', 'delhi', 'haryana', 'mumbai', 'bengaluru', 'pune', 'chennai', 'kolkata']):
+                    if 15 < len(clean) < 180 and 'cart' not in clean.lower() and 'href' not in clean.lower() and 'google.com' not in clean.lower():
+                        if clean not in addrs:
+                            addrs.append(clean)
+
+        # Directors
+        directors = []
+        for m in re.finditer(r'Other\s+Directorships\s+of\s+([A-Z\s]{4,35})', text):
+            d_name = m.group(1).strip()
+            if d_name not in directors and len(d_name) > 3 and 'DIRECTOR' not in d_name:
+                directors.append(d_name.title())
+
+        return {
+            'cin': cin,
+            'inc_date': inc_date,
+            'address': addrs[0] if addrs else '',
+            'directors': directors[:5],
+            'url': url
+        }
+    except Exception:
+        return None
+
+
 def enrich_corporate_master_data(
     query: str,
     existing_data: Dict[str, Any],
@@ -2591,65 +2708,110 @@ def enrich_corporate_master_data(
     f_year_hint = str(existing_data.get("Founding Year", "")).strip() if existing_data else ""
     hq_city_hint = str(existing_data.get("Headquarter (City)", "")).strip() if existing_data else ""
 
-    # 1. Direct Web Registry Search via DDGS for Official MCA / ZaubaCorp CIN Candidates
+    # 1. Direct Web Registry Search via Tavily AI / DDGS for Official MCA / ZaubaCorp CIN Candidates
     web_candidates = []
     try:
         q_words = set(w.lower() for w in re.findall(r'[A-Za-z]{3,}', clean_q))
-        with DDGS(timeout=7) as ddgs:
-            zauba_results = list(ddgs.text(f'"{clean_q}" CIN zaubacorp', max_results=6))
-            for r in zauba_results:
-                title = r.get("title", "")
-                href = r.get("href", "")
-                body = r.get("body", "")
-                comb = f"{title} {href} {body}"
-                cins = re.findall(r'\b([LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6})\b', comb)
-                for cin in set(cins):
-                    cin_state = cin[6:8]
-                    cin_year = cin[8:12]
-                    name_cand = ""
-                    m_url = re.search(r'zaubacorp\.com/(?:company/)?([A-Z0-9-]+?)(?:/|-)' + cin, href, re.I)
-                    if m_url:
-                        name_cand = m_url.group(1).replace("-", " ").strip()
-                    elif "|" in title:
-                        name_cand = title.split("|")[0].strip()
-                    elif "-" in title:
-                        name_cand = title.split("-")[0].strip()
-                    else:
-                        name_cand = title.strip()
+        
+        # Primary: Tavily AI Search (unblocked, direct ZaubaCorp links)
+        raw_registry_results = []
+        if os.environ.get("TAVILY_API_KEY"):
+            tav_items = query_tavily_search(f'"{clean_q}" CIN zaubacorp', max_results=6)
+            for item in tav_items:
+                raw_registry_results.append({
+                    "title": item.get("title", ""),
+                    "href": item.get("source", ""),
+                    "body": item.get("snippet", "")
+                })
+
+        # Fallback / Secondary: DDGS
+        if len(raw_registry_results) < 3:
+            with DDGS(timeout=7) as ddgs:
+                ddg_res = list(ddgs.text(f'"{clean_q}" CIN zaubacorp', max_results=6))
+                raw_registry_results.extend(ddg_res)
+
+        for r in raw_registry_results:
+            title = r.get("title", "")
+            href = r.get("href", "")
+            body = r.get("body", "")
+            comb = f"{title} {href} {body}"
+            cins = re.findall(r'\b([LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6})\b', comb)
+            for cin in set(cins):
+                cin_state = cin[6:8]
+                cin_year = cin[8:12]
+                name_cand = ""
+                m_url = re.search(r'zaubacorp\.com/(?:company/)?([A-Z0-9-]+?)(?:/|-)' + cin, href, re.I)
+                if m_url:
+                    name_cand = m_url.group(1).replace("-", " ").strip()
+                elif "|" in title:
+                    name_cand = title.split("|")[0].strip()
+                elif "-" in title:
+                    name_cand = title.split("-")[0].strip()
+                else:
+                    name_cand = title.strip()
+                
+                name_words = set(w.lower() for w in re.findall(r'[A-Za-z]{3,}', name_cand))
+                noise = {'limited', 'private', 'india', 'company', 'enterprises', 'industries', 'corporation', 'zaubacorp', 'details'}
+                name_words -= noise
+                
+                score = 0
+                overlap = len(q_words.intersection(name_words))
+                score += overlap * 25
+                
+                # Penalize extra words not present in the query (e.g. manufacturing, food, marketing)
+                extra_words = name_words - q_words
+                score -= len(extra_words) * 30
+                
+                # Major bonus for exact word match with query
+                if name_words == q_words:
+                    score += 150
+                
+                # Penalize auxiliary/marketing/estates/holding shell entities if query doesn't ask for them
+                if any(bad in name_cand.lower() for bad in ["marketing", "estates", "ventures", "finvest", "consultan", "holdings"]) and not any(bad in clean_q.lower() for bad in ["marketing", "estates"]):
+                    score -= 50
+                
+                # Prefer operating core entities
+                if any(op in name_cand.lower() for op in ["snacks", "foods", "manufacturing", "products", "technologies", "services"]):
+                    score += 10
                     
-                    name_words = set(w.lower() for w in re.findall(r'[A-Za-z]{3,}', name_cand))
-                    noise = {'limited', 'private', 'india', 'company', 'enterprises', 'industries', 'corporation', 'zaubacorp', 'details'}
-                    name_words -= noise
+                # Year match
+                if f_year_hint and f_year_hint in (cin_year, str(f_year_hint)):
+                    score += 35
                     
-                    score = 0
-                    overlap = len(q_words.intersection(name_words))
-                    score += overlap * 25
-                    
-                    # Penalize auxiliary/marketing/estates/holding shell entities if query doesn't ask for them
-                    if any(bad in name_cand.lower() for bad in ["marketing", "estates", "ventures", "finvest", "consultan", "holdings"]) and not any(bad in clean_q.lower() for bad in ["marketing", "estates"]):
-                        score -= 50
-                    
-                    # Prefer operating core entities
-                    if any(op in name_cand.lower() for op in ["snacks", "foods", "manufacturing", "products", "technologies", "services"]):
-                        score += 20
-                        
-                    # Year match
-                    if f_year_hint and f_year_hint in (cin_year, str(f_year_hint)):
-                        score += 35
-                        
-                    web_candidates.append({
-                        "name": name_cand.upper(),
-                        "cin": cin,
-                        "state": cin_state,
-                        "year": cin_year,
-                        "score": score,
-                        "url": href
-                    })
+                web_candidates.append({
+                    "name": name_cand.upper(),
+                    "cin": cin,
+                    "state": cin_state,
+                    "year": cin_year,
+                    "score": score,
+                    "url": href
+                })
         web_candidates.sort(key=lambda x: x["score"], reverse=True)
     except Exception:
         pass
 
     top_web_cand = web_candidates[0] if web_candidates and web_candidates[0]["score"] > 0 else None
+
+    # Live ZaubaCorp profile scrape from actual registry page
+    zauba_profile = None
+    if top_web_cand and top_web_cand.get("url") and "zaubacorp.com" in top_web_cand["url"]:
+        zauba_profile = fetch_zaubacorp_profile(top_web_cand["url"])
+    elif top_web_cand and top_web_cand.get("cin"):
+        zauba_profile = fetch_zaubacorp_profile(top_web_cand["cin"])
+
+    if zauba_profile:
+        if zauba_profile.get("cin"):
+            master["CIN"] = zauba_profile["cin"]
+            master["_cin_confidence"] = "High"
+        if zauba_profile.get("inc_date"):
+            master["Incorporation Date"] = zauba_profile["inc_date"]
+        if zauba_profile.get("address"):
+            master["Registered Office"] = zauba_profile["address"]
+        if zauba_profile.get("directors"):
+            master["Directors"] = zauba_profile["directors"]
+        if top_web_cand:
+            master["Legal Name"] = top_web_cand["name"]
+            master["RoC"] = f"RoC-{top_web_cand['state']}"
 
     # 2. Grounded corporate master lookup via Gemini regulatory expert prompt
     if os.environ.get("GEMINI_API_KEY"):
@@ -2757,13 +2919,17 @@ def enrich_corporate_master_data(
                     master["RoC"] = f"RoC-{top_web_cand['state']}"
                     
                 inc_val = str(parsed.get("incorporation_date", "")).strip()
-                if inc_val and inc_val != "N/A":
+                if zauba_profile and zauba_profile.get("inc_date"):
+                    master["Incorporation Date"] = zauba_profile["inc_date"]
+                elif inc_val and inc_val != "N/A":
                     master["Incorporation Date"] = inc_val
                 elif top_web_cand and top_web_cand.get("year"):
                     master["Incorporation Date"] = f"Year {top_web_cand['year']}"
                     
                 off_val = str(parsed.get("registered_office", "")).strip()
-                if off_val and off_val != "N/A":
+                if zauba_profile and zauba_profile.get("address"):
+                    master["Registered Office"] = zauba_profile["address"]
+                elif off_val and off_val != "N/A":
                     master["Registered Office"] = off_val
                     
                 if master["CIN"] != "N/A" and evidence_store is not None:
@@ -3297,9 +3463,14 @@ def fetch_table1_data(query: str, evidence_store: Optional[EvidenceStore] = None
             data["RoC"] = m_data["RoC"]
         if m_data.get("Incorporation Date") and m_data["Incorporation Date"] != "N/A":
             data["Incorporation Date"] = m_data["Incorporation Date"]
-        if (data.get("Office Address") in ("N/A", "") or not re.search(r'\b\d{6}\b', str(data.get("Office Address", ""))) or not has_city_match) and m_data.get("Registered Office") and m_data["Registered Office"] != "N/A":
+        if m_data.get("Registered Office") and m_data["Registered Office"] != "N/A":
             clean_m_addr = extract_office_address(m_data["Registered Office"], company_name=query, hq_city=hq_city_cur)
             data["Office Address"] = clean_m_addr if clean_m_addr != "N/A" else m_data["Registered Office"]
+        if m_data.get("Directors") and data.get("CEO") in ("N/A", "", "N/A (Unlisted / Not Publicly Disclosed)", "N/A — Not publicly disclosed"):
+            if len(m_data["Directors"]) > 1:
+                data["CEO"] = f"Joint Managing Directors: {', '.join(m_data['Directors'][:3])}"
+            elif len(m_data["Directors"]) == 1:
+                data["CEO"] = m_data["Directors"][0]
     except Exception:
         pass
 
