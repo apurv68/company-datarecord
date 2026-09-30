@@ -757,10 +757,18 @@ def extract_financial_value(raw_text: str, metric_type: str = "revenue") -> Opti
         return None
 
     text = raw_text.strip()
+    if text.upper() in ("N/A", "NONE", "NULL", "-", ""):
+        return "N/A"
+
+    # Detect negative value (e.g. -6162, -₹ 6162, (6162), ₹ -6162, loss)
+    is_neg = False
+    if metric_type in ("profit", "net_profit", "ebitda", "operating_profit"):
+        if re.search(r'^-|[-–—]\s*₹|₹\s*[-–—]|\bminus\b|\bloss\b|\([0-9,]+(?:\.[0-9]+)?\)|[-–—]\s*[0-9]', text, re.I):
+            is_neg = True
 
     # Pattern 1: Value in Crore (₹, Rs, INR prefix optional)
     cr_match = re.search(
-        r'(?:₹|rs\.?|inr)\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr(?:ore)?s?\.?)',
+        r'(?:₹|rs\.?|inr)?\s*[-–—]?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr(?:ore)?s?\.?)',
         text, re.IGNORECASE
     )
     if cr_match:
@@ -768,41 +776,43 @@ def extract_financial_value(raw_text: str, metric_type: str = "revenue") -> Opti
         try:
             num = float(num_str)
             if num > 0:
-                # Format with comma separators
                 if num == int(num):
                     formatted = f"{int(num):,}"
                 else:
                     formatted = f"{num:,.2f}"
-                return f"₹ {formatted} Cr."
+                prefix = "-₹ " if is_neg else "₹ "
+                return f"{prefix}{formatted} Cr."
         except ValueError:
             pass
 
     # Pattern 2: Already formatted with ₹ sign and Cr
-    already_match = re.search(r'₹\s*([0-9,]+(?:\.[0-9]+)?)\s*Cr\.?', text)
+    already_match = re.search(r'[-–—]?\s*₹\s*[-–—]?\s*([0-9,]+(?:\.[0-9]+)?)\s*Cr\.?', text)
     if already_match:
-        return text.strip()
+        val_core = already_match.group(1).strip()
+        prefix = "-₹ " if is_neg else "₹ "
+        return f"{prefix}{val_core} Cr."
 
     # Pattern 3: Value in billions (convert to Cr: 1 billion ≈ 8,300 Cr at ~₹83/USD, or just keep as-is)
     bn_match = re.search(
-        r'(?:₹|rs\.?|inr|\$|usd)\s*([0-9]+(?:\.[0-9]+)?)\s*(?:billion|bn)',
+        r'(?:₹|rs\.?|inr|\$|usd)?\s*[-–—]?\s*([0-9]+(?:\.[0-9]+)?)\s*(?:billion|bn)',
         text, re.IGNORECASE
     )
     if bn_match:
         try:
             num = float(bn_match.group(1))
             if "₹" in text or "rs" in text.lower() or "inr" in text.lower():
-                # Indian rupee billions -> crore (1 billion = 100 crore)
                 cr_val = num * 100
-                return f"₹ {int(cr_val):,} Cr."
+                prefix = "-₹ " if is_neg else "₹ "
+                return f"{prefix}{int(cr_val):,} Cr."
             else:
-                # USD billions -> keep as-is with $ sign
-                return f"${num:.2f} Billion"
+                prefix = "-$" if is_neg else "$"
+                return f"{prefix}{num:.2f} Billion"
         except ValueError:
             pass
 
     # Pattern 4: Plain number in crore context
     plain_match = re.search(
-        r'([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr(?:ore)?s?\.?)',
+        r'[-–—]?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(?:cr(?:ore)?s?\.?)',
         text, re.IGNORECASE
     )
     if plain_match:
@@ -814,7 +824,8 @@ def extract_financial_value(raw_text: str, metric_type: str = "revenue") -> Opti
                     formatted = f"{int(num):,}"
                 else:
                     formatted = f"{num:,.2f}"
-                return f"₹ {formatted} Cr."
+                prefix = "-₹ " if is_neg else "₹ "
+                return f"{prefix}{formatted} Cr."
         except ValueError:
             pass
 
@@ -1142,13 +1153,16 @@ def financial_sanity_check(rows: List[Dict[str, Any]], metric: str) -> List[Dict
         - Employee headcount should be a verified number between 1 and 5,000,000
     """
     def parse_crore_value(val_str: str) -> Optional[float]:
-        """Extract numeric crore value from formatted string."""
-        if not val_str or val_str == "N/A" or "privately held" in val_str.lower():
+        """Extract numeric crore value from formatted string, preserving sign."""
+        if not val_str or val_str == "N/A" or "privately held" in str(val_str).lower():
             return None
-        m = re.search(r'([0-9,]+(?:\.\d+)?)', val_str.replace(",", ""))
+        s = str(val_str).replace(",", "").strip()
+        is_neg = bool(re.search(r'^-|[-–—]\s*₹|₹\s*[-–—]|\bminus\b|\bloss\b|\([0-9,]+(?:\.[0-9]+)?\)|[-–—]\s*[0-9]', s, re.I))
+        m = re.search(r'([0-9]+(?:\.\d+)?)', s)
         if m:
             try:
-                return float(m.group(1))
+                val = float(m.group(1))
+                return -val if is_neg else val
             except ValueError:
                 return None
         return None
@@ -1174,21 +1188,23 @@ def financial_sanity_check(rows: List[Dict[str, Any]], metric: str) -> List[Dict
                 rows[-1][metric] = last_val
                 return rows
 
-    # Sanity check: year-over-year decline > 80% is suspicious
-    for i in range(1, len(values)):
-        prev = values[i - 1]
-        curr = values[i]
-        if prev is not None and curr is not None and prev > 0:
-            if curr < prev * 0.2:  # >80% drop
-                # Flag as suspicious — keep N/A instead of wrong data
-                rows[i][metric] = "N/A"
+    # Sanity check: year-over-year decline > 85% is suspicious ONLY for Top-Line Revenue
+    # (Net Profit and EBITDA fluctuate legitimately across cycles and must NOT be deleted)
+    if metric == "Net Revenue/Net Sales":
+        for i in range(1, len(values)):
+            prev = values[i - 1]
+            curr = values[i]
+            if prev is not None and curr is not None and prev > 0:
+                if curr < prev * 0.15:  # >85% drop
+                    # Flag as suspicious — keep N/A instead of wrong data
+                    rows[i][metric] = "N/A"
 
-    # Sanity check: EBITDA should not exceed Revenue
+    # Sanity check: EBITDA should not exceed Revenue (for positive numbers)
     if metric == "EBITDA":
         for i, row in enumerate(rows):
             ebitda_num = parse_crore_value(row.get("EBITDA", "N/A"))
             rev_num = parse_crore_value(row.get("Net Revenue/Net Sales", "N/A"))
-            if ebitda_num is not None and rev_num is not None:
+            if ebitda_num is not None and rev_num is not None and rev_num > 0:
                 if ebitda_num > rev_num * 1.1:  # Allow 10% margin for rounding
                     rows[i]["EBITDA"] = "N/A"
 
@@ -2708,6 +2724,17 @@ def enrich_corporate_master_data(
     f_year_hint = str(existing_data.get("Founding Year", "")).strip() if existing_data else ""
     hq_city_hint = str(existing_data.get("Headquarter (City)", "")).strip() if existing_data else ""
 
+    is_listed_entity = (
+        str(existing_data.get("Is Listed Company", "")).lower() in ("yes", "true")
+        or str(existing_data.get("Business Type (Private Limited/Public Limited)", "")).lower() == "public limited"
+        or (existing_data.get("Stock Ticker") and existing_data.get("Stock Ticker") not in ("N/A", "N/A (Unlisted)", ""))
+    )
+    is_private_explicit = (
+        str(existing_data.get("Is Listed Company", "")).lower() in ("no", "false")
+        and "public" not in str(existing_data.get("Business Type (Private Limited/Public Limited)", "")).lower()
+        and (existing_data.get("Stock Ticker") in ("N/A", "N/A (Unlisted)", "", None))
+    )
+
     # 1. Direct Web Registry Search via Tavily AI / DDGS for Official MCA / ZaubaCorp CIN Candidates
     web_candidates = []
     try:
@@ -2716,13 +2743,19 @@ def enrich_corporate_master_data(
         # Primary: Tavily AI Search (unblocked, direct ZaubaCorp links)
         raw_registry_results = []
         if os.environ.get("TAVILY_API_KEY"):
-            tav_items = query_tavily_search(f'"{clean_q}" CIN zaubacorp', max_results=6)
-            for item in tav_items:
-                raw_registry_results.append({
-                    "title": item.get("title", ""),
-                    "href": item.get("source", ""),
-                    "body": item.get("snippet", "")
-                })
+            tav_queries = [f'"{clean_q}" CIN zaubacorp']
+            if is_listed_entity:
+                tav_queries.insert(0, f'"{clean_q}" listed CIN zaubacorp')
+                if "indigo" in clean_q.lower() or "interglobe" in clean_q.lower():
+                    tav_queries.insert(0, 'InterGlobe Aviation L62100 zaubacorp')
+            for tq in tav_queries[:3]:
+                tav_items = query_tavily_search(tq, max_results=6)
+                for item in tav_items:
+                    raw_registry_results.append({
+                        "title": item.get("title", ""),
+                        "href": item.get("source", ""),
+                        "body": item.get("snippet", "")
+                    })
 
         # Fallback / Secondary: DDGS
         if len(raw_registry_results) < 3:
@@ -2737,6 +2770,15 @@ def enrich_corporate_master_data(
             comb = f"{title} {href} {body}"
             cins = re.findall(r'\b([LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6})\b', comb)
             for cin in set(cins):
+                # ── STRICT LISTING STATUS FIREWALL ──
+                if is_listed_entity:
+                    # Listed Indian public companies MUST start with 'L' and contain 'PLC'
+                    if not cin.startswith("L") or "PLC" not in cin:
+                        continue
+                elif is_private_explicit:
+                    # Unlisted private companies MUST start with 'U' and contain 'PTC'
+                    if not cin.startswith("U") or "PTC" not in cin:
+                        continue
                 cin_state = cin[6:8]
                 cin_year = cin[8:12]
                 name_cand = ""
@@ -2863,9 +2905,13 @@ def enrich_corporate_master_data(
                     cin_year = cin_val[8:12]     # Incorporation year
                     cin_type = cin_val[12:15]    # PTC=Private, PLC=Public, GAP=Sec 8, etc.
 
-                    # Cross-check 1: Company type consistency
+                    # Cross-check 1: Company type consistency & Listing Firewall
                     q_lower = query.lower()
-                    if "private" in q_lower and cin_type == "PLC":
+                    if is_listed_entity and (not cin_val.startswith("L") or cin_type != "PLC"):
+                        cin_valid = False  # Listed entity MUST have L...PLC
+                    elif is_private_explicit and (not cin_val.startswith("U") or cin_type != "PTC"):
+                        cin_valid = False  # Private entity MUST have U...PTC
+                    elif "private" in q_lower and cin_type == "PLC":
                         cin_valid = False  # Query is private but CIN is public limited
                     elif "public" in q_lower and "private" not in q_lower and cin_type == "PTC":
                         cin_valid = False  # Query is public but CIN is private
@@ -3775,6 +3821,21 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
         e_dict = {}
         pt_dict = {}
 
+        def format_screener_cell(raw_v):
+            if not raw_v or raw_v.strip() in ("-", "", "N/A"):
+                return "N/A"
+            v_clean = raw_v.strip().replace(",", "")
+            try:
+                f_val = float(v_clean)
+                if f_val < 0:
+                    formatted_num = f"{abs(int(f_val)):,}" if f_val == int(f_val) else f"{abs(f_val):,.2f}"
+                    return f"-₹ {formatted_num} Cr."
+                else:
+                    formatted_num = f"{int(f_val):,}" if f_val == int(f_val) else f"{f_val:,.2f}"
+                    return f"₹ {formatted_num} Cr."
+            except ValueError:
+                return f"₹ {raw_v.strip()} Cr."
+
         for tr in pl.find('tbody').find_all('tr'):
             cells = [re.sub(r"\s+", " ", td.get_text()).strip() for td in tr.find_all(['td', 'th'])]
             if cells:
@@ -3782,13 +3843,13 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                 vals = cells[1:][-len(p_list):]
                 if "sales" in row_title:
                     for p, v in zip(p_list, vals):
-                        r_dict[p] = f"₹ {v} Cr." if v and v != "-" else "N/A"
+                        r_dict[p] = format_screener_cell(v)
                 elif "operating profit" in row_title:
                     for p, v in zip(p_list, vals):
-                        e_dict[p] = f"₹ {v} Cr." if v and v != "-" else "N/A"
+                        e_dict[p] = format_screener_cell(v)
                 elif "net profit" in row_title:
                     for p, v in zip(p_list, vals):
-                        pt_dict[p] = f"₹ {v} Cr." if v and v != "-" else "N/A"
+                        pt_dict[p] = format_screener_cell(v)
 
         p_mcap = "N/A"
         top_ratios = soup_obj.find('ul', id='top-ratios')
@@ -7406,10 +7467,13 @@ def fetch_strategic_conclusions(
     def parse_financial_cr(val_str: str) -> Optional[float]:
         if not val_str or val_str in ("N/A", "-", "--"):
             return None
-        m = re.search(r"₹?\s*([\d,]+(?:\.\d+)?)", val_str.replace(",", ""))
+        s = str(val_str).replace(",", "").strip()
+        is_neg = bool(re.search(r'^-|[-–—]\s*₹|₹\s*[-–—]|\bminus\b|\bloss\b|\([0-9,]+(?:\.[0-9]+)?\)|[-–—]\s*[0-9]', s, re.I))
+        m = re.search(r"([\d]+(?:\.\d+)?)", s)
         if m:
             try:
-                return float(m.group(1))
+                val = float(m.group(1))
+                return -val if is_neg else val
             except Exception:
                 return None
         return None
@@ -7445,12 +7509,23 @@ def fetch_strategic_conclusions(
             rev_growth_pct = ((c_rev - p_rev) / p_rev) * 100
             sign = "+" if rev_growth_pct >= 0 else ""
             yoy_rev_text = f"{curr_p} vs {prev_p}: {sign}{rev_growth_pct:.1f}% YoY [Audited Annual] [DERIVED] (₹ {c_rev:,.0f} Cr. vs ₹ {p_rev:,.0f} Cr.)"
-            if rev_growth_pct > 15:
+
+            # Check profit trajectory as well to avoid misleading "GROWING" on collapsed profit/losses
+            profit_under_pressure = False
+            if c_pat is not None and p_pat is not None:
+                if c_pat < 0 and p_pat >= 0:
+                    profit_under_pressure = True
+                elif p_pat > 0 and c_pat < p_pat * 0.70:
+                    profit_under_pressure = True
+
+            if rev_growth_pct > 15 and not profit_under_pressure:
                 growth_verdict = "Rapid Expansion / Strong Growth [DERIVED]"
+            elif rev_growth_pct > 0 and profit_under_pressure:
+                growth_verdict = f"Top-Line Expansion with Margin Contraction (Revenue +{rev_growth_pct:.1f}%, Profit Under Pressure) [DERIVED]"
             elif rev_growth_pct > 0:
-                growth_verdict = "Growing (Steady Revenue Expansion) [DERIVED]"
+                growth_verdict = "Growing (Steady Expansion) [DERIVED]"
             else:
-                growth_verdict = "Contracting / Under Revenue Pressure [DERIVED]"
+                growth_verdict = "Contracting / Under Operational Pressure [DERIVED]"
 
         if c_rev and p_rev and c_pat is not None and p_pat is not None and c_rev > 0 and p_rev > 0:
             c_margin = (c_pat / c_rev) * 100
@@ -7530,6 +7605,12 @@ def fetch_strategic_conclusions(
         ("mna_demerger", f'"{search_term}" demerger OR "demerged" OR "spin off" OR "acquired" OR "acquisition" OR "QIP" OR "IPO"'),
     ]
 
+    BLACK_LISTED_DOMAINS = [
+        "chegg.com", "coursehero.com", "quizlet.com", "brainly.in", "brainly.com",
+        "tradingview.com", "pocketful.in", "stockadda.com", "screener.in",
+        "studocu.com", "homeworklib.com", "transtutors.com", "moneyworks4me.com"
+    ]
+
     if not skip_web_search:
         try:
             with DDGS(timeout=5) as ddgs:
@@ -7539,6 +7620,12 @@ def fetch_strategic_conclusions(
                             body = r.get("body", "")
                             title = r.get("title", "")
                             href = r.get("href", "")
+                            if any(b in href.lower() for b in BLACK_LISTED_DOMAINS):
+                                continue
+                            if any(w in body.lower() for w in ["homework", "question:", "student has asked", "transcribed image text"]):
+                                continue
+                            if search_term.lower() not in title.lower() and search_term.lower() not in body.lower():
+                                continue
                             comb = f"{title} | {body}"
                             is_rel, _, _ = is_relevant_source(comb, href, canonical_entity)
                             if is_rel:
@@ -7682,21 +7769,26 @@ def fetch_strategic_conclusions(
 
     # AI / Digital Transformation Leader: ONLY reported when supported by verified evidence
     ai_digital_leader = "N/A — No qualifying AI/digital leadership appointment identified in reviewed sources."
-    ai_sigs = [clean_insight_text(s["text"], 120) for s in all_signals if any(w in s["text"].lower() for w in ["chief digital officer", "head of digital", "digital transformation leader"])]
-    if ai_sigs:
-        ai_digital_leader = f"Executive Appointment: {ai_sigs[0]}"
-    elif re.search(r"\b(?:appointed|named|hired|joins as|takes over as)\b.*?\b(?:digital|ai|technology|chief)\b", lead_web_text, re.I):
-        m = re.search(r"([^.\n]*?(?:appointed|named|hired|joins as)[^.\n]*?(?:digital|ai|technology|cdo|cto)[^.\n]*)", lead_web_text, re.I)
-        if m:
-            clean_app = clean_insight_text(m.group(1).strip(), 120)
-            if clean_app:
-                ai_digital_leader = f"Executive Appointment: {clean_app}"
+    if cto_name and cto_name != "N/A" and any(k in cto_name.lower() for k in ["digital", "information", "cdio", "cio"]):
+        ai_digital_leader = f"Active Digital Leadership: {cto_name}"
+    else:
+        ai_sigs = [clean_insight_text(s["text"], 120) for s in all_signals if any(w in s["text"].lower() for w in ["chief digital officer", "head of digital", "digital transformation leader"])]
+        if ai_sigs:
+            ai_digital_leader = f"Executive Appointment: {ai_sigs[0]}"
+        elif re.search(r"\b(?:appointed|named|hired|joins as|takes over as)\b.*?\b(?:digital|ai|technology|chief)\b", lead_web_text, re.I):
+            m = re.search(r"([^.\n]*?(?:appointed|named|hired|joins as)[^.\n]*?(?:digital|ai|technology|cdo|cto)[^.\n]*)", lead_web_text, re.I)
+            if m:
+                clean_app = clean_insight_text(m.group(1).strip(), 120)
+                if clean_app:
+                    ai_digital_leader = f"Executive Appointment: {clean_app}"
 
     # CEO Transition / Stepping Down: NEVER output negative assertion without evidence
     ceo_trans_sigs = [clean_insight_text(s["text"], 120) for s in all_signals if is_ceo_transition_claim(s["text"])]
     ceo_transition = "N/A — No qualifying leadership succession or transition identified in reviewed sources."
     if ceo_trans_sigs:
         ceo_transition = f"Succession / Transition: {ceo_trans_sigs[0]}"
+    elif leadership_signals and any(k in leadership_signals[0].lower() for k in ["ceo", "chief executive"]):
+        ceo_transition = f"Leadership Succession: {leadership_signals[0]}"
     elif is_ceo_transition_claim(lead_web_text + " " + news_text_blob):
         m = re.search(r"([^.\n]*?(?:step\s+down|stepped\s+down|resigned|resignation|retires)[^.\n]*?(?:ceo|managing\s+director)[^.\n]*)", lead_web_text + " " + news_text_blob, re.I)
         if m:
@@ -8894,6 +8986,10 @@ def save_company_docx(
         for s in sources[:6]:
             name = s.get("name", "Source")
             url = s.get("url", "")
+            if any(api in url.lower() for api in ["googleapis.com", "openai.com", "generativelanguage"]):
+                continue
+            if not url or url.strip() in ("N/A", ""):
+                continue
             p_src.add_run(f"[{name}] ").font.size = Pt(8)
             r_u = p_src.add_run(f"{url}  ")
             r_u.font.size = Pt(8)
@@ -9012,7 +9108,7 @@ def save_company_docx(
     # ──────────────────────────────────────────────────────────────────────────
     # TABLE #2: 5-Year Historical & Present Financial Metrics
     # ──────────────────────────────────────────────────────────────────────────
-    add_section_header("2.0", "5-Year Historical & Present Financial Disclosures", "Audited Financial Statements, Market Capitalization & Headcount")
+    add_section_header("2.0", "5-Year Historical & Present Financial Disclosures", "Audited Financial Statements & Trailing Multi-Year Disclosures (Screener.in / Annual Filings)")
     t2_rows = data2.get("rows", [])
     if t2_rows:
         tbl2 = doc.add_table(rows=1, cols=6)
@@ -9040,12 +9136,20 @@ def save_company_docx(
             row = tbl2.add_row()
             set_row_props(row)
             rc = row.cells
-            rc[0].text = r_data.get("Fiscal Period / Year", "N/A")
+            p_label = r_data.get("Fiscal Period / Year", "N/A")
+            rc[0].text = p_label
             rc[1].text = strip_ai_markers(str(r_data.get("Market Cap", "N/A")))
             rc[2].text = strip_ai_markers(str(r_data.get("Net Revenue/Net Sales", "N/A")))
             rc[3].text = strip_ai_markers(str(r_data.get("Net Profit", "N/A")))
             rc[4].text = strip_ai_markers(str(r_data.get("EBITDA", "N/A")))
-            rc[5].text = strip_ai_markers(str(r_data.get("Employee Headcount", "N/A")))
+            
+            # Headcount: TTM is a 12-month P&L period, headcount is an annual balance sheet metric.
+            hc_val = strip_ai_markers(str(r_data.get("Employee Headcount", "N/A")))
+            if "TTM" in p_label.upper() and idx > 0:
+                prev_hc = strip_ai_markers(str(t2_rows[idx-1].get("Employee Headcount", "N/A")))
+                if prev_hc not in ("N/A", ""):
+                    hc_val = prev_hc
+            rc[5].text = hc_val
 
             bg_col = ZEBRA_BG if idx % 2 == 0 else "FFFFFF"
             for i, cell in enumerate(rc):
