@@ -302,8 +302,35 @@ def is_entity_match(
         if "telecom" in s:
             specifier_stems.add("tele")
 
-    # 1. Exact canonical full phrase match
+    # Sibling / Conflicting Entity Check in Title
+    # If the title explicitly pairs the anchor with a non-allowed follower (e.g. 'TMEN Systems' vs 'TMEN Solutions',
+    # or 'Tata Steel' vs 'Tata Motors'), reject immediately unless the full canonical phrase is in title.
+    allowed_anchor_followers = set()
+    if specifiers:
+        allowed_anchor_followers.add(specifiers[0])
+        for s in specifier_stems:
+            allowed_anchor_followers.add(s)
+    for a in aliases:
+        toks = re.findall(r"\b[a-z0-9]+\b", str(a).lower())
+        if len(toks) > 1 and toks[0] == anchor:
+            allowed_anchor_followers.add(toks[1])
+    for sub in subsidiaries:
+        sub_n = sub.get("name", "") if isinstance(sub, dict) else str(sub)
+        toks = re.findall(r"\b[a-z0-9]+\b", sub_n.lower())
+        if len(toks) > 1 and toks[0] == anchor:
+            allowed_anchor_followers.add(toks[1])
+
     canon_phrase = " ".join(canon_tokens)
+    title_clean = title.lower()
+    matches_title = re.findall(rf"\b{re.escape(anchor)}[\s\-_]+([a-zA-Z0-9]+)\b", title, flags=re.I)
+    for next_word in matches_title:
+        nw_clean = next_word.lower()
+        if nw_clean in ["group", "holdings", "enterprises", "company", "limited", "ltd", "llp", "pvt", "corp", "inc"]:
+            continue
+        if nw_clean not in allowed_anchor_followers and canon_phrase not in title_clean:
+            return False
+
+    # 1. Exact canonical full phrase match
     if canon_phrase in text_clean:
         return True
 
@@ -364,6 +391,17 @@ def is_entity_match(
     return True
 
 
+GENERIC_CORP_TOKENS = {
+    "solutions", "technologies", "services", "enterprises", "consulting",
+    "systems", "holdings", "management", "international", "industries",
+    "group", "ventures", "capital", "digital", "global", "media", "infotech",
+    "software", "logistics", "trading", "retail", "infrastructure", "india",
+    "corporation", "corporate", "commercial", "finance", "financial", "advisory",
+    "associates", "networks", "products", "operations", "engineering", "innovations",
+    "company", "limited", "private", "unlimited", "firm", "agency"
+}
+
+
 def verify_financial_source_entity(
     source_url: str,
     title: str,
@@ -374,21 +412,6 @@ def verify_financial_source_entity(
     Genuinely generic financial entity verification firewall.
     Verifies that a candidate financial source/document actually belongs to the
     requested canonical entity and was not cross-contaminated from another company.
-
-    Validates using available canonical identifiers:
-    - exact legal company name / clean name
-    - CIN (Corporate Identification Number)
-    - ticker / ISIN where applicable
-    - official domain
-    - registered aliases / subsidiaries
-    - source title and document slug metadata
-
-    Strict rules:
-    - NEVER accept a financial source merely because it contains generic keywords
-      such as 'unlisted', 'revenue', 'profit', 'crore', etc.
-    - If the URL or title is explicitly dedicated to a DIFFERENT company (e.g. Polymatech
-      for Techmagnate, or Tata Steel for Tata Motors), reject immediately.
-    - If the source entity cannot be verified: reject (return False, reason).
     """
     u = (source_url or "").lower().strip()
     t = (title or "").lower().strip()
@@ -396,8 +419,8 @@ def verify_financial_source_entity(
     comb = f"{title} {snippet}".strip()
 
     if isinstance(canonical_entity, dict):
-        canon_name = canonical_entity.get("canonical_name", "")
-        clean_name = canonical_entity.get("clean_name", "") or canon_name
+        canon_name = canonical_entity.get("canonical_name") or canonical_entity.get("clean_name") or canonical_entity.get("name") or ""
+        clean_name = canonical_entity.get("clean_name") or canonical_entity.get("name") or canon_name
         aliases = canonical_entity.get("aliases", []) or []
         subsidiaries = canonical_entity.get("subsidiaries", []) or []
         ticker = canonical_entity.get("ticker", "")
@@ -440,7 +463,7 @@ def verify_financial_source_entity(
     if m_slug:
         slug = m_slug.group(1).lower()
         slug_clean = re.sub(r"-(?:unlisted-shares|unlisted|shares|ltd|limited|pvt|private|company|inc|corp|profile|overview|financials|share-price)", "", slug)
-        slug_tokens = [tok for tok in re.findall(r"\b[a-z0-9]+\b", slug_clean) if len(tok) >= 3]
+        slug_tokens = [tok for tok in re.findall(r"\b[a-z0-9]+\b", slug_clean) if len(tok) >= 3 and tok not in GENERIC_CORP_TOKENS]
         if slug_tokens:
             has_slug_match = False
             canon_acronym = "".join(w[0] for w in canon_tokens if w).lower()
@@ -474,20 +497,26 @@ def verify_financial_source_entity(
     canon_acronym = "".join(w[0] for w in canon_tokens if w).lower()
     if canon_clean in t:
         has_title_match = True
-    elif clean_ticker and re.search(rf"\b{re.escape(clean_ticker.lower())}\b", t):
+    elif ticker and re.search(rf"\b{re.escape(re.sub(r'^(NSE|BSE):', '', ticker).strip().lower())}\b", t):
         has_title_match = True
     elif canon_acronym and len(canon_acronym) >= 2 and re.search(rf"\b{re.escape(canon_acronym)}\b", t):
         has_title_match = True
     else:
-        for ct in canon_tokens:
-            if re.search(rf"\b{re.escape(ct)}\b", t):
+        non_generic_canon = [ct for ct in canon_tokens if ct not in GENERIC_CORP_TOKENS]
+        if non_generic_canon:
+            for ct in non_generic_canon:
+                if re.search(rf"\b{re.escape(ct)}\b", t):
+                    has_title_match = True
+                    break
+        else:
+            if canon_clean in t:
                 has_title_match = True
-                break
-        for a in aliases:
-            a_clean = re.sub(legal_sfx, "", str(a), flags=re.I).strip().lower()
-            if a_clean and re.search(rf"\b{re.escape(a_clean)}\b", t):
-                has_title_match = True
-                break
+        if not has_title_match:
+            for a in aliases:
+                a_clean = re.sub(legal_sfx, "", str(a), flags=re.I).strip().lower()
+                if a_clean and re.search(rf"\b{re.escape(a_clean)}\b", t):
+                    has_title_match = True
+                    break
 
     if len(t_tokens) >= 2 and not has_title_match:
         return False, f"Source title '{title}' does not reference canonical entity '{clean_name}'"
@@ -515,6 +544,10 @@ def verify_financial_source_entity(
             if a_clean and re.search(rf"\b{re.escape(a_clean)}\b", comb.lower()):
                 has_mention = True
                 break
+        if not has_mention:
+            non_generic_canon = [ct for ct in canon_tokens if ct not in GENERIC_CORP_TOKENS]
+            if non_generic_canon and all(re.search(rf"\b{re.escape(ct)}\b", comb.lower()) for ct in non_generic_canon):
+                has_mention = True
 
     if not has_mention:
         return False, f"Financial source text lacks confirmed reference to canonical entity '{clean_name}'"
@@ -3253,13 +3286,22 @@ def validate_identity_consistency(
 
     cin_clean = cin.strip().upper()
     m_cin = re.match(r"^([LU])(\d{5})([A-Z]{2})(\d{4})([A-Z]{3})(\d{6})$", cin_clean)
-    if not m_cin:
+    m_llp = re.match(r"^([A-Z]{3}-\d{4})$", cin_clean)
+    if not m_cin and not m_llp:
         return False, [f"Invalid CIN structure: {cin_clean}"]
 
-    cin_listed_char, cin_nic, cin_state, cin_year, cin_type, cin_regno = m_cin.groups()
+    if m_llp:
+        cin_listed_char = "U"
+        cin_nic = ""
+        cin_state = ""
+        cin_year = ""
+        cin_type = "LLP"
+        cin_regno = m_llp.group(1)
+    else:
+        cin_listed_char, cin_nic, cin_state, cin_year, cin_type, cin_regno = m_cin.groups()
 
     # 1. State in CIN vs RoC
-    if roc and roc not in ("N/A", ""):
+    if cin_state and roc and roc not in ("N/A", ""):
         allowed_rocs = list(STATE_CODE_ROC_MAP.get(cin_state, []))
         allowed_rocs.extend([cin_state.lower(), f"roc-{cin_state.lower()}"])
         roc_low = roc.lower()
@@ -3267,14 +3309,14 @@ def validate_identity_consistency(
             errors.append(f"CIN State mismatch: CIN '{cin_clean}' state '{cin_state}' contradicts RoC '{roc}'")
 
     # 2. State in CIN vs Registered Office Address
-    if registered_office and registered_office not in ("N/A", ""):
+    if cin_state and registered_office and registered_office not in ("N/A", ""):
         reg_low = registered_office.lower()
         allowed_states = STATE_CODE_ROC_MAP.get(cin_state, [])
         if allowed_states and not any(s in reg_low for s in allowed_states):
             errors.append(f"CIN State vs Address mismatch: CIN '{cin_clean}' state '{cin_state}' not found in address '{registered_office}'")
 
     # 3. Year in CIN vs Incorporation Date
-    if inc_date and inc_date not in ("N/A", ""):
+    if cin_year and inc_date and inc_date not in ("N/A", ""):
         m_inc_yr = re.search(r"\b(19\d\d|20\d\d)\b", inc_date)
         if m_inc_yr:
             is_full_date = bool(re.search(r"\d{1,2}[-/ ](?:[A-Za-z]+|\d{1,2})[-/ ]\d{4}|\d{4}[-/]\d{2}[-/]\d{2}", inc_date))
@@ -3298,8 +3340,8 @@ def validate_identity_consistency(
 
     # Generic entity identity check: Candidate legal name MUST relate to company_name
     if leg_low and comp_low:
-        comp_clean_words = [w for w in re.findall(r'[a-z0-9]{3,}', comp_low) if w not in ('limited', 'private', 'ltd', 'pvt', 'india', 'company', 'corp', 'the', 'services', 'technologies', 'solutions', 'enterprises')]
-        leg_clean_words = [w for w in re.findall(r'[a-z0-9]{3,}', leg_low) if w not in ('limited', 'private', 'ltd', 'pvt', 'india', 'company', 'corp', 'the', 'services', 'technologies', 'solutions', 'enterprises')]
+        comp_clean_words = [w for w in re.findall(r'[a-z0-9]{3,}', comp_low) if w not in ('limited', 'private', 'ltd', 'pvt', 'india', 'company', 'corp', 'the', 'services', 'technologies', 'solutions', 'enterprises', 'llp')]
+        leg_clean_words = [w for w in re.findall(r'[a-z0-9]{3,}', leg_low) if w not in ('limited', 'private', 'ltd', 'pvt', 'india', 'company', 'corp', 'the', 'services', 'technologies', 'solutions', 'enterprises', 'llp')]
 
         has_overlap = bool(set(comp_clean_words).intersection(set(leg_clean_words)))
         has_substring = any(w in leg_low for w in comp_clean_words) or (comp_low.replace(' ', '') in leg_low.replace(' ', ''))
@@ -3353,18 +3395,27 @@ def prove_entity_relationship(
 
     cin_clean = candidate_cin.strip().upper() if candidate_cin else ""
     m_cin = re.match(r"^([LU])(\d{5})([A-Z]{2})(\d{4})([A-Z]{3})(\d{6})$", cin_clean)
-    if not m_cin:
+    m_llp = re.match(r"^([A-Z]{3}-\d{4})$", cin_clean)
+    if not m_cin and not m_llp:
         return False, -999.0, ["Invalid CIN format"], "Disqualified: Invalid CIN structure"
 
-    cin_listed, cin_nic, cin_state, cin_year, cin_type, cin_regno = m_cin.groups()
-    evidence_used.append(f"Statutory Registry Proof: Valid MCA CIN '{cin_clean}' registered in state '{cin_state}'")
-    score += 20.0
+    if m_llp:
+        cin_listed = "U"
+        cin_state = ""
+        cin_year = ""
+        cin_type = "LLP"
+        evidence_used.append(f"Statutory Registry Proof: Valid MCA LLPIN '{cin_clean}' registered as Limited Liability Partnership")
+        score += 20.0
+    else:
+        cin_listed, cin_nic, cin_state, cin_year, cin_type, cin_regno = m_cin.groups()
+        evidence_used.append(f"Statutory Registry Proof: Valid MCA CIN '{cin_clean}' registered in state '{cin_state}'")
+        score += 20.0
 
     # 1. Legal Name & Brand Containment
     clean_brand = re.sub(r"[^a-zA-Z0-9]", "", brand_or_query.lower())
     clean_legal = re.sub(r"[^a-zA-Z0-9]", "", candidate_legal_name.lower())
-    brand_tokens = [w for w in re.findall(r"[a-z0-9]{3,}", brand_or_query.lower()) if w not in ('limited', 'private', 'ltd', 'pvt', 'india', 'company', 'corp', 'the', 'services', 'solutions', 'technologies', 'enterprises')]
-    legal_tokens = [w for w in re.findall(r"[a-z0-9]{3,}", candidate_legal_name.lower()) if w not in ('limited', 'private', 'ltd', 'pvt', 'india', 'company', 'corp', 'the', 'services', 'solutions', 'technologies', 'enterprises')]
+    brand_tokens = [w for w in re.findall(r"[a-z0-9]{3,}", brand_or_query.lower()) if w not in ('limited', 'private', 'ltd', 'pvt', 'india', 'company', 'corp', 'the', 'services', 'solutions', 'technologies', 'enterprises', 'llp')]
+    legal_tokens = [w for w in re.findall(r"[a-z0-9]{3,}", candidate_legal_name.lower()) if w not in ('limited', 'private', 'ltd', 'pvt', 'india', 'company', 'corp', 'the', 'services', 'solutions', 'technologies', 'enterprises', 'llp')]
 
     brand_overlap = bool(set(brand_tokens).intersection(set(legal_tokens)))
     brand_contained = (clean_brand in clean_legal) or any(t in candidate_legal_name.lower() for t in brand_tokens)
@@ -3383,7 +3434,7 @@ def prove_entity_relationship(
 
     # 2. Business Description & Industry/Sector Alignment
     if expected_desc:
-        exp_tokens = set(w for w in re.findall(r"[a-z]{3,}", expected_desc.lower()) if w not in ('firm', 'company', 'enterprise', 'solutions', 'private', 'limited', 'india', 'headquartered', 'specializing', 'services'))
+        exp_tokens = set(w for w in re.findall(r"[a-z]{3,}", expected_desc.lower()) if w not in ('firm', 'company', 'enterprise', 'solutions', 'private', 'limited', 'india', 'headquartered', 'specializing', 'services', 'llp'))
         cand_sector_text = f"{candidate_desc} {candidate_legal_name} {registry_text}".lower()
         cand_tokens = set(re.findall(r"[a-z]{3,}", cand_sector_text))
         common_desc_tokens = exp_tokens.intersection(cand_tokens)
@@ -3412,21 +3463,21 @@ def prove_entity_relationship(
     # 3. Geographic / RoC Jurisdiction Alignment
     if expected_location:
         loc_low = expected_location.lower()
-        allowed_states = list(STATE_CODE_ROC_MAP.get(cin_state, []))
-        allowed_states.extend([cin_state.lower(), f"roc-{cin_state.lower()}"])
+        allowed_states = list(STATE_CODE_ROC_MAP.get(cin_state, [])) if cin_state else []
+        if cin_state:
+            allowed_states.extend([cin_state.lower(), f"roc-{cin_state.lower()}"])
         # Check NCR equivalence: Noida/Greater Noida/Ghaziabad/Gurgaon/Faridabad/Delhi are all part of Delhi NCR
         is_ncr = any(c in loc_low for c in ["noida", "delhi", "gurgaon", "gurugram", "faridabad", "ghaziabad"])
         is_cand_ncr = cin_state in ["DL", "HR", "UP"] or any(s in candidate_address.lower() for s in ["delhi", "haryana", "uttar pradesh", "noida", "gurgaon"])
-        if (is_ncr and is_cand_ncr) or any(s in loc_low for s in allowed_states) or any(s in candidate_address.lower() for s in allowed_states):
+        if (is_ncr and is_cand_ncr) or (allowed_states and any(s in loc_low for s in allowed_states)) or any(s in candidate_address.lower() for s in ["delhi", "mumbai", "bengaluru", "chennai", "hyderabad", "kolkata", "pune"] if s in loc_low):
             score += 30.0
-            evidence_used.append(f"Geographic Proof: Registered state ({cin_state}) and address align with expected headquarters ({expected_location})")
+            evidence_used.append(f"Geographic Proof: Registered address aligns with expected location ({expected_location})")
         else:
-            score -= 30.0
-            evidence_used.append(f"Geographic Variance: State ({cin_state}) differs from expected headquarters ({expected_location})")
+            score -= 15.0
 
     # 4. Incorporation Chronology Alignment
     m_inc_yr = re.search(r"\b(19\d\d|20\d\d)\b", expected_desc)
-    if m_inc_yr:
+    if m_inc_yr and cin_year:
         exp_yr = m_inc_yr.group(1)
         if cin_year == exp_yr:
             score += 25.0
@@ -3530,27 +3581,28 @@ def enrich_corporate_master_data(
             body = r.get("body", "")
             comb = f"{title} {href} {body}"
             
-            # If the URL itself anchors to a specific company CIN, prioritize that exact CIN
-            cin_in_href = re.search(r'([LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6})', href)
+            # If the URL itself anchors to a specific company CIN or LLPIN, prioritize that
+            cin_in_href = re.search(r'([LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}|[A-Z]{3}-\d{4})', href)
             if cin_in_href:
                 cins = [cin_in_href.group(1)]
             else:
-                cins = list(set(re.findall(r'\b([LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6})\b', comb)))
+                cins = list(set(re.findall(r'\b([LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}|[A-Z]{3}-\d{4})\b', comb)))
 
             for cin in cins:
+                is_llpin = bool(re.match(r'^[A-Z]{3}-\d{4}$', cin))
                 # ── STRICT LISTING STATUS FIREWALL ──
                 if is_listed_entity:
                     # Listed Indian public companies MUST start with 'L' and contain 'PLC'
-                    if not cin.startswith("L") or "PLC" not in cin:
+                    if is_llpin or not cin.startswith("L") or "PLC" not in cin:
                         continue
                 elif is_private_explicit:
-                    # Unlisted private companies MUST start with 'U' and contain 'PTC'
-                    if not cin.startswith("U") or "PTC" not in cin:
+                    # Unlisted private companies MUST start with 'U' and contain 'PTC' or be an LLP
+                    if not is_llpin and (not cin.startswith("U") or "PTC" not in cin):
                         continue
-                cin_state = cin[6:8]
-                cin_year = cin[8:12]
+                cin_state = cin[6:8] if (len(cin) >= 8 and not is_llpin) else ""
+                cin_year = cin[8:12] if (len(cin) >= 12 and not is_llpin) else ""
                 name_cand = ""
-                m_url = re.search(r'zaubacorp\.com/(?:company/)?([A-Z0-9-]+?)(?:/|-)' + cin, href, re.I)
+                m_url = re.search(r'zaubacorp\.com/(?:company/)?([A-Za-z0-9-]+?)(?:/|-)' + cin, href, re.I)
                 if m_url:
                     name_cand = m_url.group(1).replace("-", " ").strip()
                 elif "|" in title:
@@ -3654,33 +3706,49 @@ def enrich_corporate_master_data(
 
     # Live ZaubaCorp profile scrape from actual registry page
     zauba_profile = None
-    if top_web_cand and top_web_cand.get("cin"):
+    cin_to_fetch = ""
+    target_url = ""
+    if selected_candidate and isinstance(selected_candidate, dict):
+        if selected_candidate.get("cin"):
+            cin_to_fetch = selected_candidate["cin"]
+        if selected_candidate.get("url"):
+            target_url = selected_candidate["url"]
+
+    if not cin_to_fetch and top_web_cand and top_web_cand.get("cin"):
         cin_to_fetch = top_web_cand["cin"]
-        target_url = f"https://www.zaubacorp.com/company-cin/{cin_to_fetch}"
         if top_web_cand.get("url") and cin_to_fetch in top_web_cand["url"]:
             target_url = top_web_cand["url"]
+
+    if not target_url and cin_to_fetch:
+        target_url = f"https://www.zaubacorp.com/company-cin/{cin_to_fetch}"
+
+    if target_url:
         zauba_profile = fetch_zaubacorp_profile(target_url)
 
     if zauba_profile:
-        # Check that zauba_profile address is consistent with CIN state
-        cin_cand = zauba_profile.get("cin") or (top_web_cand.get("cin") if top_web_cand else "")
-        cand_state = cin_cand[6:8] if len(cin_cand) >= 8 else ""
-        allowed_states = STATE_CODE_ROC_MAP.get(cand_state, [])
-        z_addr = zauba_profile.get("address", "")
-        if z_addr and allowed_states and not any(s in z_addr.lower() for s in allowed_states):
-            # Contaminated/unrelated address from third-party ads or related companies! Reject it.
-            zauba_profile["address"] = ""
+        # Check that zauba_profile address is consistent with CIN state (for 21-digit CIN)
+        cin_cand = zauba_profile.get("cin") or cin_to_fetch or (top_web_cand.get("cin") if top_web_cand else "")
+        is_llpin_cand = bool(re.match(r'^[A-Z]{3}-\d{4}$', cin_cand))
+        if not is_llpin_cand:
+            cand_state = cin_cand[6:8] if len(cin_cand) >= 8 else ""
+            allowed_states = STATE_CODE_ROC_MAP.get(cand_state, [])
+            z_addr = zauba_profile.get("address", "")
+            if z_addr and allowed_states and not any(s in z_addr.lower() for s in allowed_states):
+                # Contaminated/unrelated address from third-party ads or related companies! Reject it.
+                zauba_profile["address"] = ""
 
-        # Check that zauba_profile inc_date year matches cin_year
-        cand_yr = cin_cand[8:12] if len(cin_cand) >= 12 else ""
-        z_inc = zauba_profile.get("inc_date", "")
-        if z_inc and cand_yr and cand_yr not in z_inc:
-            # Contaminated/unrelated incorporation date! Reject it.
-            zauba_profile["inc_date"] = ""
+            # Check that zauba_profile inc_date year matches cin_year
+            cand_yr = cin_cand[8:12] if len(cin_cand) >= 12 else ""
+            z_inc = zauba_profile.get("inc_date", "")
+            if z_inc and cand_yr and cand_yr not in z_inc:
+                # Contaminated/unrelated incorporation date! Reject it.
+                zauba_profile["inc_date"] = ""
 
         if zauba_profile.get("cin"):
             master["CIN"] = zauba_profile["cin"]
             master["_cin_confidence"] = "High"
+        elif cin_to_fetch:
+            master["CIN"] = cin_to_fetch
         if zauba_profile.get("legal_name"):
             master["Legal Name"] = zauba_profile["legal_name"]
         elif top_web_cand:
@@ -3689,7 +3757,7 @@ def enrich_corporate_master_data(
             master["Incorporation Date"] = zauba_profile["inc_date"]
         if zauba_profile.get("roc"):
             master["RoC"] = zauba_profile["roc"]
-        elif top_web_cand:
+        elif top_web_cand and top_web_cand.get("state"):
             master["RoC"] = f"RoC-{top_web_cand['state']}"
         if zauba_profile.get("address"):
             master["Registered Office"] = zauba_profile["address"]
@@ -4372,14 +4440,15 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
                 t1_prompt = (
                     f"You are a regulatory corporate intelligence officer for Indian companies.\n"
                     f"Provide verified, factual corporate details for: '{comp_query_name}' (Search Query: '{query}').\n"
-                    f"Provide facts based strictly on Ministry of Corporate Affairs (MCA), BSE/NSE disclosures, and verified annual reports:\n"
+                    f"STRICT REQUIREMENT: Provide facts based strictly on Ministry of Corporate Affairs (MCA), BSE/NSE disclosures, and verified annual reports.\n"
+                    f"If the company is small, unlisted, obscure, or not in verified official records, output 'N/A' for unknown fields. Strictly DO NOT fabricate or guess founding years, headquarters, or officer names.\n"
                     f"- founding_year: (4-digit year e.g. '1954' or 'N/A')\n"
                     f"- founders: (comma-separated founder names or 'N/A')\n"
                     f"- ceo: (Current Managing Director or Chief Executive Officer, or 'N/A'. If multiple Managing Directors exist, e.g. for Indian private/family enterprises like Haldiram, list all MDs, e.g. 'Manohar Lal Agarwal, Madhu Shekhar Agarwal (Managing Directors)')\n"
                     f"- cfo: (Current Chief Financial Officer / Head of Finance, or 'N/A')\n"
                     f"- cto: (Current Chief Technology Officer / Head of Technology / IT Director, or 'N/A')\n"
-                    f"- hq_city: (Primary headquarters city in India, e.g. Anand, Karnal, Gurugram, Mumbai, etc.)\n"
-                    f"- office_address: (Clean physical registered/corporate office address with pincode, without sentence prefixes or company names, e.g. 'Amul Dairy Road, Anand - 388001, Gujarat, India', or 'N/A')\n"
+                    f"- hq_city: (Primary headquarters city in India, e.g. Anand, Karnal, Gurugram, Mumbai, or 'N/A')\n"
+                    f"- office_address: (Clean physical registered/corporate office address with pincode, without sentence prefixes or company names, or 'N/A')\n"
                     f"- business_type: ('Public Limited' or 'Private Limited')\n\n"
                     f"Return strictly a valid JSON object with these exact keys and no other text."
                 )
@@ -4431,9 +4500,21 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
             data["RoC"] = m_data["RoC"]
         if m_data.get("Incorporation Date") and m_data["Incorporation Date"] != "N/A":
             data["Incorporation Date"] = m_data["Incorporation Date"]
+            m_inc_yr = re.search(r'\b(19\d\d|20\d\d)\b', m_data["Incorporation Date"])
+            if m_inc_yr:
+                data["Founding Year"] = m_inc_yr.group(1)
         if m_data.get("Registered Office") and m_data["Registered Office"] != "N/A":
             clean_m_addr = extract_office_address(m_data["Registered Office"], company_name=query, hq_city=hq_city_cur)
             data["Office Address"] = clean_m_addr if clean_m_addr != "N/A" else m_data["Registered Office"]
+            m_city = re.search(r',\s*([A-Za-z\s]+?)\s*-\s*\d{6}', m_data["Registered Office"])
+            if not m_city:
+                m_city = re.search(r'(?:Delhi|New Delhi|Mumbai|Bengaluru|Bangalore|Chennai|Kolkata|Hyderabad|Pune|Ahmedabad|Jaipur|Surat|Lucknow|Kanpur|Nagpur|Indore|Thane|Bhopal|Visakhapatnam|Pimpri-Chinchwad|Patna|Vadodara|Ghaziabad|Ludhiana|Agra|Nashik|Faridabad|Meerut|Rajkot|Kalyan-Dombivli|Vasai-Virar|Varanasi|Srinagar|Aurangabad|Dhanbad|Amritsar|Navi Mumbai|Allahabad|Ranchi|Howrah|Coimbatore|Jabalpur|Gwalior|Vijayawada|Jodhpur|Madurai|Raipur|Kota|Guwahati|Chandigarh|Solapur|Hubli-Dharwad|Bareilly|Moradabad|Mysore|Gurgaon|Gurugram|Aligarh|Jalandhar|Tiruchirappalli|Bhubaneswar|Salem|Mira-Bhayandar|Warangal|Thiruvananthapuram|Bhiwandi|Saharanpur|Guntur|Amravati|Bikaner|Noida|Jamshedpur|Bhilai|Cuttack|Firozabad|Kochi|Nellore|Bhavnagar|Dehradun|Durgapur|Asansol|Rourkela|Nanded|Kolhapur|Ajmer|Akola|Gulbarga|Jamnagar|Ujjain|Loni|Siliguri|Jhansi|Ulhasnagar|Jammu|Sangli-Miraj|Mangalore|Erode|Belgaum|Ambattur|Tirunelveli|Malegaon|Gaya|Jalgaon|Udaipur|Maheshtala)', m_data["Registered Office"], re.I)
+            if m_city:
+                data["Headquarter (City)"] = m_city.group(0).strip()
+            elif m_data.get("RoC") and m_data["RoC"] != "N/A":
+                m_roc = re.search(r'RoC-([A-Za-z]+)', m_data["RoC"])
+                if m_roc:
+                    data["Headquarter (City)"] = m_roc.group(1).strip()
         if m_data.get("Identity Status"):
             data["Identity Status"] = m_data["Identity Status"]
         if m_data.get("_is_ambiguous"):
@@ -4707,7 +4788,11 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
     """
     if isinstance(company_name_or_entity, dict):
         canonical_entity = company_name_or_entity
-        company_name = canonical_entity.get("canonical_name") or canonical_entity.get("clean_name", "")
+        company_name = canonical_entity.get("canonical_name") or canonical_entity.get("clean_name") or canonical_entity.get("name", "")
+        if not canonical_entity.get("canonical_name"):
+            canonical_entity["canonical_name"] = company_name
+        if not canonical_entity.get("clean_name"):
+            canonical_entity["clean_name"] = company_name
         if (stock_ticker == "N/A" or not stock_ticker) and canonical_entity.get("ticker"):
             stock_ticker = canonical_entity.get("ticker")
     else:
@@ -4997,7 +5082,7 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                 f'"{clean_name}" employees headcount OR workforce OR employs',
             ]
             if cin_val and cin_val != "N/A":
-                overview_queries.insert(0, f'"{cin_val}" (revenue OR turnover OR "operating revenue" OR "financials")')
+                overview_queries.insert(0, f'"{clean_name}" "{cin_val}" (revenue OR turnover OR "operating revenue" OR "financials")')
                 overview_queries.append(f'"{company_name}" "{cin_val}" tofler OR zaubacorp')
 
             raw_fin_items = []
@@ -5039,8 +5124,7 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                     continue
 
                 txt = f"{title} | {body}"
-                unlisted_fin_snippets.append(f"{title}: {body} (Source: {href})")
-                add_source(f"Audited ROC / Media Disclosures ({href.split('/')[2] if '//' in href else 'Registry'})", href)
+                did_extract = False
 
                 for p in periods:
                     m_fy = re.search(r'FY\s*(\d{2})', p, re.I)
@@ -5078,6 +5162,7 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                                 else:
                                     rev_by_period[p] = f"₹ {float(matched_num):,g} Cr."
                                 data_source_labels[(p, "Net Revenue/Net Sales")] = "SCRAPED"
+                                did_extract = True
                                 break
 
                     p_pat_pats = [
@@ -5091,6 +5176,7 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                                 pat_num = m_pat.group(1).replace(",", "")
                                 pat_by_period[p] = f"₹ {float(pat_num):,g} Cr."
                                 data_source_labels[(p, "Net Profit")] = "SCRAPED"
+                                did_extract = True
                                 break
 
                     p_eb_pats = [
@@ -5104,71 +5190,22 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                                 eb_num = m_eb.group(1).replace(",", "")
                                 ebitda_by_period[p] = f"₹ {float(eb_num):,g} Cr."
                                 data_source_labels[(p, "EBITDA")] = "SCRAPED"
+                                did_extract = True
                                 break
+
+                # Only add source citation if financial metrics were actually extracted, or if it is an exact registry/entity page
+                is_exact_registry = False
+                if cin_val and cin_val.lower() in href.lower():
+                    is_exact_registry = True
+                elif clean_name.replace(" ", "-").lower() in href.lower() or clean_name.replace(" ", "_").lower() in href.lower():
+                    is_exact_registry = True
+
+                if did_extract or is_exact_registry:
+                    add_source(f"Audited ROC / Media Disclosures ({href.split('/')[2] if '//' in href else 'Registry'})", href)
         except Exception:
             pass
-
-        # Heuristic fallback for unlisted companies based ONLY on scraped statutory bands/ranges
-        if is_private and all(v == "N/A" for v in rev_by_period.values()):
-            comb = " ".join(unlisted_fin_snippets) if unlisted_fin_snippets else ""
-            base_cr = None
-            if comb:
-                # Match ranges e.g. "Over INR 500 cr"
-                over_m = re.search(r'(?:over|above|exceeding)\s*(?:inr|rs\.?|₹)?\s*([0-9]{1,3}(?:,[0-9]{3})*|[0-9]{2,5})\s*(?:cr|crore)', comb, re.I)
-                if over_m:
-                    base_cr = float(over_m.group(1).replace(",", ""))
-                else:
-                    rng_m = re.search(r'(?:inr|rs\.?|₹)?\s*([0-9]{1,3}(?:,[0-9]{3})*|[0-9]{2,5})\s*(?:cr|crore)?\s*(?:–|-|to)\s*(?:inr|rs\.?|₹)?\s*([0-9]{1,3}(?:,[0-9]{3})*|[0-9]{2,5})\s*(?:cr|crore)', comb, re.I)
-                    if rng_m:
-                        base_cr = (float(rng_m.group(1).replace(",", "")) + float(rng_m.group(2).replace(",", ""))) / 2.0
-                    else:
-                        s_cr = re.search(r'(?:inr|rs\.?|₹)\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]{2,5}(?:\.[0-9]+)?)\s*(?:cr|crore)', comb, re.I)
-                        if s_cr:
-                            base_cr = float(s_cr.group(1).replace(",", ""))
-                        else:
-                            usd_m = re.search(r'(?:\$|usd)\s*([0-9]{1,4}(?:\.[0-9]+)?)\s*(?:million|mn|m|billion|bn)\b', comb, re.I)
-                            if usd_m:
-                                mult = 8300.0 if any(b in usd_m.group(0).lower() for b in ["billion", "bn"]) else 8.3
-                                base_cr = float(usd_m.group(1).replace(",", "")) * mult
-
-            # Fallback based on canonical entity employee count ONLY if substantial workforce is verified
-            if not base_cr:
-                emp_count_cand = None
-                if isinstance(company_name_or_entity, dict):
-                    e_raw = str(company_name_or_entity.get("employees", "") or company_name_or_entity.get("headcount", ""))
-                    m_emp = re.search(r'([0-9]{2,6})', e_raw.replace(",", ""))
-                    if m_emp:
-                        emp_count_cand = int(m_emp.group(1))
-                if emp_count_cand and emp_count_cand > 200:
-                    base_cr = round(emp_count_cand * 0.25, 1)  # ~25 Lakhs per employee benchmark
-                else:
-                    base_cr = None  # Zero fabrication: do not default to synthetic 180 Cr
-
-            if base_cr:
-                for idx, p in enumerate(periods):
-                    factor = (1.08) ** (idx - 3)
-                    calc_rev = round(base_cr * factor)
-                    rev_by_period[p] = f"₹ {calc_rev:,} Cr."
-                    data_source_labels[(p, "Net Revenue/Net Sales")] = "ESTIMATED"
-                    if pat_by_period.get(p, "N/A") == "N/A":
-                        pat_by_period[p] = f"₹ {round(calc_rev * 0.08, 1)} Cr."
-                        data_source_labels[(p, "Net Profit")] = "ESTIMATED"
-                    if ebitda_by_period.get(p, "N/A") == "N/A":
-                        ebitda_by_period[p] = f"₹ {round(calc_rev * 0.12, 1)} Cr."
-                        data_source_labels[(p, "EBITDA")] = "ESTIMATED"
-
-            # Employee fallback
-            if all(v == "N/A" for v in emp_by_period.values()):
-                base_emp = None
-                if comb:
-                    emp_m = re.search(r'(?:employs|workforce of|headcount of|approximately)\s*([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{3,6})\s*(?:people|employees|professionals)?', comb, re.I)
-                    if emp_m:
-                        base_emp = int(emp_m.group(1).replace(",", ""))
-                if not base_emp:
-                    base_emp = round(base_cr * 4.0) if base_cr else 750
-                for idx, p in enumerate(periods):
-                    emp_by_period[p] = f"{round(base_emp * ((1.05) ** (idx - 3))):,}"
-                    data_source_labels[(p, "Employee Headcount")] = "ESTIMATED"
+            # Strict data fidelity: do not extrapolate single mentions or employee counts into fake multi-year financials
+            pass
 
     table2_rows = []
     for p in periods:
@@ -5239,11 +5276,11 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                     f"{currency_instruction}"
                     f"Task: Provide corporate financial numbers for each period: annual revenue/turnover, net profit/surplus, EBITDA, and verified employee headcount.\n\n"
                     f"SPECIFIC FIELD GUIDANCE:\n"
-                    f"- revenue: Verified annual turnover / net revenue in INR Crores (e.g. '₹ 220 Cr.', '₹ 250 Cr.'). For unlisted private companies or cooperatives (e.g. AgreeYa Solutions, Amul, Haldirams, Parle), provide realistic annual turnover across all 6 periods based on statutory ROC filings, Tofler/Zauba/Tracxn data, or operating run-rate. Extrapolate realistic yearly progression across periods based on reported CAGR (e.g. ~8%). Do NOT output all 'N/A' for unlisted companies.\n"
-                    f"- net_profit: Audited net profit / profit after tax (PAT) or cooperative net surplus / statutory surplus in INR Crores. For unlisted private firms, provide realistic statutory profit margins/PAT across periods rather than N/A.\n"
-                    f"- ebitda: Operating profit / EBITDA / operating surplus in INR Crores if reported or estimated from margin, or 'N/A'.\n"
+                    f"- revenue: Verified annual turnover / net revenue in INR Crores (e.g. '₹ 220 Cr.', '₹ 250 Cr.'). For unlisted private companies or cooperatives, provide turnover ONLY if grounded in statutory ROC filings, Tofler/Zauba/Tracxn data, or verified disclosures. If no verified corporate disclosures or filings exist, output 'N/A'. Strictly DO NOT guess or fabricate numbers.\n"
+                    f"- net_profit: Audited net profit / profit after tax (PAT) in INR Crores if reported in filings or disclosures, or 'N/A'. Strictly DO NOT guess or fabricate numbers.\n"
+                    f"- ebitda: Operating profit / EBITDA in INR Crores if reported, or 'N/A'.\n"
                     f"- employees: Verified corporate headcount for that period (digits only, e.g. '693', '750', '811', '1000') or 'N/A' if completely unknown. Never guess vague ranges with '+' or '~'.\n\n"
-                    f"CRITICAL REQUIREMENT: For unlisted companies, do NOT output all 'N/A' when filing ranges or reported annual turnover are present in the research or corporate history. Populate all 6 periods with realistic progression or run-rate.\n"
+                    f"CRITICAL RULE: If this company is unlisted, obscure, or has no verified financial disclosures, return 'N/A' for revenue, net_profit, and ebitda. Do NOT invent mechanical progressions or make up numbers.\n"
                     f"Output strictly a JSON array of objects with keys: 'period', 'revenue', 'net_profit', 'ebitda', 'employees'."
                 )
                 t2_raw = call_gemini(t2_prompt, system_instruction="Output strictly valid JSON with no markdown formatting.", temperature=0.0)
@@ -9571,6 +9608,16 @@ def fetch_peer_comparison(
 
     if os.environ.get("GEMINI_API_KEY"):
         try:
+            # Check if a reliable sector/industry is available
+            clean_ind = str(industry or "").strip()
+            if not clean_ind or clean_ind.lower() in ("industry peers", "unknown", "n/a", "general", "others", "corporates"):
+                if isinstance(canonical_entity, dict):
+                    clean_ind = str(canonical_entity.get("primary_industry") or canonical_entity.get("activity_type") or canonical_entity.get("industry") or "").strip()
+            
+            # If still no verified sector, do not hallucinate arbitrary peers
+            if not clean_ind or clean_ind.lower() in ("industry peers", "unknown", "n/a", "general", "others", "corporates"):
+                clean_ind = ""
+
             t2_context = ""
             if latest_t2 and latest_t2.get("rev") is not None:
                 t2_context = (
@@ -9581,26 +9628,32 @@ def fetch_peer_comparison(
                     f"- Sales Growth: {target_sales_var}%, Profit Growth: {target_profit_var}%\n"
                 )
 
-            ai_prompt = (
-                f"You are an Indian corporate equity research analyst.\n"
-                f"Target Company: '{canonical_name}' in India (Sector: '{industry}').\n"
-                f"{t2_context}\n"
-                f"Identify 4 to 6 top direct operating competitors and peers for '{canonical_name}' in India of comparable or leading market scale.\n"
-                f"For each competitor, provide realistic current financial and valuation metrics:\n"
-                f"- name: Competitor corporate name (e.g. 'Livspace', 'HomeLane', 'DesignCafe')\n"
-                f"- cmp: Current Share Price (in Rs, or 'Unlisted')\n"
-                f"- pe: Price to Earnings ratio (or 'N/A')\n"
-                f"- market_cap: Market Cap or Valuation (in Rs Cr)\n"
-                f"- div_yield: Dividend Yield % (or 'N/A')\n"
-                f"- np_qtr: Latest Quarter Net Profit (in Rs Cr, or 'N/A')\n"
-                f"- qtr_profit_var: Quarter Profit Growth % (or 'N/A')\n"
-                f"- sales_qtr: Latest Quarter Sales/Revenue (in Rs Cr, or 'N/A')\n"
-                f"- qtr_sales_var: Quarter Sales Growth % (or 'N/A')\n"
-                f"- roce: Return on Capital Employed (ROCE %) (or 'N/A')\n"
-                f"- is_benchmark: false\n\n"
-                f"Return strictly a JSON array of objects with the above keys for the competitors."
-            )
-            raw_ai = call_gemini(ai_prompt, system_instruction="Output strictly valid JSON with no markdown formatting.", temperature=0.1)
+            if clean_ind:
+                ai_prompt = (
+                    f"You are an Indian corporate equity research analyst.\n"
+                    f"Target Company: '{canonical_name}' in India (Sector: '{clean_ind}').\n"
+                    f"{t2_context}\n"
+                    f"Identify 3 to 5 direct operating competitors and peers for '{canonical_name}' in India of comparable domain and market scale.\n"
+                    f"CRITICAL FIDELITY RULES:\n"
+                    f"- Do NOT suggest giant conglomerates (such as TCS, Infosys, Reliance, Tata) if the target company is a private/small entity in a specialized or unverified niche.\n"
+                    f"- If no realistic direct operating peers can be verified in '{clean_ind}', return strictly an empty list [].\n"
+                    f"For each verified competitor, provide:\n"
+                    f"- name: Competitor corporate name\n"
+                    f"- cmp: Current Share Price (in Rs, or 'Unlisted')\n"
+                    f"- pe: Price to Earnings ratio (or 'N/A')\n"
+                    f"- market_cap: Market Cap or Valuation (in Rs Cr, or 'N/A')\n"
+                    f"- div_yield: Dividend Yield % (or 'N/A')\n"
+                    f"- np_qtr: Latest Quarter Net Profit (in Rs Cr, or 'N/A')\n"
+                    f"- qtr_profit_var: Quarter Profit Growth % (or 'N/A')\n"
+                    f"- sales_qtr: Latest Quarter Sales/Revenue (in Rs Cr, or 'N/A')\n"
+                    f"- qtr_sales_var: Quarter Sales Growth % (or 'N/A')\n"
+                    f"- roce: Return on Capital Employed (ROCE %) (or 'N/A')\n"
+                    f"- is_benchmark: false\n\n"
+                    f"Return strictly a JSON array of objects with the above keys for the competitors."
+                )
+                raw_ai = call_gemini(ai_prompt, system_instruction="Output strictly valid JSON with no markdown formatting.", temperature=0.1)
+            else:
+                raw_ai = "[]"
             if raw_ai:
                 clean_json = re.sub(r"^```(?:json)?\s*", "", raw_ai.strip())
                 clean_json = re.sub(r"\s*```$", "", clean_json)
@@ -10940,14 +10993,14 @@ POSITIVE_COMPANY_PATTERNS = [
     r"\b(?:software|technology company|tech company|it services|e-commerce|delivery service|quick-commerce|holding company)\b",
     r"\b(?:telecommunications|telecom|automaker|automotive|pharmaceutical|pharma|dairy|cooperative society|cooperative)\b",
     r"\b(?:fmcg|steelmaker|metallurgy|energy company|power producer|commercial bank|investment company|tyre|tire)\b",
-    r"\b(?:ltd|limited|pvt|inc|corp|group|industries|technologies|enterprises)\b"
+    r"\b(?:ltd|limited|pvt|inc|corp|group|industries|technologies|enterprises|llp|limited liability partnership)\b"
 ]
 
 INDIAN_COMPANY_TOKENS = [
     "india", "indian", "mumbai", "delhi", "new delhi", "bengaluru", "bangalore",
     "chennai", "hyderabad", "kolkata", "pune", "nagpur", "gurugram", "gurgaon",
     "noida", "ahmedabad", "rajasthan", "gujarat", "maharashtra", "karnataka",
-    "tamil nadu", "bse", "nse", "pvt ltd", "private limited"
+    "tamil nadu", "bse", "nse", "pvt ltd", "private limited", "llp"
 ]
 
 
@@ -10955,7 +11008,7 @@ def normalize_candidate_key(name: str) -> str:
     """Normalize company name to deduplicate legal variations."""
     s = name.lower()
     s = re.sub(r"\s*\([^)]*\)", "", s)
-    s = re.sub(r"\b(?:pvt|private|ltd|limited|inc|corp|corporation|group|industries|co)\b", "", s)
+    s = re.sub(r"\b(?:pvt|private|ltd|limited|inc|corp|corporation|group|industries|co|llp)\b", "", s)
     s = re.sub(r"[^\w\s]", "", s)
     return " ".join(s.split())
 
@@ -11172,19 +11225,86 @@ def find_company_candidates(query: str) -> List[Dict[str, str]]:
         except Exception:
             pass
 
-    # 4. Gemini AI Candidate Discovery Fallback if Indian matches are sparse (< 3)
-    if len([c for c in candidates if c.get("is_indian")]) < 3 and os.environ.get("GEMINI_API_KEY"):
+    # 3b. Indian Corporate Registry Search (ZaubaCorp, Tofler, MCA, Tracxn)
+    reg_queries = [f'"{clean_q}" India zaubacorp', f'{clean_q} CIN zaubacorp', f'"{clean_q}" LLP zaubacorp']
+    reg_results = []
+    if os.environ.get("TAVILY_API_KEY"):
+        for rq in reg_queries[:2]:
+            try:
+                t_items = query_tavily_search(rq, max_results=5)
+                for it in t_items:
+                    reg_results.append({
+                        "title": it.get("title", ""),
+                        "href": it.get("source", ""),
+                        "body": it.get("snippet", "")
+                    })
+            except Exception:
+                pass
+    if len(reg_results) < 2:
+        try:
+            with DDGS(timeout=5) as ddgs:
+                d_items = list(ddgs.text(f'"{clean_q}" India zaubacorp', max_results=5))
+                reg_results.extend(d_items)
+        except Exception:
+            pass
+
+    for item in reg_results:
+        raw_title = item.get("title", "")
+        href = item.get("href", "")
+        body = item.get("body", "")
+        c_cand_name = ""
+        m_t = re.match(r'^(?:Company search results\s*[-–—]\s*)?([A-Za-z0-9\s.,&()/-]+?)\s*(?:\||[-–—]\s*(?:ZaubaCorp|Tofler|Tracxn|TheCompanyCheck|IndiaFilings|Company Profile|Insights|\d{4}))', raw_title, re.I)
+        if m_t:
+            c_cand_name = m_t.group(1).strip()
+        elif "zaubacorp.com" in href:
+            m_u = re.search(r'zaubacorp\.com/(?:company/)?([A-Za-z0-9-]+?)(?:/|-)([LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}|[A-Z]{3}-\d{4})', href, re.I)
+            if m_u:
+                c_cand_name = m_u.group(1).replace("-", " ").strip()
+            elif raw_title and len(raw_title) < 70 and not any(k in raw_title.lower() for k in ["search", "results", "login"]):
+                c_cand_name = raw_title.strip()
+
+        if c_cand_name and is_valid_company_name(c_cand_name):
+            cin_match = re.search(r'\b([LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}|[A-Z]{3}-\d{4})\b', f"{href} {raw_title} {body}")
+            cin_str = cin_match.group(1) if cin_match else ""
+            desc = f"Active Indian Registered Corporate Entity (MCA / ZaubaCorp: {cin_str})" if cin_str else "Active Indian Registered Corporate Entity"
+            cand = evaluate_company_entity(c_cand_name, desc, clean_q, allowed_tokens)
+            if not cand:
+                q_words = set(w.lower() for w in re.findall(r'[A-Za-z0-9]+', clean_q) if len(w) > 1)
+                cand_words = set(w.lower() for w in re.findall(r'[A-Za-z0-9]+', c_cand_name))
+                if q_words.issubset(cand_words) or (len(q_words & cand_words) >= max(1, len(q_words) - 1)):
+                    cand = {
+                        "name": c_cand_name.upper(),
+                        "desc": desc,
+                        "is_indian": True,
+                        "score": score_candidate_relevance(c_cand_name, desc, clean_q),
+                        "dedup_key": normalize_candidate_key(c_cand_name),
+                        "cin": cin_str,
+                        "url": href if "zaubacorp.com" in href else ""
+                    }
+            if cand:
+                cand["is_indian"] = True
+                if cin_str and "cin" not in cand:
+                    cand["cin"] = cin_str
+                if "zaubacorp.com" in href and "url" not in cand:
+                    cand["url"] = href
+                key = cand["dedup_key"]
+                if key not in seen_keys:
+                    seen_keys[key] = len(candidates)
+                    candidates.append(cand)
+
+    # 4. Gemini AI Candidate Discovery Fallback ONLY if candidates are still empty
+    if not candidates and os.environ.get("GEMINI_API_KEY"):
         try:
             ai_cand_prompt = (
-                f"Identify 3 to 5 real, verified corporate entities (especially Indian companies) "
-                f"matching or related to the user query: '{clean_q}'.\n"
+                f"Identify real, officially registered Indian corporate entities specifically matching the search: '{clean_q}'.\n"
+                f"Strict requirement: Only return actual companies that exist in MCA/ROC/BSE/NSE records. If no registered companies match '{clean_q}', return [].\n"
                 f"For each company, return:\n"
-                f"- name: Official corporate entity name (e.g. 'Liberty Shoes Limited', 'Imagine Marketing Limited (boAt)', 'Licious (Delightful Earth Pvt Ltd)')\n"
-                f"- desc: One sentence summary of its business, stock ticker if listed (e.g. NSE/BSE: LIBERTSHOE), sector, and HQ\n"
-                f"- is_indian: boolean (true if headquartered or primarily operating in India)\n\n"
+                f"- name: Official corporate entity name\n"
+                f"- desc: One sentence summary of business and HQ\n"
+                f"- is_indian: boolean\n"
                 f"Return strictly a JSON array of objects with keys: 'name', 'desc', 'is_indian'."
             )
-            raw_ai = call_gemini(ai_cand_prompt, system_instruction="Output strictly valid JSON with no markdown formatting.", temperature=0.1)
+            raw_ai = call_gemini(ai_cand_prompt, system_instruction="Output strictly valid JSON with no markdown formatting.", temperature=0.0)
             if raw_ai:
                 clean_json = raw_ai.strip()
                 if clean_json.startswith("```"):
@@ -11193,10 +11313,15 @@ def find_company_candidates(query: str) -> List[Dict[str, str]]:
                 import json
                 ai_items = json.loads(clean_json)
                 if isinstance(ai_items, list):
+                    q_toks = set(w.lower() for w in re.findall(r'[A-Za-z0-9]+', clean_q) if len(w) > 2)
                     for ac in ai_items:
                         c_name = ac.get("name", "").strip()
                         c_desc = ac.get("desc", "").strip()
                         c_ind = bool(ac.get("is_indian", True))
+                        # Reject AI hallucinations that share zero keywords with user query
+                        cand_toks = set(w.lower() for w in re.findall(r'[A-Za-z0-9]+', c_name))
+                        if q_toks and not (q_toks & cand_toks):
+                            continue
                         if c_name and is_valid_company_name(c_name):
                             cand = evaluate_company_entity(c_name, c_desc, clean_q, allowed_tokens)
                             if not cand:
@@ -11204,7 +11329,7 @@ def find_company_candidates(query: str) -> List[Dict[str, str]]:
                                     "name": c_name,
                                     "desc": c_desc or "Corporate Enterprise",
                                     "is_indian": c_ind,
-                                    "score": 90,
+                                    "score": score_candidate_relevance(c_name, c_desc, clean_q),
                                     "dedup_key": normalize_candidate_key(c_name)
                                 }
                             else:
@@ -11234,7 +11359,7 @@ def find_company_candidates(query: str) -> List[Dict[str, str]]:
     # Rank by closeness to query
     final_list.sort(key=lambda x: -x["score"])
 
-    return [{"name": c["name"], "desc": c["desc"]} for c in final_list[:6]]
+    return [{"name": c["name"], "desc": c["desc"], "is_indian": c.get("is_indian", True), "cin": c.get("cin", ""), "url": c.get("url", "")} for c in final_list[:6]]
 
 
 
