@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: corporate-intelligence-portal
+    name: vantage-intelligence-portal
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn web_server:app --host 0.0.0.0 --port $PORT
