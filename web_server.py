@@ -242,7 +242,7 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     host = os.environ.get("HOST", "0.0.0.0")
     print("\n" + "="*70)
-    print("  VANTAGE INTELLIGENCE SYSTEM")
+    print("  CORPORATE INTELLIGENCE SYSTEM")
     print(f"  Executive Web Portal running on: http://{host}:{port}")
     print("="*70 + "\n")
     uvicorn.run("web_server:app", host=host, port=port, reload=False)
