@@ -4398,6 +4398,42 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
         "Share Price": "N/A (Privately Held)"
     }
 
+    # Early Statutory Registry Master Extraction (fast direct CIN & MCA resolution)
+    try:
+        m_early = enrich_corporate_master_data(selected_candidate, data, sources, evidence_store=evidence_store)
+        if m_early.get("CIN") and m_early["CIN"] != "N/A":
+            data["CIN"] = m_early["CIN"]
+        if m_early.get("Legal Name") and m_early["Legal Name"] != "N/A":
+            data["Legal Name"] = m_early["Legal Name"]
+            data["Company Name"] = m_early["Legal Name"]
+        if m_early.get("RoC") and m_early["RoC"] != "N/A":
+            data["RoC"] = m_early["RoC"]
+        if m_early.get("Incorporation Date") and m_early["Incorporation Date"] != "N/A":
+            data["Incorporation Date"] = m_early["Incorporation Date"]
+            m_inc_yr = re.search(r'\b(19\d\d|20\d\d)\b', m_early["Incorporation Date"])
+            if m_inc_yr:
+                data["Founding Year"] = m_inc_yr.group(1)
+        if m_early.get("Registered Office") and m_early["Registered Office"] != "N/A":
+            data["Registered Office Address"] = m_early["Registered Office"]
+            data["Office Address"] = m_early["Registered Office"]
+        if m_early.get("Directors"):
+            data["Directors"] = m_early["Directors"]
+            data["Board of Directors"] = m_early["Directors"]
+            dirs_list = [str(d).strip().title() for d in m_early["Directors"] if str(d).strip() not in ("N/A", "None", "")]
+            if dirs_list:
+                data["Board of Directors / Key Promoters"] = ", ".join(dirs_list[:8])
+                data["Founder Name(s)"] = ", ".join(dirs_list[:3])
+                data["CEO"] = f"{dirs_list[0]} (Managing Director / Board: {', '.join(dirs_list[:3])})"
+                data["Owner"] = f"{', '.join(dirs_list[:3])} (Promoters)"
+        if m_early.get("Official Website"):
+            data["Official Website"] = m_early["Official Website"]
+            add_source("Official Corporate Website", data["Official Website"])
+        if m_early.get("Official Email"):
+            data["Official Email"] = m_early["Official Email"]
+            data["Contact Details"] = f"Email: {m_early['Official Email']}"
+    except Exception:
+        pass
+
     # 1. Live Market Data via Screener.in (Real-time BSE/NSE financial ratios)
     screener_match = None
     try:
