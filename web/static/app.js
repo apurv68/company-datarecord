@@ -393,6 +393,29 @@ document.addEventListener("DOMContentLoaded", () => {
       directors = isPrivate ? "Statutory Board of Directors (MCA Records)" : "Executive & Independent Board of Directors";
     }
 
+    // Contact & Registrar Details
+    const email = t1["Official Email"] || canon.email || "";
+    const tele = t1["Telephone"] || canon.telephone || "";
+    const contactRaw = t1["Contact Details"] || canon.contact_details || "";
+    const registrar = t1["Registrar"] || canon.registrar || "";
+    const compSec = t1["Company Secretary"] || "";
+
+    let contactHtml = "";
+    const contactParts = [];
+    if (email && email !== "N/A") {
+      contactParts.push(`<a href="mailto:${escapeHtml(email)}" style="color: #38BDF8; text-decoration: underline;">${escapeHtml(email)}</a>`);
+    }
+    if (tele && tele !== "N/A") {
+      contactParts.push(`<a href="tel:${escapeHtml(tele.replace(/[^0-9+]/g, ''))}" style="color: #38BDF8;">${escapeHtml(tele)}</a>`);
+    }
+    if (contactParts.length) {
+      contactHtml = contactParts.join(" • ");
+    } else if (contactRaw && contactRaw !== "N/A") {
+      contactHtml = escapeHtml(contactRaw);
+    } else {
+      contactHtml = isPrivate ? "Statutory Ministry Records / Corporate Desk" : "Exchange Listed Corporate Portal";
+    }
+
     metaContainer.innerHTML = `
       <div class="meta-field">
         <div class="meta-label">Corporate Identification Number (CIN / LLPIN)</div>
@@ -426,6 +449,15 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="meta-label">Official Corporate Domain</div>
         <div class="meta-val"><a href="${website.startsWith('http') ? escapeHtml(website) : 'https://' + escapeHtml(website)}" target="_blank" style="color: #38BDF8; text-decoration: underline;">${escapeHtml(websiteDisp)}</a></div>
       </div>
+      <div class="meta-field">
+        <div class="meta-label">Official Contact Details & Investor Relations</div>
+        <div class="meta-val">${contactHtml}</div>
+      </div>
+      ${registrar && registrar !== 'N/A' ? `
+      <div class="meta-field">
+        <div class="meta-label">Registrar & Share Transfer Agent (RTA)</div>
+        <div class="meta-val">${escapeHtml(registrar)}</div>
+      </div>` : ''}
       <div class="meta-field">
         <div class="meta-label">Market Capitalization / Valuation Scope</div>
         <div class="meta-val">${escapeHtml(mcap)}</div>
@@ -468,6 +500,15 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="leader-name">${escapeHtml(cto)}</div>
         </div>
       </div>
+
+      ${compSec && compSec !== 'N/A' ? `
+      <div class="leader-card" style="border-left: 3px solid #14B8A6;">
+        <div class="leader-avatar" style="background: linear-gradient(135deg, #134E4A, #0D9488); color: #CCFBF1;">CS</div>
+        <div>
+          <div class="leader-role">Company Secretary & Compliance Officer</div>
+          <div class="leader-name">${escapeHtml(compSec)}</div>
+        </div>
+      </div>` : ''}
 
       <div class="leader-card" style="border-left: 3px solid #EC4899;">
         <div class="leader-avatar" style="background: linear-gradient(135deg, #831843, #DB2777); color: #FCE7F3;">FND</div>

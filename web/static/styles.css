@@ -999,6 +999,7 @@ body {
   margin-bottom: 20px;
 }
 
+.meta-field,
 .meta-field-card {
   background: #0A0F1A;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -1006,6 +1007,7 @@ body {
   padding: 12px 14px;
 }
 
+.meta-label,
 .meta-field-label {
   font-size: 0.7rem;
   text-transform: uppercase;
@@ -1015,6 +1017,7 @@ body {
   font-weight: 600;
 }
 
+.meta-val,
 .meta-field-val {
   font-size: 0.86rem;
   color: #FFFFFF;

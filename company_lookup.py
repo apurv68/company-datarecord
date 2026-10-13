@@ -3247,6 +3247,76 @@ COMMON_INDIAN_ACRONYMS = {
     "bikaji foods": ("Bikaji Foods International Ltd", "Major Indian ethnic snacks and sweets manufacturer (NSE/BSE: BIKAJI)"),
 }
 
+def fetch_bse_corporate_info(scripcode: str) -> Optional[Dict[str, Any]]:
+    """
+    Direct statutory extractor from BSE India CorpInfo API (api.bseindia.com).
+    Authoritative regulatory disclosures for listed Indian companies:
+    - Registered Office Address, City, State, PIN
+    - Official Corporate Telephone & Investor Email
+    - Official Corporate Website
+    - Key Executives: CEO/MD, Chairman, CFO, CS, and Board of Directors
+    - Registrar & Transfer Agent
+    - Statutory CIN and ISIN
+    """
+    if not scripcode:
+        return None
+    scrip_str = str(scripcode).strip()
+    if not re.match(r"^\d{4,8}$", scrip_str):
+        return None
+    try:
+        url = f"https://api.bseindia.com/BseIndiaAPI/api/CorpInfo/w?scripcode={scrip_str}"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Referer": "https://www.bseindia.com/",
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "en-US,en;q=0.9"
+        }
+        r = requests.get(url, headers=headers, timeout=6)
+        if r.status_code == 200 and r.text:
+            data = r.json()
+            if isinstance(data, dict):
+                return data
+    except Exception:
+        pass
+    return None
+
+
+def search_official_website(company_name: str) -> Optional[str]:
+    """
+    Search and verify official corporate website for Indian entities.
+    Filters out aggregator directories, jobs boards, and social media.
+    """
+    if not company_name:
+        return None
+    clean = re.sub(r"\b(pvt|private|ltd|limited|corp|corporation|llp|inc)\b", "", company_name, flags=re.I).strip()
+    clean = re.sub(r"\s+", " ", clean)
+    queries = [
+        f"{clean} company official website",
+        f"{clean} official website India",
+        f'"{clean}" official website'
+    ]
+    blocked_domains = {
+        "linkedin.com", "facebook.com", "instagram.com", "twitter.com", "x.com",
+        "youtube.com", "zaubacorp.com", "tofler.in", "wikipedia.org", "indiamart.com",
+        "justdial.com", "instafinancials.com", "ambitionbox.com", "glassdoor.co.in",
+        "glassdoor.com", "screener.in", "moneycontrol.com", "economictimes.indiatimes.com",
+        "google.com", "bing.com", "duckduckgo.com", "tracxn.com", "crunchbase.com"
+    }
+    for q in queries:
+        try:
+            with DDGS(timeout=5) as ddgs:
+                results = list(ddgs.text(q, max_results=4))
+                for r in results:
+                    href = r.get("href", "")
+                    if href.startswith("http"):
+                        domain = re.sub(r"^https?://(?:www\.)?", "", href).split("/")[0].lower()
+                        if not any(b in domain for b in blocked_domains):
+                            base = re.match(r"^https?://[^/]+", href)
+                            if base:
+                                return base.group(0)
+        except Exception:
+            continue
+    return None
 
 
 def fetch_zaubacorp_profile(url_or_cin: str) -> Optional[Dict[str, Any]]:
@@ -3333,6 +3403,26 @@ def fetch_zaubacorp_profile(url_or_cin: str) -> Optional[Dict[str, Any]]:
             if d_name not in directors and len(d_name) > 3 and 'DIRECTOR' not in d_name:
                 directors.append(d_name.title())
 
+        # Extract Email ID if present
+        email = ""
+        m_em = re.search(r'Email\s*(?:ID)?\s*:\s*<[^>]+>\s*([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})', text, re.I)
+        if m_em:
+            email = m_em.group(1).strip()
+        else:
+            m_em2 = re.search(r'mailto:([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})', text, re.I)
+            if m_em2:
+                email = m_em2.group(1).strip()
+
+        # Extract Website if present
+        website = ""
+        m_w = re.search(r'Website\s*:\s*<[^>]+>\s*<a[^>]*href=["\']([^"\']+)["\']', text, re.I)
+        if m_w:
+            website = m_w.group(1).strip()
+        else:
+            m_w2 = re.search(r'Website\s*:\s*([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})', text, re.I)
+            if m_w2:
+                website = f"https://{m_w2.group(1).strip()}"
+
         return {
             'cin': cin,
             'legal_name': legal_name,
@@ -3340,6 +3430,8 @@ def fetch_zaubacorp_profile(url_or_cin: str) -> Optional[Dict[str, Any]]:
             'roc': roc,
             'address': address,
             'directors': directors[:5],
+            'email': email,
+            'website': website,
             'url': url
         }
     except Exception:
@@ -3864,6 +3956,10 @@ def enrich_corporate_master_data(
             master["Registered Office"] = zauba_profile["address"]
         if zauba_profile.get("directors"):
             master["Directors"] = zauba_profile["directors"]
+        if zauba_profile.get("website"):
+            master["Official Website"] = zauba_profile["website"]
+        if zauba_profile.get("email"):
+            master["Official Email"] = zauba_profile["email"]
 
     # Final Identity Consistency Verification
     is_id_valid, id_errors = validate_identity_consistency(
@@ -4129,6 +4225,10 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
         "Headquarter (City)": "N/A",
         "Office Address": "N/A",
         "Official Website": "N/A",
+        "Contact Details": "N/A",
+        "Official Email": "N/A",
+        "Telephone": "N/A",
+        "Registrar": "N/A",
         "Parent Company": "N/A",
         "Business Type (Private Limited/Public Limited)": "Private Limited",
         "Is Listed Company": "No",
@@ -4282,6 +4382,153 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
                     data["Business Type (Private Limited/Public Limited)"] = "Private Limited"
                     data["Stock Ticker"] = "N/A (Unlisted)"
                     data["Company Name"] = query
+
+                # ── Statutory BSE & NSE Links & Disclosures Extraction ──
+                bse_anchor = soup.find("a", href=re.compile(r"bseindia\.com/stock-share-price/[^/]+/[^/]+/(\d+)", re.I))
+                bse_scrip = None
+                if bse_anchor:
+                    m_scrip = re.search(r"/(\d+)/", bse_anchor.get("href", ""))
+                    if m_scrip:
+                        bse_scrip = m_scrip.group(1)
+                        data["_bse_scrip"] = bse_scrip
+                        data["BSE Scrip Code"] = bse_scrip
+                        add_source("BSE India (Bombay Stock Exchange)", bse_anchor["href"])
+
+                    parent_links = bse_anchor.parent
+                    if parent_links:
+                        for la in parent_links.find_all("a", href=True):
+                            lh = la["href"].strip()
+                            if lh.startswith("http") and not any(d in lh for d in ["screener.in", "bseindia.com", "nseindia.com"]):
+                                if data.get("Official Website") in ("N/A", "", None):
+                                    data["Official Website"] = lh
+                                    add_source("Official Corporate Website", lh)
+                            elif "nseindia.com" in lh:
+                                add_source("NSE India (National Stock Exchange)", lh)
+
+                # Fetch Statutory Corporate Governance & Registered Office from BSE India
+                if bse_scrip:
+                    bse_corp = fetch_bse_corporate_info(bse_scrip)
+                    if bse_corp:
+                        # Table1: Registered Office, Website, Contact Info
+                        b_t1_list = bse_corp.get("Table1", [])
+                        if b_t1_list and isinstance(b_t1_list, list) and len(b_t1_list) > 0:
+                            b_t1 = b_t1_list[0]
+                            b_addr = (b_t1.get("Address") or "").strip()
+                            b_city = (b_t1.get("City") or "").strip()
+                            b_state = (b_t1.get("State") or "").strip()
+                            b_pin = str(b_t1.get("nPIN") or "").strip()
+
+                            addr_parts = [p for p in [b_addr, b_city, b_state] if p]
+                            if addr_parts:
+                                full_b_addr = ", ".join(addr_parts)
+                                if b_pin and b_pin != "0" and b_pin not in full_b_addr:
+                                    full_b_addr += f" - {b_pin}"
+                                if not full_b_addr.lower().endswith("india"):
+                                    full_b_addr += ", India"
+                                data["Office Address"] = full_b_addr
+                                data["Registered Office Address"] = full_b_addr
+
+                            if b_city:
+                                data["Headquarter (City)"] = b_city
+
+                            b_url = (b_t1.get("sURL") or "").strip()
+                            if b_url and data.get("Official Website") in ("N/A", "", None):
+                                data["Official Website"] = f"https://{b_url}" if not b_url.startswith("http") else b_url
+                                add_source("Official Corporate Website", data["Official Website"])
+
+                            b_email = (b_t1.get("sEmail") or "").strip().rstrip(";, ")
+                            b_tele = (b_t1.get("Tele") or "").strip().rstrip(";, ")
+                            if b_email:
+                                data["Official Email"] = b_email
+                            if b_tele:
+                                data["Telephone"] = b_tele
+
+                            contact_parts = []
+                            if b_email:
+                                contact_parts.append(f"Email: {b_email}")
+                            if b_tele:
+                                contact_parts.append(f"Tel: {b_tele}")
+                            if contact_parts:
+                                data["Contact Details"] = " | ".join(contact_parts)
+
+                        # Table2: Registrar & Transfer Agent
+                        b_t2_list = bse_corp.get("Table2", [])
+                        if b_t2_list and isinstance(b_t2_list, list) and len(b_t2_list) > 0:
+                            b_t2 = b_t2_list[0]
+                            r_name = (b_t2.get("RegName") or "").strip()
+                            r_email = (b_t2.get("fld_Emailid") or "").strip()
+                            r_phone = (b_t2.get("Phone") or "").strip()
+                            if r_name:
+                                r_info = r_name
+                                r_sub = []
+                                if r_email:
+                                    r_sub.append(f"Email: {r_email}")
+                                if r_phone:
+                                    r_sub.append(f"Tel: {r_phone}")
+                                if r_sub:
+                                    r_info += f" ({', '.join(r_sub)})"
+                                data["Registrar"] = r_info
+
+                        # Table3: CIN, ISIN, Industry
+                        b_t3_list = bse_corp.get("Table3", [])
+                        if b_t3_list and isinstance(b_t3_list, list) and len(b_t3_list) > 0:
+                            b_t3 = b_t3_list[0]
+                            b_cin = (b_t3.get("fld_cin") or "").strip()
+                            b_isin = (b_t3.get("ISIN_NUMBER") or "").strip()
+                            b_ind = (b_t3.get("Industry") or "").strip()
+                            if b_cin and (not data.get("CIN") or data["CIN"] == "N/A"):
+                                data["CIN"] = b_cin
+                            if b_isin:
+                                data["ISIN"] = b_isin
+                            if b_ind:
+                                data["Primary Industry / Sector"] = b_ind
+
+                        # Table: Key Executives, MD/CEO, CFO, Chairperson, Board of Directors
+                        b_execs = bse_corp.get("Table", [])
+                        if b_execs and isinstance(b_execs, list):
+                            all_dirs = []
+                            ceo_found = None
+                            cfo_found = None
+                            chair_found = None
+                            cs_found = None
+
+                            for row in b_execs:
+                                fn = (row.get("sFirstname") or "").strip()
+                                mn = (row.get("sMiddlename") or "").strip()
+                                ln = (row.get("sLastname") or "").strip()
+                                full_n = " ".join([p for p in [fn, mn, ln] if p]).strip()
+                                desig = (row.get("sDesignation") or "").strip()
+                                desig_l = desig.lower()
+
+                                if not full_n:
+                                    continue
+
+                                all_dirs.append(full_n)
+
+                                if not ceo_found and any(k in desig_l for k in ["ceo-md", "chief executive officer", "executive director-md", "managing director"]):
+                                    ceo_found = full_n
+                                if not chair_found and any(k in desig_l for k in ["chairperson", "chairman"]):
+                                    chair_found = full_n
+                                if not cfo_found and any(k in desig_l for k in ["chief financial officer", "cfo"]):
+                                    cfo_found = full_n
+                                if not cs_found and any(k in desig_l for k in ["company secretary", "compliance officer"]):
+                                    cs_found = full_n
+
+                            if ceo_found:
+                                data["CEO"] = ceo_found
+                                data["Managing Director / CEO"] = ceo_found
+                            if chair_found:
+                                data["Owner"] = f"{chair_found} (Chairperson / Board)"
+                                data["Ultimate Owner / Promoters"] = f"{chair_found} (Chairperson / Board)"
+                            if cfo_found:
+                                data["CFO"] = cfo_found
+                                data["Chief Financial Officer (CFO)"] = cfo_found
+                            if cs_found:
+                                data["Company Secretary"] = cs_found
+                            if all_dirs:
+                                data["Board of Directors"] = all_dirs
+                                data["Directors"] = all_dirs
+                                data["Board of Directors / Key Promoters"] = ", ".join(all_dirs[:8])
 
                 add_source("Screener.in (BSE & NSE Corporate Financials)", c_url)
         except Exception:
@@ -4442,6 +4689,13 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
                     data["Stock Ticker"] = val
                     data["Is Listed Company"] = "Yes"
                     data["Business Type (Private Limited/Public Limited)"] = "Public Limited"
+
+    # Fallback search for Official Corporate Website if still unknown
+    if data.get("Official Website") in ("N/A", "", None):
+        found_web = search_official_website(data.get("Company Name", query))
+        if found_web:
+            data["Official Website"] = found_web
+            add_source("Official Corporate Website", found_web)
 
     # 3. Targeted Web Search for Office Address if needed (AI-filtered extraction)
     hq_city_cur = resolve_hq_city(data.get("Headquarter (City)", ""), data.get("Office Address", ""))
@@ -4662,6 +4916,13 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
                     data["Headquarter (City)"] = m_roc.group(1).strip()
         if m_data.get("Identity Status"):
             data["Identity Status"] = m_data["Identity Status"]
+        if m_data.get("Official Website") and data.get("Official Website") in ("N/A", "", None):
+            data["Official Website"] = m_data["Official Website"]
+            add_source("Official Corporate Website", data["Official Website"])
+        if m_data.get("Official Email") and data.get("Official Email") in ("N/A", "", None):
+            data["Official Email"] = m_data["Official Email"]
+            if data.get("Contact Details") in ("N/A", "", None):
+                data["Contact Details"] = f"Email: {m_data['Official Email']}"
         if m_data.get("_is_ambiguous"):
             data["_is_ambiguous"] = True
             data["_conflict_entities"] = m_data.get("_conflict_entities", [])
@@ -4693,7 +4954,7 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
     if evidence_store is not None:
         src_url = sources[0]["url"] if sources else "N/A"
         src_name = sources[0]["name"] if sources else "Corporate Disclosures"
-        for k in ["Company Name", "Founding Year", "Founder Name(s)", "CEO", "CFO", "CTO", "Headquarter (City)", "Office Address", "Business Type (Private Limited/Public Limited)", "Is Listed Company", "Stock Ticker", "Current Market Cap (Market Value/Mcap)", "Share Price", "CIN", "RoC", "Incorporation Date"]:
+        for k in ["Company Name", "Founding Year", "Founder Name(s)", "CEO", "CFO", "CTO", "Headquarter (City)", "Office Address", "Registered Office Address", "Official Website", "Contact Details", "Business Type (Private Limited/Public Limited)", "Is Listed Company", "Stock Ticker", "Current Market Cap (Market Value/Mcap)", "Share Price", "CIN", "RoC", "Incorporation Date"]:
             v = data.get(k)
             if v and v != "N/A" and "unlisted" not in str(v).lower() and "privately held" not in str(v).lower():
                 evidence_store.add_evidence(
@@ -4769,6 +5030,11 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
     data["Chief Technology Officer (CTO)"] = cto_val
     data["Ultimate Owner / Promoters"] = owner_val
     data["Registered Office Address"] = data.get("Office Address") or data.get("Registered Address") or "N/A"
+    data["Official Website"] = data.get("Official Website") or "N/A"
+    data["Contact Details"] = data.get("Contact Details") or "N/A"
+    data["Official Email"] = data.get("Official Email") or "N/A"
+    data["Telephone"] = data.get("Telephone") or "N/A"
+    data["Registrar"] = data.get("Registrar") or "N/A"
     data["Incorporation Year"] = data.get("Founding Year") or data.get("Incorporation Date") or "N/A"
     data["Stock Ticker / Symbol"] = data.get("Stock Ticker") or "N/A"
     data["Primary Industry / Sector"] = data.get("Primary Industry / Sector") or data.get("Business Type (Private Limited/Public Limited)") or "Corporate"
@@ -6261,7 +6527,13 @@ def resolve_canonical_entity(
         "ceo": d1.get("CEO", "N/A"),
         "cfo": d1.get("CFO", "N/A"),
         "cto": d1.get("CTO", "N/A"),
-        "official_domain": official_domain,
+        "website": d1.get("Official Website", "N/A"),
+        "address": d1.get("Registered Office Address") or d1.get("Office Address", "N/A"),
+        "contact_details": d1.get("Contact Details", "N/A"),
+        "email": d1.get("Official Email", "N/A"),
+        "telephone": d1.get("Telephone", "N/A"),
+        "registrar": d1.get("Registrar", "N/A"),
+        "official_domain": official_domain or d1.get("Official Website", ""),
         "aliases": list(aliases),
         "subsidiaries": subsidiaries,
         "parent_company": d1.get("Parent Company", "") if d1.get("Parent Company") not in ("N/A", None) else "",
@@ -10606,6 +10878,9 @@ def save_company_docx(
         ("Board of Directors / Key Promoters", directors_str),
         ("Headquarter (City)", hq_val),
         ("Registered Office / Corporate Address", addr_val),
+        ("Official Website", data1.get("Official Website", "N/A")),
+        ("Contact Details (Email & Phone)", data1.get("Contact Details", "N/A")),
+        ("Registrar & Transfer Agent", data1.get("Registrar", "N/A")),
         ("Current Valuation / Market Cap", mcap_val),
         ("Share Price", data1.get("Share Price", "N/A")),
         ("Statutory Verification Status", data1.get("Identity Status", "Verified — Active Registry Entry")),
@@ -10615,6 +10890,8 @@ def save_company_docx(
     normalized_keys = {
         "company name", "legal name", "cin", "roc", "incorporation date",
         "business type", "is listed company", "stock ticker",
+        "official website", "website", "contact details", "contact details (email & phone)",
+        "official email", "telephone", "registrar", "registrar & transfer agent",
         "official domain", "registered address", "office address", "registered office",
         "managing director / ceo", "ceo", "chief financial officer (cfo)", "cfo",
         "chief technology officer (cto)", "cto", "board of directors", "directors", "board of directors / key promoters", "board of directors/key promoters",
