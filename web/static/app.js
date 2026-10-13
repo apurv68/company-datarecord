@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeCandidate = null;
   let debounceTimer = null;
   let candidatesList = [];
+  let currentFetchController = null;
 
   // Initialize System Status Pills
   checkSystemStatus();
@@ -128,14 +129,22 @@ document.addEventListener("DOMContentLoaded", () => {
   // Autocomplete & Disambiguation
   // --------------------------------------------------------------------------
   async function fetchCandidates(query) {
+    if (currentFetchController) {
+      currentFetchController.abort();
+    }
+    currentFetchController = new AbortController();
     try {
-      const res = await fetch(`/api/candidates?q=${encodeURIComponent(query)}`);
+      const res = await fetch(`/api/candidates?q=${encodeURIComponent(query)}`, {
+        signal: currentFetchController.signal
+      });
       if (!res.ok) return;
       const data = await res.json();
       candidatesList = data.candidates || [];
       renderAutocomplete(candidatesList);
     } catch (e) {
-      console.error("Autocomplete error", e);
+      if (e.name !== "AbortError") {
+        console.error("Autocomplete error", e);
+      }
     }
   }
 
@@ -146,11 +155,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     autocompleteMenu.innerHTML = items.map((cand, idx) => `
       <div class="autocomplete-item" data-idx="${idx}">
-        <div>
+        <div style="flex: 1; min-width: 0; padding-right: 12px;">
           <div class="cand-name">${escapeHtml(cand.name)}</div>
           <div class="cand-desc">${escapeHtml(cand.desc || "Verified Enterprise Candidate")}</div>
+          ${cand.cin ? `<div class="cand-cin">CIN: ${escapeHtml(cand.cin)}</div>` : ""}
         </div>
-        <span class="cand-badge">${cand.is_indian ? "Indian Entity" : "Global"}</span>
+        <span class="cand-badge">${cand.cin ? "MCA / RoC" : (cand.is_indian ? "Indian Entity" : "Global")}</span>
       </div>
     `).join("");
 

@@ -20,6 +20,7 @@ import xml.etree.ElementTree as ET
 import email.utils
 from datetime import datetime
 from typing import Dict, Any, Optional, List, Tuple, Union
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Ensure UTF-8 output on Windows consoles with immediate line buffering
 if hasattr(sys.stdout, "reconfigure"):
@@ -3670,7 +3671,9 @@ def enrich_corporate_master_data(
         # Fallback / Secondary: DDGS
         if len(raw_registry_results) < 3:
             with DDGS(timeout=7) as ddgs:
-                ddg_res = list(ddgs.text(f'"{clean_q}" CIN zaubacorp', max_results=6))
+                ddg_res = list(ddgs.text(f'{clean_q} zaubacorp CIN', max_results=6))
+                if not ddg_res:
+                    ddg_res = list(ddgs.text(f'{clean_q} zaubacorp', max_results=6))
                 raw_registry_results.extend(ddg_res)
 
         for r in raw_registry_results:
@@ -4107,8 +4110,15 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
             sources.append({"name": name, "url": str(url).strip()})
             seen_urls.add(url)
 
+    init_cin = "N/A"
+    if isinstance(selected_candidate, dict) and selected_candidate.get("cin"):
+        init_cin = selected_candidate["cin"]
+    elif re.match(r'^[LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}$', clean_q, re.I) or re.match(r'^[A-Z]{3}-\d{4}$', clean_q, re.I):
+        init_cin = clean_q.upper()
+
     data = {
         "Company Name": query,
+        "CIN": init_cin,
         "_candidate": selected_candidate,
         "_candidate_desc": cand_desc,
         "Founding Year": "N/A",
@@ -6221,6 +6231,12 @@ def resolve_canonical_entity(
 
     # Extract CIN from Table 1 data if available
     cin = d1.get("CIN", d1.get("cin", ""))
+    if (not cin or cin == "N/A") and isinstance(selected_candidate, dict):
+        cin = selected_candidate.get("cin", "")
+    if (not cin or cin == "N/A") and (re.match(r'^[LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}$', query_str.strip(), re.I) or re.match(r'^[A-Z]{3}-\d{4}$', query_str.strip(), re.I)):
+        cin = query_str.strip().upper()
+    if cin and cin != "N/A":
+        d1["CIN"] = cin
 
     return {
         "canonical_name": raw_name,
@@ -11306,25 +11322,24 @@ def score_candidate_relevance(name: str, desc: str, query: str) -> int:
     d_low = desc.lower().strip()
     cand_text = f"{c_low} {d_low}"
 
-    score = 20
-    if c_low == q_low:
+    score = 25
+    q_col = re.sub(r'[\s\-_]', '', q_low)
+    c_col = re.sub(r'[\s\-_]', '', c_low)
+
+    if c_low == q_low or (q_col and q_col == c_col):
         score = 100
-    elif c_low.startswith(q_low) or q_low.startswith(c_low):
+    elif c_low.startswith(q_low) or q_low.startswith(c_low) or (q_col and (c_col.startswith(q_col) or q_col.startswith(c_col))):
         score = 85
-    elif q_low in c_low or c_low in q_low:
+    elif q_low in c_low or c_low in q_low or (q_col and (q_col in c_col or c_col in q_col)):
         score = 80
     else:
-        generic_stopwords = {
-            "airline", "airlines", "company", "limited", "ltd", "pvt", "private",
-            "corp", "corporation", "industries", "group", "bank", "services", "india", "indian"
-        }
         q_tokens = [w for w in re.findall(r"\w+", q_low) if len(w) > 1]
-        distinctive_q = [w for w in q_tokens if w not in generic_stopwords]
+        distinctive_q = [w for w in q_tokens if w not in GENERIC_CORP_TOKENS]
 
-        if distinctive_q and any(dq in c_low for dq in distinctive_q):
-            score = 70
-            if all(dq in c_low for dq in distinctive_q):
-                score += 10
+        if distinctive_q and all(dq in c_low or (q_col and dq in c_col) for dq in distinctive_q):
+            score = 75
+        elif distinctive_q and any(dq in c_low or (q_col and dq in c_col) for dq in distinctive_q):
+            score = 65
 
     # Industry words alignment
     airline_kw = {"airline", "airlines", "aviation", "flight", "airways"}
@@ -11353,8 +11368,9 @@ def evaluate_company_entity(name: str, desc: str, query: str, allowed_tokens: li
     n_lower = name_clean.lower()
     d_lower = desc.lower().strip()
     comb = f"{n_lower} {d_lower}"
+    q_lower = query.lower().strip()
 
-    if len(name_clean) < 2 or len(name_clean) > 60 or name_clean.isdigit():
+    if len(name_clean) < 2 or len(name_clean) > 85 or name_clean.isdigit():
         return None
 
     for pat in REJECT_CANDIDATE_PATTERNS:
@@ -11367,7 +11383,20 @@ def evaluate_company_entity(name: str, desc: str, query: str, allowed_tokens: li
 
     is_indian = any(tok in comb for tok in INDIAN_COMPANY_TOKENS)
 
-    is_relevant = any(t in n_lower or t in d_lower for t in allowed_tokens) if allowed_tokens else True
+    # Distinctive token check: generic corporate suffixes alone must NOT cause a false match
+    q_col = re.sub(r'[\s\-_]', '', q_lower)
+    n_col = re.sub(r'[\s\-_]', '', n_lower)
+    distinctive_q_tokens = [t for t in allowed_tokens if t not in GENERIC_CORP_TOKENS]
+
+    if distinctive_q_tokens:
+        if q_col in n_col or n_col in q_col:
+            is_relevant = True
+        else:
+            n_words = set(re.findall(r'\w+', n_lower))
+            is_relevant = any(dt in n_words or any(dt in nw for nw in n_words) for dt in distinctive_q_tokens)
+    else:
+        is_relevant = any(t in n_lower or t in d_lower for t in allowed_tokens) if allowed_tokens else True
+
     if not is_relevant:
         return None
 
@@ -11382,115 +11411,147 @@ def evaluate_company_entity(name: str, desc: str, query: str, allowed_tokens: li
 
 def find_company_candidates(query: str) -> List[Dict[str, str]]:
     """
-    Discover verified corporate candidates for queries, strictly excluding non-companies
-    (metro stations, categories, geographic locations) and prioritizing Indian companies.
+    Discover verified corporate candidates for queries, prioritizing Indian companies
+    and resolving Corporate Identification Numbers (CIN/LLPIN).
+    Executes multi-source checks (MCA/ZaubaCorp registry, BSE/NSE Screener, Wikipedia) in parallel.
     """
-    candidates = []
-    seen_keys = {}
+    clean_q = query.strip()
+    if not clean_q:
+        return []
+    q_lower = clean_q.lower()
     headers = {"User-Agent": "CompanyIntelligence/2.0 (Windows; company-candidate-filter@company-datarecord.org)"}
 
-    clean_q = query.strip()
-    q_lower = clean_q.lower()
+    cin_pat = r'^[LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}$'
+    llp_pat = r'^[A-Z]{3}-\d{4}$'
+    is_cin_query = bool(re.match(cin_pat, clean_q, re.I) or re.match(llp_pat, clean_q, re.I))
 
-    allowed_tokens = [t for t in re.findall(r"\w+", q_lower) if len(t) > 1]
+    q_tokens = [t for t in re.findall(r"\w+", q_lower) if len(t) > 1]
+    distinctive_q_tokens = [t for t in q_tokens if t not in GENERIC_CORP_TOKENS]
 
-    # Pre-seed known Indian abbreviations
+    candidates = []
+    seen_keys = {}
+
+    def add_candidate(cand: Dict[str, Any]):
+        key = cand.get("dedup_key") or normalize_candidate_key(cand["name"])
+        if key in seen_keys:
+            idx = seen_keys[key]
+            existing = candidates[idx]
+            if cand.get("cin") and not existing.get("cin"):
+                existing["cin"] = cand["cin"]
+                existing["score"] += 35
+                if "CIN" not in existing.get("desc", ""):
+                    existing["desc"] = f"{existing.get('desc', 'Indian Corporate Entity')} (CIN: {cand['cin']})"
+            if cand.get("url") and not existing.get("url"):
+                existing["url"] = cand["url"]
+            if cand.get("is_indian") and not existing.get("is_indian"):
+                existing["is_indian"] = True
+            if cand.get("score", 0) > existing.get("score", 0):
+                existing["score"] = cand["score"]
+        else:
+            cand["dedup_key"] = key
+            seen_keys[key] = len(candidates)
+            candidates.append(cand)
+
+    # 0. Pre-seed known Indian abbreviations
     if q_lower in COMMON_INDIAN_ACRONYMS:
         canonical_name, canonical_desc = COMMON_INDIAN_ACRONYMS[q_lower]
-        c_entry = {
+        add_candidate({
             "name": canonical_name,
             "desc": canonical_desc,
             "is_indian": True,
-            "score": 100,
-            "dedup_key": normalize_candidate_key(canonical_name)
-        }
-        candidates.append(c_entry)
-        seen_keys[c_entry["dedup_key"]] = 0
-        allowed_tokens.extend([t for t in re.findall(r"\w+", canonical_name.lower()) if len(t) > 2])
+            "score": 120,
+            "cin": "",
+            "url": ""
+        })
 
-    search_terms = []
-    if q_lower in COMMON_INDIAN_ACRONYMS:
-        search_terms.append(COMMON_INDIAN_ACRONYMS[q_lower][0])
-    # Acronym-based search term expansion is handled generically via COMMON_INDIAN_ACRONYMS
-    search_terms.extend([f"{clean_q} company India", f"{clean_q} company", clean_q])
+    # Worker 1: Indian Corporate Registry (ZaubaCorp / MCA / Tofler / Tracxn)
+    def worker_registry():
+        results = []
+        raw_items = []
+        reg_queries = [clean_q] if is_cin_query else [f"{clean_q} zaubacorp CIN", f"{clean_q} zaubacorp"]
 
-    # 1. Wikipedia Search API with description & pageprops
-    for sq in search_terms:
-        try:
-            r = requests.get(
-                "https://en.wikipedia.org/w/api.php",
-                params={
-                    "action": "query",
-                    "generator": "search",
-                    "gsrsearch": sq,
-                    "gsrlimit": 6,
-                    "prop": "description|pageprops",
-                    "format": "json"
-                },
-                headers=headers,
-                timeout=3.5
-            )
-            if r.status_code == 200:
-                pages = r.json().get("query", {}).get("pages", {})
-                for pid, p in pages.items():
-                    if "disambiguation" in p.get("pageprops", {}):
+        # Try Tavily if key is available
+        if os.environ.get("TAVILY_API_KEY"):
+            for rq in reg_queries[:1]:
+                try:
+                    t_items = query_tavily_search(rq, max_results=5)
+                    for it in t_items:
+                        raw_items.append({
+                            "title": it.get("title", ""),
+                            "href": it.get("source", ""),
+                            "body": it.get("snippet", "")
+                        })
+                except Exception:
+                    pass
+
+        # Primary / Fallback via DDGS
+        if len(raw_items) < 2:
+            try:
+                with DDGS(timeout=3.5) as ddgs:
+                    for rq in reg_queries:
+                        for it in ddgs.text(rq, max_results=5):
+                            raw_items.append(it)
+                        if len(raw_items) >= 4:
+                            break
+            except Exception:
+                pass
+
+        for item in raw_items:
+            title = item.get("title", "")
+            href = item.get("href", "")
+            body = item.get("body", "")
+            comb = f"{title} {href} {body}"
+            cin_m = re.search(r'\b([LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}|[A-Z]{3}-\d{4})\b', comb)
+            cin_str = cin_m.group(1) if cin_m else ""
+
+            name_cand = ""
+            m_z = re.search(r'zaubacorp\.com/(?:company/)?([A-Za-z0-9-]+?)(?:/|-)([LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}|[A-Z]{3}-\d{4})', href, re.I)
+            if m_z:
+                name_cand = m_z.group(1).replace("-", " ").strip()
+            else:
+                clean_title = re.sub(r'^(?:Directors of|Board of|Contact details of|Financials of|Overview of)\s+', '', title, flags=re.I).strip()
+                m_t = re.match(r'^(?:Company search results\s*[-–—]\s*)?([A-Za-z0-9\s.,&()/-]+?)\s*(?:\||[-–—]\s*(?:ZaubaCorp|Tofler|Tracxn|TheCompanyCheck|IndiaFilings|Company Profile|Insights|\d{4}))', clean_title, re.I)
+                if m_t:
+                    name_cand = m_t.group(1).strip()
+                elif "zaubacorp" in href.lower() or "tofler" in href.lower():
+                    name_cand = clean_title.split("|")[0].split("-")[0].strip()
+
+            name_cand = re.sub(r'\s+(?:company profile|overview|zaubacorp|tofler|tracxn|details)$', '', name_cand, flags=re.I).strip()
+            if not name_cand or len(name_cand) < 3 or len(name_cand) > 75:
+                continue
+            if re.search(r'\b(?:team lead|manager|lead at|director at|employee at|software engineer|vice president)\b', name_cand, re.I):
+                continue
+
+            # Distinctive token filter
+            if not is_cin_query and distinctive_q_tokens:
+                n_low = name_cand.lower()
+                q_col = re.sub(r'[\s\-_]', '', q_lower)
+                n_col = re.sub(r'[\s\-_]', '', n_low)
+                if not (q_col in n_col or n_col in q_col):
+                    n_toks = set(re.findall(r'\w+', n_low))
+                    if not any(dt in n_toks or any(dt in nt for nt in n_toks) for dt in distinctive_q_tokens):
                         continue
-                    cand = evaluate_company_entity(p.get("title", ""), p.get("description", ""), clean_q, allowed_tokens)
-                    if cand:
-                        key = cand["dedup_key"]
-                        if key not in seen_keys:
-                            seen_keys[key] = len(candidates)
-                            candidates.append(cand)
-                        else:
-                            idx = seen_keys[key]
-                            if cand["is_indian"] and not candidates[idx]["is_indian"]:
-                                candidates[idx]["is_indian"] = True
-        except Exception:
-            pass
-        if len([c for c in candidates if c["is_indian"]]) >= 4:
-            break
 
-    # 2. Wikidata Entities Search
-    for w_query in [clean_q, f"{clean_q} India"]:
-        try:
-            w_res = requests.get(
-                "https://www.wikidata.org/w/api.php",
-                params={
-                    "action": "wbsearchentities",
-                    "search": w_query,
-                    "language": "en",
-                    "format": "json",
-                    "limit": 8
-                },
-                headers=headers,
-                timeout=3.5
-            )
-            if w_res.status_code == 200:
-                for item in w_res.json().get("search", []):
-                    cand = evaluate_company_entity(item.get("label", ""), item.get("description", ""), clean_q, allowed_tokens)
-                    if cand:
-                        key = cand["dedup_key"]
-                        if key not in seen_keys:
-                            seen_keys[key] = len(candidates)
-                            candidates.append(cand)
-                        else:
-                            idx = seen_keys[key]
-                            if cand["is_indian"] and not candidates[idx]["is_indian"]:
-                                candidates[idx]["is_indian"] = True
-                                candidates[idx]["desc"] = cand["desc"]
-        except Exception:
-            pass
+            desc = f"Active Indian Registered Corporate Entity (MCA / ZaubaCorp: {cin_str})" if cin_str else "Active Indian Registered Corporate Entity"
+            score = score_candidate_relevance(name_cand, desc, clean_q) + (40 if cin_str else 20)
+            results.append({
+                "name": name_cand.upper(),
+                "desc": desc,
+                "is_indian": True,
+                "cin": cin_str,
+                "url": href if "zaubacorp.com" in href else "",
+                "score": score
+            })
+        return results
 
-    # 3. Screener API search for active Indian listed companies
-    screener_queries = [clean_q]
-    if q_lower in COMMON_INDIAN_ACRONYMS:
-        screener_queries.append(COMMON_INDIAN_ACRONYMS[q_lower][0])
-    # Screener expansion handled generically via COMMON_INDIAN_ACRONYMS
-
-    for sq in screener_queries:
+    # Worker 2: Screener API search for active Indian listed companies
+    def worker_screener():
+        results = []
+        if is_cin_query:
+            return results
         try:
             s_res = requests.get(
-                f"https://www.screener.in/api/company/search/?q={requests.utils.quote(sq)}",
+                f"https://www.screener.in/api/company/search/?q={requests.utils.quote(clean_q)}",
                 headers={"User-Agent": "Mozilla/5.0"},
                 timeout=3
             )
@@ -11501,151 +11562,94 @@ def find_company_candidates(query: str) -> List[Dict[str, str]]:
                         continue
                     url = item.get("url", "")
                     ticker = url.strip("/").split("/")[-1] if "/company/" in url else ""
-                    cand = evaluate_company_entity(raw_name, f"Indian Public Listed Enterprise (NSE/BSE: {ticker})", clean_q, allowed_tokens)
+                    if distinctive_q_tokens:
+                        n_low = raw_name.lower()
+                        q_col = re.sub(r'[\s\-_]', '', q_lower)
+                        n_col = re.sub(r'[\s\-_]', '', n_low)
+                        if not (q_col in n_col or n_col in q_col):
+                            n_toks = set(re.findall(r'\w+', n_low))
+                            if not any(dt in n_toks or any(dt in nt for nt in n_toks) for dt in distinctive_q_tokens):
+                                continue
+                    cand = evaluate_company_entity(raw_name, f"Indian Public Listed Enterprise (NSE/BSE: {ticker})", clean_q, q_tokens)
                     if cand:
                         cand["is_indian"] = True
-                        key = cand["dedup_key"]
-                        if key not in seen_keys:
-                            seen_keys[key] = len(candidates)
-                            candidates.append(cand)
+                        cand["score"] += 15
+                        cand["url"] = f"https://www.screener.in{url}" if url else ""
+                        cand["cin"] = ""
+                        results.append(cand)
         except Exception:
             pass
+        return results
 
-    # 3b. Indian Corporate Registry Search (ZaubaCorp, Tofler, MCA, Tracxn)
-    reg_queries = [f'"{clean_q}" India zaubacorp', f'{clean_q} CIN zaubacorp', f'"{clean_q}" LLP zaubacorp']
-    reg_results = []
-    if os.environ.get("TAVILY_API_KEY"):
-        for rq in reg_queries[:2]:
-            try:
-                t_items = query_tavily_search(rq, max_results=5)
-                for it in t_items:
-                    reg_results.append({
-                        "title": it.get("title", ""),
-                        "href": it.get("source", ""),
-                        "body": it.get("snippet", "")
-                    })
-            except Exception:
-                pass
-    if len(reg_results) < 2:
+    # Worker 3: Wikipedia Search API
+    def worker_wikipedia():
+        results = []
+        if is_cin_query:
+            return results
         try:
-            with DDGS(timeout=5) as ddgs:
-                d_items = list(ddgs.text(f'"{clean_q}" India zaubacorp', max_results=5))
-                reg_results.extend(d_items)
-        except Exception:
-            pass
-
-    for item in reg_results:
-        raw_title = item.get("title", "")
-        href = item.get("href", "")
-        body = item.get("body", "")
-        c_cand_name = ""
-        m_t = re.match(r'^(?:Company search results\s*[-–—]\s*)?([A-Za-z0-9\s.,&()/-]+?)\s*(?:\||[-–—]\s*(?:ZaubaCorp|Tofler|Tracxn|TheCompanyCheck|IndiaFilings|Company Profile|Insights|\d{4}))', raw_title, re.I)
-        if m_t:
-            c_cand_name = m_t.group(1).strip()
-        elif "zaubacorp.com" in href:
-            m_u = re.search(r'zaubacorp\.com/(?:company/)?([A-Za-z0-9-]+?)(?:/|-)([LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}|[A-Z]{3}-\d{4})', href, re.I)
-            if m_u:
-                c_cand_name = m_u.group(1).replace("-", " ").strip()
-            elif raw_title and len(raw_title) < 70 and not any(k in raw_title.lower() for k in ["search", "results", "login"]):
-                c_cand_name = raw_title.strip()
-
-        if c_cand_name and is_valid_company_name(c_cand_name):
-            cin_match = re.search(r'\b([LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}|[A-Z]{3}-\d{4})\b', f"{href} {raw_title} {body}")
-            cin_str = cin_match.group(1) if cin_match else ""
-            desc = f"Active Indian Registered Corporate Entity (MCA / ZaubaCorp: {cin_str})" if cin_str else "Active Indian Registered Corporate Entity"
-            cand = evaluate_company_entity(c_cand_name, desc, clean_q, allowed_tokens)
-            if not cand:
-                q_words = set(w.lower() for w in re.findall(r'[A-Za-z0-9]+', clean_q) if len(w) > 1)
-                cand_words = set(w.lower() for w in re.findall(r'[A-Za-z0-9]+', c_cand_name))
-                if q_words.issubset(cand_words) or (len(q_words & cand_words) >= max(1, len(q_words) - 1)):
-                    cand = {
-                        "name": c_cand_name.upper(),
-                        "desc": desc,
-                        "is_indian": True,
-                        "score": score_candidate_relevance(c_cand_name, desc, clean_q),
-                        "dedup_key": normalize_candidate_key(c_cand_name),
-                        "cin": cin_str,
-                        "url": href if "zaubacorp.com" in href else ""
-                    }
-            if cand:
-                cand["is_indian"] = True
-                if cin_str and "cin" not in cand:
-                    cand["cin"] = cin_str
-                if "zaubacorp.com" in href and "url" not in cand:
-                    cand["url"] = href
-                key = cand["dedup_key"]
-                if key not in seen_keys:
-                    seen_keys[key] = len(candidates)
-                    candidates.append(cand)
-
-    # 4. Gemini AI Candidate Discovery Fallback ONLY if candidates are still empty
-    if not candidates and os.environ.get("GEMINI_API_KEY"):
-        try:
-            ai_cand_prompt = (
-                f"Identify real, officially registered Indian corporate entities specifically matching the search: '{clean_q}'.\n"
-                f"Strict requirement: Only return actual companies that exist in MCA/ROC/BSE/NSE records. If no registered companies match '{clean_q}', return [].\n"
-                f"For each company, return:\n"
-                f"- name: Official corporate entity name\n"
-                f"- desc: One sentence summary of business and HQ\n"
-                f"- is_indian: boolean\n"
-                f"Return strictly a JSON array of objects with keys: 'name', 'desc', 'is_indian'."
+            r = requests.get(
+                "https://en.wikipedia.org/w/api.php",
+                params={
+                    "action": "query",
+                    "generator": "search",
+                    "gsrsearch": f"{clean_q} company India",
+                    "gsrlimit": 5,
+                    "prop": "description|pageprops",
+                    "format": "json"
+                },
+                headers=headers,
+                timeout=3
             )
-            raw_ai = call_gemini(ai_cand_prompt, system_instruction="Output strictly valid JSON with no markdown formatting.", temperature=0.0)
-            if raw_ai:
-                clean_json = raw_ai.strip()
-                if clean_json.startswith("```"):
-                    clean_json = re.sub(r"^```(?:json)?\s*", "", clean_json)
-                    clean_json = re.sub(r"\s*```$", "", clean_json)
-                import json
-                ai_items = json.loads(clean_json)
-                if isinstance(ai_items, list):
-                    q_toks = set(w.lower() for w in re.findall(r'[A-Za-z0-9]+', clean_q) if len(w) > 2)
-                    for ac in ai_items:
-                        c_name = ac.get("name", "").strip()
-                        c_desc = ac.get("desc", "").strip()
-                        c_ind = bool(ac.get("is_indian", True))
-                        # Reject AI hallucinations that share zero keywords with user query
-                        cand_toks = set(w.lower() for w in re.findall(r'[A-Za-z0-9]+', c_name))
-                        if q_toks and not (q_toks & cand_toks):
-                            continue
-                        if c_name and is_valid_company_name(c_name):
-                            cand = evaluate_company_entity(c_name, c_desc, clean_q, allowed_tokens)
-                            if not cand:
-                                cand = {
-                                    "name": c_name,
-                                    "desc": c_desc or "Corporate Enterprise",
-                                    "is_indian": c_ind,
-                                    "score": score_candidate_relevance(c_name, c_desc, clean_q),
-                                    "dedup_key": normalize_candidate_key(c_name)
-                                }
-                            else:
-                                if c_ind:
-                                    cand["is_indian"] = True
-                            key = cand["dedup_key"]
-                            if key not in seen_keys:
-                                seen_keys[key] = len(candidates)
-                                candidates.append(cand)
+            if r.status_code == 200:
+                pages = r.json().get("query", {}).get("pages", {})
+                for pid, p in pages.items():
+                    if "disambiguation" in p.get("pageprops", {}):
+                        continue
+                    title = p.get("title", "")
+                    desc = p.get("description", "")
+                    cand = evaluate_company_entity(title, desc, clean_q, q_tokens)
+                    if cand:
+                        cand["url"] = f"https://en.wikipedia.org/wiki/{title.replace(' ', '_')}"
+                        cand["cin"] = ""
+                        results.append(cand)
         except Exception:
             pass
+        return results
+
+    # Execute all 3 candidate discovery channels concurrently
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        f_reg = executor.submit(worker_registry)
+        f_scr = executor.submit(worker_screener)
+        f_wiki = executor.submit(worker_wikipedia)
+        for f in as_completed([f_reg, f_scr, f_wiki]):
+            for cand in f.result():
+                add_candidate(cand)
 
     # Fallback safety: guarantee candidates is never empty for a valid query
     if not candidates and is_valid_company_name(clean_q):
         candidates.append({
-            "name": clean_q,
+            "name": clean_q if not is_cin_query else clean_q.upper(),
             "desc": f"Corporate Entity matching query '{clean_q}'",
             "is_indian": True,
             "score": 50,
+            "cin": clean_q.upper() if is_cin_query else "",
             "dedup_key": normalize_candidate_key(clean_q)
         })
 
     # Strictly focus on Indian companies if any Indian companies match
-    indian_cands = [c for c in candidates if c["is_indian"]]
+    indian_cands = [c for c in candidates if c.get("is_indian")]
     final_list = indian_cands if indian_cands else candidates
 
-    # Rank by closeness to query
+    # Rank by score descending
     final_list.sort(key=lambda x: -x["score"])
 
-    return [{"name": c["name"], "desc": c["desc"], "is_indian": c.get("is_indian", True), "cin": c.get("cin", ""), "url": c.get("url", "")} for c in final_list[:6]]
+    return [{
+        "name": c["name"],
+        "desc": c["desc"],
+        "is_indian": c.get("is_indian", True),
+        "cin": c.get("cin", ""),
+        "url": c.get("url", "")
+    } for c in final_list[:6]]
 
 
 
