@@ -11487,7 +11487,7 @@ def find_company_candidates(query: str) -> List[Dict[str, str]]:
         # Primary / Fallback via DDGS
         if len(raw_items) < 2:
             try:
-                with DDGS(timeout=3.5) as ddgs:
+                with DDGS(timeout=6.0) as ddgs:
                     for rq in reg_queries:
                         for it in ddgs.text(rq, max_results=5):
                             raw_items.append(it)
