@@ -3284,7 +3284,8 @@ def fetch_bse_corporate_info(scripcode: str) -> Optional[Dict[str, Any]]:
 def search_official_website(company_name: str) -> Optional[str]:
     """
     Search and verify official corporate website for Indian entities.
-    Filters out aggregator directories, jobs boards, and social media.
+    Filters out aggregator directories, dictionaries, jobs boards, and social media.
+    Guarantees brand token alignment between domain and company name.
     """
     if not company_name:
         return None
@@ -3300,20 +3301,42 @@ def search_official_website(company_name: str) -> Optional[str]:
         "youtube.com", "zaubacorp.com", "tofler.in", "wikipedia.org", "indiamart.com",
         "justdial.com", "instafinancials.com", "ambitionbox.com", "glassdoor.co.in",
         "glassdoor.com", "screener.in", "moneycontrol.com", "economictimes.indiatimes.com",
-        "google.com", "bing.com", "duckduckgo.com", "tracxn.com", "crunchbase.com"
+        "google.com", "bing.com", "duckduckgo.com", "tracxn.com", "crunchbase.com",
+        "falconebiz.com", "indiafilings.com", "thecompanycheck.com", "quickcompany.in",
+        "merriam-webster.com", "dictionary.com", "cambridge.org", "collinsdictionary.com",
+        "wiktionary.org", "vocabulary.com", "thefreedictionary.com", "britannica.com",
+        "oxfordlearnersdictionaries.com", "definitions.net", "urbandictionary.com",
+        "quora.com", "reddit.com", "medium.com", "pinterest.com", "github.com",
+        "amazon.in", "amazon.com", "flipkart.com", "indiatimes.com", "ndtv.com"
     }
+
+    brand_tokens = [w.lower() for w in re.findall(r'[a-zA-Z0-9]{3,}', clean) if w.lower() not in GENERIC_CORP_TOKENS]
+    brand_compact = "".join(brand_tokens)
+
     for q in queries:
         try:
             with DDGS(timeout=5) as ddgs:
-                results = list(ddgs.text(q, max_results=4))
+                results = list(ddgs.text(q, max_results=6))
                 for r in results:
                     href = r.get("href", "")
                     if href.startswith("http"):
                         domain = re.sub(r"^https?://(?:www\.)?", "", href).split("/")[0].lower()
-                        if not any(b in domain for b in blocked_domains):
-                            base = re.match(r"^https?://[^/]+", href)
-                            if base:
-                                return base.group(0)
+                        if any(b in domain for b in blocked_domains):
+                            continue
+
+                        # Verify domain relevance: must contain distinctive brand token or brand compact
+                        domain_clean = re.sub(r"[^a-z0-9]", "", domain.split(".")[0])
+                        has_brand_match = (
+                            any(bt in domain_clean for bt in brand_tokens) or
+                            (brand_compact and brand_compact in domain_clean) or
+                            (domain_clean and domain_clean in brand_compact)
+                        )
+                        if not has_brand_match and brand_tokens:
+                            continue
+
+                        base = re.match(r"^https?://[^/]+", href)
+                        if base:
+                            return base.group(0)
         except Exception:
             continue
     return None
@@ -3321,8 +3344,8 @@ def search_official_website(company_name: str) -> Optional[str]:
 
 def fetch_zaubacorp_profile(url_or_cin: str) -> Optional[Dict[str, Any]]:
     """
-    Direct Web Registry Extractor for ZaubaCorp/MCA pages.
-    Extracts official CIN, Legal Name, Incorporation Date, RoC, Registered Office Address, and Directors.
+    Direct Web Registry Extractor for ZaubaCorp/IndiaFilings/FalconeBiz MCA pages.
+    Extracts official CIN, Legal Name, Incorporation Date, RoC, Registered Office Address, Directors, Email, and Website.
     """
     if not url_or_cin:
         return None
@@ -3342,20 +3365,61 @@ def fetch_zaubacorp_profile(url_or_cin: str) -> Optional[Dict[str, Any]]:
         address = ""
         cin = ""
         roc = ""
+        directors = []
+        email = ""
+        website = ""
+
         m_json = re.search(r'<script type="application/ld\+json">([^<]+)</script>', text)
         if m_json:
             try:
                 jd = json.loads(m_json.group(1))
-                legal_name = jd.get("legalName", "")
-                inc_date = jd.get("foundingDate", "")
-                address = jd.get("address", "")
-                ident = jd.get("identifier", {})
-                if isinstance(ident, dict) and ident.get("value"):
-                    cin = ident["value"]
+                if isinstance(jd, list) and jd:
+                    jd = jd[0]
+                if isinstance(jd, dict):
+                    legal_name = jd.get("legalName") or jd.get("name") or ""
+                    inc_date = jd.get("foundingDate", "")
+                    addr_val = jd.get("address", "")
+                    if isinstance(addr_val, dict):
+                        addr_parts = []
+                        for k in ["streetAddress", "addressLocality", "addressRegion", "postalCode", "addressCountry"]:
+                            v = addr_val.get(k)
+                            if v and isinstance(v, str):
+                                addr_parts.append(v.strip())
+                        address = ", ".join([p for p in addr_parts if p])
+                    elif isinstance(addr_val, str):
+                        address = addr_val.strip()
+
+                    ident = jd.get("identifier", {})
+                    if isinstance(ident, dict) and ident.get("value"):
+                        cin = ident["value"]
+                    elif isinstance(ident, str) and re.match(r'^[LU]\d{5}', ident):
+                        cin = ident
+
+                    # Founders / Management in JSON-LD (e.g. FalconeBiz, IndiaFilings)
+                    for f_key in ["founders", "founder", "employee", "alumni"]:
+                        f_list = jd.get(f_key, [])
+                        if isinstance(f_list, list):
+                            for f in f_list:
+                                if isinstance(f, dict) and f.get("name"):
+                                    fn = re.sub(r'[^A-Za-z\s]', '', str(f["name"])).strip().title()
+                                    if len(fn) > 3 and fn not in directors:
+                                        directors.append(fn)
+                                elif isinstance(f, str):
+                                    fn = re.sub(r'[^A-Za-z\s]', '', f).strip().title()
+                                    if len(fn) > 3 and fn not in directors:
+                                        directors.append(fn)
+
+                    # RoC from description in JSON-LD
+                    jd_desc = jd.get("description", "")
+                    if jd_desc and not roc:
+                        m_r_jd = re.search(r'registered\s+under\s+(RoC-[A-Za-z]+)', jd_desc, re.I)
+                        if m_r_jd:
+                            roc = m_r_jd.group(1).title()
             except Exception:
                 pass
 
         # 2. Secondary: Description Meta Tag
+        desc = ""
         m_desc = re.search(r'"description":\s*"([^"]+)"', text)
         if m_desc:
             desc = m_desc.group(1)
@@ -3377,19 +3441,32 @@ def fetch_zaubacorp_profile(url_or_cin: str) -> Optional[Dict[str, Any]]:
                 if m_addr_desc:
                     address = m_addr_desc.group(1).strip()
 
-        # 3. Fallbacks
+        # 3. Fallbacks for Identity Attributes
+        if not legal_name:
+            m_h1 = re.search(r'<h1[^>]*>([A-Za-z0-9\s.,&()/-]+?\s+(?:PRIVATE LIMITED|LIMITED|LLP))</h1>', text, re.I)
+            if m_h1:
+                legal_name = m_h1.group(1).strip()
+            else:
+                m_title = re.search(r'<title>([A-Za-z0-9\s.,&()/-]+?\s+(?:PRIVATE LIMITED|LIMITED|LLP))', text, re.I)
+                if m_title:
+                    legal_name = m_title.group(1).strip()
+
         if not cin:
             m_cin = re.search(r'\b([LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6})\b', text)
             cin = m_cin.group(1) if m_cin else ''
+
+        if not roc:
+            m_roc_text = re.search(r'\b(RoC-[A-Za-z]+)\b', text)
+            if m_roc_text:
+                roc = m_roc_text.group(1).strip()
 
         if not address:
             m_lbl = re.search(r'<label[^>]*class="col-sm-6">([^<]*?India\s*-\s*\d{6})</label>', text, re.I)
             if m_lbl:
                 address = m_lbl.group(1).strip()
 
-        # Directors
-        directors = []
-        if m_desc:
+        # Directors from description or tables
+        if desc:
             m_dir_desc = re.search(r'Directors\s+of\s+[^.]*?\s+are\s+([^.]+)', desc, re.I)
             if m_dir_desc:
                 raw_dirs = m_dir_desc.group(1).replace(" and ", ", ").split(",")
@@ -3398,13 +3475,22 @@ def fetch_zaubacorp_profile(url_or_cin: str) -> Optional[Dict[str, Any]]:
                     if len(d_clean) > 3 and d_clean not in directors and "Director" not in d_clean:
                         directors.append(d_clean)
 
+        for m_zb in re.finditer(r'<td>\s*(?:\d{8})?\s*</td>\s*<td>\s*<a[^>]*href=["\']/director/[^"\']+["\']>([A-Za-z\s]{3,40})</a>', text, re.I):
+            d_name = m_zb.group(1).strip().title()
+            if d_name not in directors and len(d_name) > 3 and 'Director' not in d_name:
+                directors.append(d_name)
+
+        for m_fb in re.finditer(r'<td[^>]*data-label="Name"[^>]*>(?:<strong>)?<a[^>]*>([A-Za-z\s]{3,40})</a>', text, re.I):
+            d_name = m_fb.group(1).strip().title()
+            if d_name not in directors and len(d_name) > 3 and 'Director' not in d_name:
+                directors.append(d_name)
+
         for m in re.finditer(r'Other\s+Directorships\s+of\s+([A-Z\s]{4,35})', text):
             d_name = m.group(1).strip()
             if d_name not in directors and len(d_name) > 3 and 'DIRECTOR' not in d_name:
                 directors.append(d_name.title())
 
-        # Extract Email ID if present
-        email = ""
+        # Extract Official Email ID
         m_em = re.search(r'Email\s*(?:ID)?\s*:\s*<[^>]+>\s*([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})', text, re.I)
         if m_em:
             email = m_em.group(1).strip()
@@ -3412,16 +3498,49 @@ def fetch_zaubacorp_profile(url_or_cin: str) -> Optional[Dict[str, Any]]:
             m_em2 = re.search(r'mailto:([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})', text, re.I)
             if m_em2:
                 email = m_em2.group(1).strip()
+            else:
+                all_emails = re.findall(r'\b([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})\b', text)
+                for em in all_emails:
+                    em_low = em.lower()
+                    if not any(ign in em_low for ign in ["sentry", "wixpress", "cloudflare", "example", "rating", "indiafilings", "falconebiz", "zaubacorp", "tofler"]):
+                        email = em
+                        break
 
-        # Extract Website if present
-        website = ""
+        # Extract Website or derive from authoritative business email domain
+        # Extract Website or derive from authoritative business email domain
         m_w = re.search(r'Website\s*:\s*<[^>]+>\s*<a[^>]*href=["\']([^"\']+)["\']', text, re.I)
         if m_w:
-            website = m_w.group(1).strip()
+            w_cand = m_w.group(1).strip()
+            if not any(ign in w_cand.lower() for ign in ["falconebiz", "zaubacorp", "indiafilings", "tofler", "google", "facebook", "twitter"]):
+                website = w_cand
         else:
             m_w2 = re.search(r'Website\s*:\s*([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})', text, re.I)
             if m_w2:
-                website = f"https://{m_w2.group(1).strip()}"
+                w_cand = m_w2.group(1).strip()
+                if not any(ign in w_cand.lower() for ign in ["falconebiz", "zaubacorp", "indiafilings", "tofler", "email.com", "example.com", "google", "click", "login"]):
+                    website = f"https://{w_cand}"
+
+        if not website and email and "@" in email:
+            em_domain = email.split("@")[-1].lower().strip()
+            public_providers = {"gmail.com", "yahoo.com", "yahoo.co.in", "hotmail.com", "outlook.com", "rediffmail.com", "icloud.com", "protonmail.com"}
+            if em_domain and em_domain not in public_providers and "." in em_domain:
+                website = f"https://www.{em_domain}"
+
+        # Brand token firewall on website candidate
+        if website:
+            w_dom = re.sub(r"^https?://(?:www\.)?", "", website).split("/")[0].lower()
+            if any(ign in w_dom for ign in ["email.com", "example.com", "domain.com", "click"]):
+                website = ""
+            elif legal_name:
+                brand_toks = [w.lower() for w in re.findall(r'[a-zA-Z0-9]{3,}', legal_name) if w.lower() not in GENERIC_CORP_TOKENS]
+                if brand_toks and not any(bt in w_dom for bt in brand_toks):
+                    website = ""
+
+        # Guarantee address is cleanly formatted string
+        if isinstance(address, dict):
+            address = ", ".join(str(v) for v in address.values() if v and isinstance(v, str))
+        else:
+            address = str(address or "").strip()
 
         return {
             'cin': cin,
@@ -3445,10 +3564,10 @@ STATE_CODE_ROC_MAP = {
     "PN": ["pune", "roc-pune", "mumbai", "roc-mumbai", "maharashtra"],
     "KA": ["bangalore", "bengaluru", "roc-bangalore", "karnataka"],
     "TN": ["chennai", "roc-chennai", "coimbatore", "roc-coimbatore", "tamil nadu"],
-    "CH": ["chennai", "roc-chennai", "coimbatore", "roc-coimbatore", "tamil nadu"],
+    "CH": ["chennai", "roc-chennai", "coimbatore", "roc-coimbatore", "tamil nadu", "chandigarh"],
     "GJ": ["ahmedabad", "roc-ahmedabad", "gujarat"],
     "WB": ["kolkata", "roc-kolkata", "calcutta", "west bengal"],
-    "UP": ["kanpur", "roc-kanpur", "uttar pradesh"],
+    "UP": ["kanpur", "roc-kanpur", "uttar pradesh", "uttar", "roc-uttar", "roc-uttar pradesh"],
     "TG": ["hyderabad", "roc-hyderabad", "telangana"],
     "AP": ["hyderabad", "roc-hyderabad", "andhra pradesh", "vijayawada"],
     "RJ": ["jaipur", "roc-jaipur", "rajasthan"]
@@ -3795,15 +3914,21 @@ def enrich_corporate_master_data(
                 cin_state = cin[6:8] if (len(cin) >= 8 and not is_llpin) else ""
                 cin_year = cin[8:12] if (len(cin) >= 12 and not is_llpin) else ""
                 name_cand = ""
-                m_url = re.search(r'zaubacorp\.com/(?:company/)?([A-Za-z0-9-]+?)(?:/|-)' + cin, href, re.I)
+                m_url = re.search(r'(?:zaubacorp\.com|falconebiz\.com|indiafilings\.com|thecompanycheck\.com|tofler\.in|instafinancials\.com)/(?:company(?:-cin)?/)?([A-Za-z0-9-]+?)(?:/|-)' + cin, href, re.I)
                 if m_url:
                     name_cand = m_url.group(1).replace("-", " ").strip()
-                elif "|" in title:
-                    name_cand = title.split("|")[0].strip()
-                elif "-" in title:
-                    name_cand = title.split("-")[0].strip()
                 else:
-                    name_cand = title.strip()
+                    m_legal = re.search(r'\b([A-Za-z0-9\s.,&()/-]+?\s+(?:PRIVATE LIMITED|LIMITED|LLP))\b', title, re.I)
+                    if m_legal:
+                        name_cand = m_legal.group(1).strip()
+                    elif "|" in title:
+                        name_cand = title.split("|")[0].strip()
+                    elif "-" in title:
+                        name_cand = title.split("-")[0].strip()
+                    else:
+                        name_cand = title.strip()
+                name_cand = re.split(r'\b(?:having\s+CIN|CIN|LLPIN|Registration|Overview|Details|Incorporation|Turnover|is\s+\d+)\b', name_cand, flags=re.I)[0].strip()
+                name_cand = re.sub(r'[-|:,]+$', '', name_cand).strip()
                 
                 name_words = set(w.lower() for w in re.findall(r'[A-Za-z]{3,}', name_cand))
                 noise = {'limited', 'private', 'india', 'company', 'enterprises', 'industries', 'corporation', 'zaubacorp', 'details'}
@@ -3918,6 +4043,33 @@ def enrich_corporate_master_data(
     if target_url:
         zauba_profile = fetch_zaubacorp_profile(target_url)
 
+    # Multi-registry fallback: if target_url missed legal_name, address, directors, or email
+    if cin_to_fetch and (not zauba_profile or not zauba_profile.get("legal_name") or not zauba_profile.get("address") or not zauba_profile.get("directors")):
+        zb_url = f"https://www.zaubacorp.com/company-cin/{cin_to_fetch}"
+        if zb_url != target_url:
+            alt_prof = fetch_zaubacorp_profile(zb_url)
+            if alt_prof and (alt_prof.get("cin") == cin_to_fetch or (zauba_profile and alt_prof.get("legal_name") == zauba_profile.get("legal_name"))):
+                if not zauba_profile:
+                    zauba_profile = alt_prof
+                else:
+                    for k, v in alt_prof.items():
+                        if v and not zauba_profile.get(k):
+                            zauba_profile[k] = v
+                        elif k == "directors" and v and not zauba_profile.get("directors"):
+                            zauba_profile["directors"] = v
+
+        if not zauba_profile.get("directors") or zauba_profile.get("email") in ("your@email.com", "", None):
+            for wc in web_candidates:
+                if wc.get("cin") == cin_to_fetch and wc.get("url") and wc["url"] != target_url:
+                    wc_prof = fetch_zaubacorp_profile(wc["url"])
+                    if wc_prof:
+                        if wc_prof.get("directors") and not zauba_profile.get("directors"):
+                            zauba_profile["directors"] = wc_prof["directors"]
+                        if wc_prof.get("email") and (not zauba_profile.get("email") or zauba_profile.get("email") == "your@email.com"):
+                            zauba_profile["email"] = wc_prof["email"]
+                        if zauba_profile.get("directors"):
+                            break
+
     if zauba_profile:
         # Check that zauba_profile address is consistent with CIN state (for 21-digit CIN)
         cin_cand = zauba_profile.get("cin") or cin_to_fetch or (top_web_cand.get("cin") if top_web_cand else "")
@@ -3925,14 +4077,16 @@ def enrich_corporate_master_data(
         if not is_llpin_cand:
             cand_state = cin_cand[6:8] if len(cin_cand) >= 8 else ""
             allowed_states = STATE_CODE_ROC_MAP.get(cand_state, [])
-            z_addr = zauba_profile.get("address", "")
+            z_addr = str(zauba_profile.get("address", "") or "").strip()
+            zauba_profile["address"] = z_addr
             if z_addr and allowed_states and not any(s in z_addr.lower() for s in allowed_states):
                 # Contaminated/unrelated address from third-party ads or related companies! Reject it.
                 zauba_profile["address"] = ""
 
             # Check that zauba_profile inc_date year matches cin_year
             cand_yr = cin_cand[8:12] if len(cin_cand) >= 12 else ""
-            z_inc = zauba_profile.get("inc_date", "")
+            z_inc = str(zauba_profile.get("inc_date", "") or "").strip()
+            zauba_profile["inc_date"] = z_inc
             if z_inc and cand_yr and cand_yr not in z_inc:
                 # Contaminated/unrelated incorporation date! Reject it.
                 zauba_profile["inc_date"] = ""
@@ -4189,9 +4343,16 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
         comp_query = selected_candidate.get("name", "")
         cand_desc = selected_candidate.get("desc", "")
     else:
-        selected_candidate = {"name": str(query), "desc": "", "is_indian": True}
-        comp_query = str(query)
-        cand_desc = ""
+        # Pre-resolve candidate to acquire statutory CIN if available
+        resolved_cands = find_company_candidates(str(query))
+        if resolved_cands:
+            selected_candidate = resolved_cands[0]
+            comp_query = selected_candidate.get("name", str(query))
+            cand_desc = selected_candidate.get("desc", "")
+        else:
+            selected_candidate = {"name": str(query), "desc": "", "is_indian": True}
+            comp_query = str(query)
+            cand_desc = ""
 
     clean_q = comp_query.strip()
     q_lower = clean_q.lower()
@@ -4916,12 +5077,12 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
                     data["Headquarter (City)"] = m_roc.group(1).strip()
         if m_data.get("Identity Status"):
             data["Identity Status"] = m_data["Identity Status"]
-        if m_data.get("Official Website") and data.get("Official Website") in ("N/A", "", None):
+        if m_data.get("Official Website") and (data.get("Official Website") in ("N/A", "", None) or not any(bt in str(data.get("Official Website", "")).lower() for bt in [w.lower() for w in re.findall(r'[a-zA-Z0-9]{3,}', data.get("Company Name", "")) if w.lower() not in GENERIC_CORP_TOKENS])):
             data["Official Website"] = m_data["Official Website"]
             add_source("Official Corporate Website", data["Official Website"])
         if m_data.get("Official Email") and data.get("Official Email") in ("N/A", "", None):
             data["Official Email"] = m_data["Official Email"]
-            if data.get("Contact Details") in ("N/A", "", None):
+            if data.get("Contact Details") in ("N/A", "", None, "Statutory Ministry Records / Corporate Desk"):
                 data["Contact Details"] = f"Email: {m_data['Official Email']}"
         if m_data.get("_is_ambiguous"):
             data["_is_ambiguous"] = True
@@ -11816,7 +11977,7 @@ def find_company_candidates(query: str) -> List[Dict[str, str]]:
                 "desc": desc,
                 "is_indian": True,
                 "cin": cin_str,
-                "url": href if "zaubacorp.com" in href else "",
+                "url": href if "zaubacorp.com" in href else (f"https://www.zaubacorp.com/company-cin/{cin_str}" if cin_str else (href if href.startswith("http") else "")),
                 "score": score
             })
         return results
