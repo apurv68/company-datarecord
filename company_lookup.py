@@ -3342,6 +3342,211 @@ def search_official_website(company_name: str) -> Optional[str]:
     return None
 
 
+def fetch_local_sqlite_mca_master(query_str: str, cin_hint: str = "") -> Optional[Dict[str, Any]]:
+    """Query local SQLite database cache (e.g., mca_companies.db) for instant 0ms statutory resolution."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    db_paths = [
+        os.path.join(base_dir, "mca_companies.db"),
+        os.path.join(base_dir, "scratch", "mca_companies.db")
+    ]
+    for db_path in db_paths:
+        if not os.path.isfile(db_path):
+            continue
+        try:
+            import sqlite3
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            if cin_hint:
+                cursor.execute("SELECT cin, company_name, roc, incorporation_date, registered_office FROM companies WHERE cin = ? LIMIT 1", (cin_hint.strip(),))
+            else:
+                clean_term = re.sub(r"\b(?:ltd|limited|pvt|private)\b", "", query_str, flags=re.I).strip()
+                cursor.execute("SELECT cin, company_name, roc, incorporation_date, registered_office FROM companies WHERE company_name LIKE ? LIMIT 1", (f"%{clean_term}%",))
+            row = cursor.fetchone()
+            conn.close()
+            if row:
+                return {
+                    "cin": row[0],
+                    "legal_name": row[1],
+                    "roc": row[2],
+                    "inc_date": row[3],
+                    "address": row[4],
+                    "source": "Local SQLite Registry Cache"
+                }
+        except Exception:
+            continue
+    return None
+
+
+def fetch_datagov_mca_master(query_str: str, cin_hint: str = "") -> Optional[Dict[str, Any]]:
+    """Query official Open Government Data (data.gov.in) MCA resource endpoint when DATAGOV_API_KEY is configured."""
+    api_key = os.environ.get("DATAGOV_API_KEY", "").strip()
+    if not api_key:
+        return None
+    try:
+        resource_id = os.environ.get("DATAGOV_RESOURCE_ID", "a40a5a31-b66e-4f05-9e6a-7f0e95ffcf62").strip()
+        clean_term = cin_hint.strip() if cin_hint else query_str.strip()
+        url = (
+            f"https://api.data.gov.in/resource/{resource_id}?api-key={api_key}&format=json&limit=5&filters[cin]={urllib.parse.quote(clean_term)}"
+            if cin_hint
+            else f"https://api.data.gov.in/resource/{resource_id}?api-key={api_key}&format=json&limit=5&filters[company_name]={urllib.parse.quote(clean_term)}"
+        )
+        req = urllib.request.Request(url, headers={"User-Agent": "CorporateIntelligenceEngine/2.0"})
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            data = json.loads(resp.read().decode())
+            records = data.get("records", [])
+            if records:
+                rec = records[0]
+                cin_val = rec.get("cin") or rec.get("CIN") or ""
+                legal_name = rec.get("company_name") or rec.get("Company Name") or ""
+                roc_val = rec.get("roc") or rec.get("RoC") or ""
+                inc_date = rec.get("incorporation_date") or rec.get("Date of Registration") or ""
+                address_val = rec.get("registered_office_address") or rec.get("Address") or ""
+                if cin_val:
+                    return {
+                        "cin": cin_val,
+                        "legal_name": legal_name,
+                        "roc": roc_val,
+                        "inc_date": inc_date,
+                        "address": address_val,
+                        "source": "api.data.gov.in (Official OGD Platform)"
+                    }
+    except Exception:
+        pass
+    return None
+
+
+def fetch_opencorporates_master(query_str: str, cin_hint: str = "") -> Optional[Dict[str, Any]]:
+    """Query OpenCorporates Global Registry API when OPENCORPORATES_API_KEY is configured."""
+    api_token = os.environ.get("OPENCORPORATES_API_KEY", "").strip()
+    if not api_token:
+        return None
+    try:
+        if cin_hint:
+            url = f"https://api.opencorporates.com/v0.4/companies/in/{cin_hint.strip()}?api_token={api_token}"
+        else:
+            clean_term = urllib.parse.quote(re.sub(r"\b(?:ltd|limited|pvt|private)\b", "", query_str, flags=re.I).strip())
+            url = f"https://api.opencorporates.com/v0.4/companies/search?q={clean_term}&jurisdiction_code=in&api_token={api_token}"
+        req = urllib.request.Request(url, headers={"User-Agent": "CorporateIntelligenceEngine/2.0"})
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            data = json.loads(resp.read().decode())
+            company = None
+            if "company" in data.get("results", {}):
+                company = data["results"]["company"]
+            elif "companies" in data.get("results", {}) and data["results"]["companies"]:
+                company = data["results"]["companies"][0].get("company", {})
+            if company:
+                cin_val = company.get("company_number", "")
+                legal_name = company.get("name", "")
+                inc_date = company.get("incorporation_date", "")
+                address_val = company.get("registered_address_in_full", "")
+                if cin_val:
+                    return {
+                        "cin": cin_val,
+                        "legal_name": legal_name,
+                        "roc": f"RoC-{cin_val[6:8]}" if len(cin_val) >= 8 else "",
+                        "inc_date": inc_date,
+                        "address": address_val,
+                        "source": "OpenCorporates Global Registry"
+                    }
+    except Exception:
+        pass
+    return None
+
+
+def fetch_sandbox_mca_master(query_str: str, cin_hint: str = "") -> Optional[Dict[str, Any]]:
+    """Query Sandbox.co.in MCA KYB API when SANDBOX_API_KEY is configured."""
+    api_key = os.environ.get("SANDBOX_API_KEY", "").strip()
+    api_secret = os.environ.get("SANDBOX_API_SECRET", "").strip()
+    if not api_key:
+        return None
+    try:
+        auth_url = "https://api.sandbox.co.in/authenticate"
+        auth_req = urllib.request.Request(
+            auth_url,
+            headers={
+                "x-api-key": api_key,
+                "x-api-secret": api_secret,
+                "x-api-version": "1.0",
+                "Content-Type": "application/json"
+            },
+            data=b"{}"
+        )
+        with urllib.request.urlopen(auth_req, timeout=5) as a_resp:
+            a_data = json.loads(a_resp.read().decode())
+            access_token = a_data.get("data", {}).get("access_token", "") or a_data.get("access_token", "")
+            if not access_token:
+                return None
+
+        lookup_cin = cin_hint.strip()
+        if not lookup_cin:
+            srch_url = f"https://api.sandbox.co.in/mca/companies/search?query={urllib.parse.quote(query_str)}"
+            s_req = urllib.request.Request(
+                srch_url,
+                headers={"Authorization": access_token, "x-api-key": api_key, "x-api-version": "1.0"}
+            )
+            with urllib.request.urlopen(s_req, timeout=5) as s_resp:
+                s_data = json.loads(s_resp.read().decode())
+                comps = s_data.get("data", {}).get("companies", []) or s_data.get("companies", [])
+                if comps:
+                    lookup_cin = comps[0].get("cin") or comps[0].get("company_id", "")
+
+        if lookup_cin:
+            mca_url = f"https://api.sandbox.co.in/mca/companies/{lookup_cin}"
+            m_req = urllib.request.Request(
+                mca_url,
+                headers={"Authorization": access_token, "x-api-key": api_key, "x-api-version": "1.0"}
+            )
+            with urllib.request.urlopen(m_req, timeout=6) as m_resp:
+                m_data = json.loads(m_resp.read().decode())
+                cd = m_data.get("data", {}) or m_data
+                return {
+                    "cin": cd.get("cin") or lookup_cin,
+                    "legal_name": cd.get("company_name", ""),
+                    "roc": cd.get("roc", ""),
+                    "inc_date": cd.get("date_of_incorporation", ""),
+                    "address": cd.get("registered_address", ""),
+                    "source": "Sandbox.co.in Government KYB Gateway"
+                }
+    except Exception:
+        pass
+    return None
+
+
+def fetch_multi_source_statutory_master(
+    query_str: str,
+    cin_hint: str = ""
+) -> Optional[Dict[str, Any]]:
+    """
+    Tiered Waterfall Resolution:
+    Tier 1: Local SQLite Cache (0ms)
+    Tier 2: Sandbox.co.in MCA KYB API (if keys present)
+    Tier 3: data.gov.in Official OGD API (if key present)
+    Tier 4: OpenCorporates API (if key present)
+    Returns None if none of the above succeed, falling through to Tier 5 (Web Aggregator Scrapers).
+    """
+    # 1. Local Cache
+    local_rec = fetch_local_sqlite_mca_master(query_str, cin_hint=cin_hint)
+    if local_rec and local_rec.get("cin"):
+        return local_rec
+
+    # 2. Sandbox KYB
+    sb_rec = fetch_sandbox_mca_master(query_str, cin_hint=cin_hint)
+    if sb_rec and sb_rec.get("cin"):
+        return sb_rec
+
+    # 3. data.gov.in Official OGD
+    dg_rec = fetch_datagov_mca_master(query_str, cin_hint=cin_hint)
+    if dg_rec and dg_rec.get("cin"):
+        return dg_rec
+
+    # 4. OpenCorporates
+    oc_rec = fetch_opencorporates_master(query_str, cin_hint=cin_hint)
+    if oc_rec and oc_rec.get("cin"):
+        return oc_rec
+
+    return None
+
+
 def fetch_zaubacorp_profile(url_or_cin: str) -> Optional[Dict[str, Any]]:
     """
     Direct Web Registry Extractor for ZaubaCorp/IndiaFilings/FalconeBiz MCA pages.
@@ -3852,6 +4057,24 @@ def enrich_corporate_master_data(
         and "public" not in str(existing_data.get("Business Type (Private Limited/Public Limited)", "")).lower()
         and (existing_data.get("Stock Ticker") in ("N/A", "N/A (Unlisted)", "", None))
     )
+
+    # 0. Check Tiered Statutory Waterfall Connectors (Local SQLite, Sandbox KYB, data.gov.in, OpenCorporates)
+    cin_candidate_hint = selected_candidate.get("cin", "") if (selected_candidate and isinstance(selected_candidate, dict)) else ""
+    statutory_waterfall_hit = fetch_multi_source_statutory_master(clean_q, cin_hint=cin_candidate_hint)
+    if statutory_waterfall_hit and statutory_waterfall_hit.get("cin"):
+        s_cin = statutory_waterfall_hit["cin"]
+        if re.match(r'^[LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}$', s_cin) or re.match(r'^[A-Z]{3}-\d{4}$', s_cin):
+            master["CIN"] = s_cin
+            master["_cin_confidence"] = "High"
+            if statutory_waterfall_hit.get("legal_name"):
+                master["Legal Name"] = statutory_waterfall_hit["legal_name"].upper()
+            if statutory_waterfall_hit.get("roc"):
+                master["RoC"] = statutory_waterfall_hit["roc"]
+            if statutory_waterfall_hit.get("inc_date"):
+                master["Incorporation Date"] = statutory_waterfall_hit["inc_date"]
+            if statutory_waterfall_hit.get("address"):
+                master["Registered Office"] = statutory_waterfall_hit["address"]
+            master["_statutory_source"] = statutory_waterfall_hit.get("source", "Statutory Registry")
 
     # 1. Direct Web Registry Search via Tavily AI / DDGS for Official MCA / ZaubaCorp CIN Candidates
     web_candidates = []

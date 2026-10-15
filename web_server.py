@@ -60,6 +60,11 @@ def get_system_status():
     """Return live status of AI and statutory integration pipelines."""
     has_gemini = bool(os.environ.get("GEMINI_API_KEY", "").strip())
     has_tavily = bool(os.environ.get("TAVILY_API_KEY", "").strip())
+    has_datagov = bool(os.environ.get("DATAGOV_API_KEY", "").strip())
+    has_opencorp = bool(os.environ.get("OPENCORPORATES_API_KEY", "").strip())
+    has_sandbox = bool(os.environ.get("SANDBOX_API_KEY", "").strip())
+    has_local_db = os.path.isfile(os.path.join(BASE_DIR, "mca_companies.db")) or os.path.isfile(os.path.join(BASE_DIR, "scratch", "mca_companies.db"))
+
     return {
         "status": "online",
         "integrations": {
@@ -67,7 +72,11 @@ def get_system_status():
             "tavily_search": {"connected": has_tavily, "mode": "Anti-Bot Web Intelligence" if has_tavily else "DuckDuckGo Fallback"},
             "screener_exchange": {"connected": True, "mode": "Audited BSE/NSE Public Tables"},
             "wikidata_sparql": {"connected": True, "mode": "Semantic Entity Disambiguation (P31)"},
-            "mca_roc_registry": {"connected": True, "mode": "Statutory Indian Corporate Filings"}
+            "mca_roc_registry": {"connected": True, "mode": "Statutory Indian Corporate Filings (Waterfall Architecture)"},
+            "data_gov_in": {"connected": has_datagov, "mode": "Official OGD Platform India" if has_datagov else "Fallback to Web Mirrors"},
+            "opencorporates": {"connected": has_opencorp, "mode": "Global Open Registry" if has_opencorp else "Fallback to Web Mirrors"},
+            "sandbox_kyb": {"connected": has_sandbox, "mode": "Direct Fintech KYB Gateway" if has_sandbox else "Standby"},
+            "local_mca_cache": {"connected": has_local_db, "mode": "0ms Offline SQLite Registry" if has_local_db else "Live Network Mode"}
         }
     }
 
