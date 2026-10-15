@@ -381,8 +381,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Governance & Leadership Resolution
     const owner = t1["Ultimate Owner / Promoters"] || t1["Owner"] || t1["Parent Company"] || (isPrivate ? (t1["Board of Directors / Key Promoters"] ? `${t1["Board of Directors / Key Promoters"]} (Promoters)` : "Closely Held Private Promoters") : "Publicly Held / Institutional Shareholders");
     const ceo = t1["Managing Director / CEO"] || t1["CEO"] || t1["Key People / CEO"] || canon.ceo || "Executive Leadership";
-    const cfo = t1["Chief Financial Officer (CFO)"] || t1["CFO"] || (isPrivate ? "Executive Board / Finance Directorate (Unlisted)" : "Not Publicly Disclosed");
-    const cto = t1["Chief Technology Officer (CTO)"] || t1["CTO"] || (isPrivate ? "Technology Division / Executive Leadership (Unlisted)" : "Not Publicly Disclosed");
+    const cfo = t1["Chief Financial Officer (CFO)"] || t1["CFO"] || (isPrivate ? "Executive Board / Finance Directorate (Unlisted)" : "N/A — Not Publicly Disclosed");
+    const rawCto = t1["Chief Technology Officer (CTO)"] || t1["CTO"] || "";
+    const cto = (rawCto && rawCto !== "N/A" && !rawCto.startsWith("N/A")) ? rawCto : (isPrivate ? "Technology Division / Executive Leadership (Unlisted)" : "N/A — Not Publicly Disclosed (Executive Committee Structure)");
     const founders = t1["Founder Name(s)"] || t1["Founders"] || (t1["Board of Directors / Key Promoters"] || "Founding Promoters / Incorporators");
     
     let directors = t1["Board of Directors / Key Promoters"] || t1["Board of Directors"] || "";

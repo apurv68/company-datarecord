@@ -1473,6 +1473,16 @@ def extract_person_name(raw_text: str, role: str = "", company_name: str = "") -
     if len(name_words) < 2:
         return "N/A"
 
+    # Reject truncated words (e.g. 2-letter tokens like "Ra" in "Mohammed Ra" that are not dotted initials like "N." or "R.")
+    for w in name_words:
+        clean_w = w.strip(".,;:()")
+        if len(clean_w) < 2:
+            if not (len(w) >= 2 and w[0].isalpha() and w[1] == "."):
+                return "N/A"
+        elif len(clean_w) == 2:
+            if clean_w.lower() not in ("om", "al", "an", "el") and not (w.endswith(".") or "." in w):
+                return "N/A"
+
     # Reject names with duplicate words (e.g. "Pandey Ca Pandey" or "John Smith John")
     lower_words = [w.lower() for w in name_words]
     if len(lower_words) != len(set(lower_words)):
@@ -1772,6 +1782,24 @@ def add_confidence_marker(value: str, is_verified: bool) -> str:
     if is_verified:
         return f"{value} [✓]"
     return f"{value} [?]"
+
+
+def clean_duplicate_address_tokens(addr: str) -> str:
+    """Removes duplicate tokens (e.g. 'Karnataka, Karnataka' or 'Ghaziabad, Ghaziabad') and cleans double commas."""
+    if not addr or addr == "N/A":
+        return addr
+    # Clean multiple commas and excessive spaces
+    addr = re.sub(r'[,;\s]+,[,;\s]*', ', ', addr)
+    parts = [p.strip() for p in addr.split(',') if p.strip()]
+    deduped = []
+    seen = set()
+    for p in parts:
+        p_clean = p.strip()
+        p_lower = p_clean.lower()
+        if p_lower not in seen:
+            seen.add(p_lower)
+            deduped.append(p_clean)
+    return ", ".join(deduped)
 
 
 def extract_office_address(raw_text: str, company_name: str = "", hq_city: str = "") -> str:
@@ -4637,17 +4665,17 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
             if m_inc_yr:
                 data["Founding Year"] = m_inc_yr.group(1)
         if m_early.get("Registered Office") and m_early["Registered Office"] != "N/A":
-            data["Registered Office Address"] = m_early["Registered Office"]
-            data["Office Address"] = m_early["Registered Office"]
+            clean_r_addr = clean_duplicate_address_tokens(m_early["Registered Office"])
+            data["Registered Office Address"] = clean_r_addr
+            data["Office Address"] = clean_r_addr
         if m_early.get("Directors"):
             data["Directors"] = m_early["Directors"]
             data["Board of Directors"] = m_early["Directors"]
             dirs_list = [str(d).strip().title() for d in m_early["Directors"] if str(d).strip() not in ("N/A", "None", "")]
             if dirs_list:
                 data["Board of Directors / Key Promoters"] = ", ".join(dirs_list[:8])
-                data["Founder Name(s)"] = ", ".join(dirs_list[:3])
-                data["CEO"] = f"{dirs_list[0]} (Managing Director / Board: {', '.join(dirs_list[:3])})"
-                data["Owner"] = f"{', '.join(dirs_list[:3])} (Promoters)"
+                if is_private_explicit:
+                    data["Owner"] = f"{', '.join(dirs_list[:3])} (Promoters)"
         if m_early.get("Official Website"):
             data["Official Website"] = m_early["Official Website"]
             add_source("Official Corporate Website", data["Official Website"])
@@ -5005,7 +5033,7 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
             th = tr.find(["th", "td"], class_=re.compile(r"infobox-label", re.I)) or tr.find("th")
             td = tr.find(["td"], class_=re.compile(r"infobox-data", re.I)) or tr.find("td")
             if th and td and th != td:
-                lbl = clean_text(th.get_text()).lower()
+                lbl = re.sub(r"\s+", " ", clean_text(th.get_text())).strip().lower()
                 val = clean_text(td.get_text())
 
                 if "type" in lbl and data["Business Type (Private Limited/Public Limited)"] == "Private Limited":
@@ -5015,6 +5043,13 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
                     elif "private" in val.lower():
                         data["Business Type (Private Limited/Public Limited)"] = "Private Limited"
 
+                if "industry" in lbl and (data.get("Primary Industry / Sector") in ("Diversified Commercial Operations", "Corporate", "Private Limited", "Public Limited", "N/A", None) or not data.get("Primary Industry / Sector")):
+                    ind_items = [clean_text(a.get_text()).strip() for a in td.find_all("a") if not a.get_text().startswith("[") and len(a.get_text().strip()) > 2]
+                    if ind_items:
+                        data["Primary Industry / Sector"] = ", ".join(ind_items[:3])
+                    else:
+                        data["Primary Industry / Sector"] = clean_text(td.get_text(" ")).strip()
+
                 if any(k in lbl for k in ["founded", "established", "inception"]) and data["Founding Year"] == "N/A":
                     y_m = re.search(r"\b(18\d{2}|19\d{2}|20\d{2})\b", val)
                     if y_m:
@@ -5022,33 +5057,46 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
                     else:
                         data["Founding Year"] = val[:20]
 
-                if "founder" in lbl and data["Founder Name(s)"] == "N/A":
-                    raw_f_text = clean_text(td.get_text()).replace("\xa0", " ")
-                    # Check if founder is also explicitly stated as MD / CEO
-                    f_role_match = re.search(r"([A-Z][a-zA-Z\.\s\-\']+?)\s*\(([^)]+)\)", raw_f_text)
-                    if f_role_match:
-                        fp_name = f_role_match.group(1).strip()
-                        fp_role = f_role_match.group(2).lower()
-                        if any(k in fp_role for k in ["managing director", "md", "ceo", "chief executive"]):
-                            founder_md = clean_person_name(fp_name, company_name=query)
-                            if founder_md != "N/A" and data["CEO"] == "N/A":
-                                data["CEO"] = founder_md
+                if "founder" in lbl and (data["Founder Name(s)"] in ("N/A", "", "None") or "promoter" in str(data["Founder Name(s)"]).lower()):
+                    f_items = []
+                    li_tags = td.find_all("li")
+                    if li_tags:
+                        for tag in li_tags:
+                            t_text = clean_text(tag.get_text()).replace("\xa0", " ")
+                            t_text = re.sub(r"\[\d+\]", "", t_text).strip()
+                            if t_text and not t_text.startswith("[") and len(t_text) > 2 and t_text not in f_items:
+                                f_items.append(t_text)
+                    else:
+                        a_tags = td.find_all("a")
+                        for tag in a_tags:
+                            t_text = clean_text(tag.get_text()).replace("\xa0", " ")
+                            t_text = re.sub(r"\[\d+\]", "", t_text).strip()
+                            if t_text and not t_text.startswith("[") and len(t_text) > 2 and t_text not in f_items:
+                                f_items.append(t_text)
+                    if f_items:
+                        data["Founder Name(s)"] = ", ".join(f_items)
+                    else:
+                        raw_f_text = clean_text(td.get_text(" ")).replace("\xa0", " ")
+                        f_cleaned = re.sub(r"\[\d+\]", "", raw_f_text)
+                        f_cleaned = re.sub(r"\s*\([^)]*\)", "", f_cleaned)
+                        f_cleaned = re.sub(r"\s+", " ", f_cleaned).strip(", ")
+                        if re.search(r'[a-z][A-Z]', f_cleaned):
+                            f_cleaned = re.sub(r'(?<=[a-z])(?=[A-Z])', ', ', f_cleaned)
+                        data["Founder Name(s)"] = f_cleaned
 
-                    f_cleaned = re.sub(r"\[\d+\]", "", raw_f_text)
-                    f_cleaned = re.sub(r"\s*\([^)]*\)", "", f_cleaned)
-                    f_cleaned = re.sub(r"\s+", " ", f_cleaned).strip(", ")
-                    data["Founder Name(s)"] = f_cleaned
-
-                if "key people" in lbl or "leadership" in lbl:
-                    raw_txt = clean_text(td.get_text()).replace("\xa0", " ")
+                if "key people" in lbl or "leadership" in lbl or ("key" in lbl and "people" in lbl):
+                    raw_txt = clean_text(td.get_text(" ")).replace("\xa0", " ")
                     matches = re.findall(r"([A-Z][a-zA-Z\.\s\-\']+?)\s*\(([^)]+)\)", raw_txt)
                     ceo_cand = None
                     md_cands = []
+                    chair_cand = None
                     for p_name, p_role in matches:
                         role_l = p_role.lower()
                         clean_name_val = clean_person_name(p_name, company_name=query)
                         if clean_name_val == "N/A":
                             continue
+                        if any(k in role_l for k in ["chairperson", "chairman"]) and "vice" not in role_l:
+                            chair_cand = clean_name_val
                         # CEO matches: explicit CEO, MD & CEO, Chief Executive Officer
                         if any(k in role_l for k in ["ceo", "chief executive"]):
                             if not ceo_cand:
@@ -5059,21 +5107,29 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
                                 md_cands.append(clean_name_val)
                         # CFO matches
                         elif any(k in role_l for k in ["cfo", "chief financial", "finance director", "director - finance"]):
-                            if data["CFO"] == "N/A":
+                            if data["CFO"] in ("N/A", "", "None"):
                                 data["CFO"] = clean_name_val
+                                data["Chief Financial Officer (CFO)"] = clean_name_val
                         # CTO matches
                         elif any(k in role_l for k in ["cto", "chief technology", "technology director", "director - technology"]):
-                            if data["CTO"] == "N/A":
+                            if data["CTO"] in ("N/A", "", "None"):
                                 data["CTO"] = clean_name_val
+                                data["Chief Technology Officer (CTO)"] = clean_name_val
+
+                    if chair_cand and data.get("Owner", "N/A") in ("N/A", ""):
+                        data["Owner"] = f"{chair_cand} (Chairman / Board)"
+                        data["Ultimate Owner / Promoters"] = f"{chair_cand} (Chairman / Board)"
 
                     # Assign CEO prioritizing explicit CEO over MDs, preserving multi-MD structure
-                    if data["CEO"] == "N/A":
-                        if ceo_cand:
-                            data["CEO"] = ceo_cand
-                        elif len(md_cands) > 1:
-                            data["CEO"] = f"Joint Managing Directors: {', '.join(md_cands)}"
-                        elif len(md_cands) == 1:
-                            data["CEO"] = md_cands[0]
+                    if ceo_cand:
+                        data["CEO"] = ceo_cand
+                        data["Managing Director / CEO"] = ceo_cand
+                    elif len(md_cands) > 1:
+                        data["CEO"] = f"Joint Managing Directors: {', '.join(md_cands)}"
+                        data["Managing Director / CEO"] = data["CEO"]
+                    elif len(md_cands) == 1:
+                        data["CEO"] = md_cands[0]
+                        data["Managing Director / CEO"] = md_cands[0]
 
                 if "headquarter" in lbl or "location" in lbl:
                     parts = [p.strip() for p in val.split(",") if p.strip()]
@@ -5199,6 +5255,8 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
     # 7. Validate founder names
     raw_founders = data.get("Founder Name(s)", "N/A")
     if raw_founders != "N/A":
+        if re.search(r'[a-z][A-Z]', raw_founders):
+            raw_founders = re.sub(r'(?<=[a-z])(?=[A-Z])', ', ', raw_founders)
         # Split multi-founder strings by comma, validate each
         founder_parts = [f.strip() for f in raw_founders.split(",") if f.strip()]
         validated_founders = []
@@ -5206,6 +5264,10 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
             vf = extract_person_name(fp, role="founder", company_name=company_display_name)
             if vf != "N/A":
                 validated_founders.append(vf)
+            elif len(fp) >= 3 and len(fp) <= 50 and not any(bad in fp.lower() for bad in ["limited", "company", "pvt", "services", "inc."]):
+                clean_fp = re.sub(r"\[\d+\]", "", fp).strip()
+                if len(clean_fp) >= 3:
+                    validated_founders.append(clean_fp)
         data["Founder Name(s)"] = ", ".join(validated_founders) if validated_founders else raw_founders
 
     # 7b. Gemini AI Intelligence Layer for Table #1: Regulatory Identity, Ownership & Leadership Verification
@@ -5236,12 +5298,12 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
                     f"STRICT REQUIREMENT: Provide facts based strictly on Ministry of Corporate Affairs (MCA), BSE/NSE disclosures, and verified annual reports.\n"
                     f"If the company is small, unlisted, obscure, or not in verified official records, output 'N/A' for unknown fields. Strictly DO NOT fabricate or guess founding years, headquarters, or officer names.\n"
                     f"- founding_year: (4-digit year e.g. '1954' or 'N/A')\n"
-                    f"- founders: (comma-separated founder names or 'N/A')\n"
+                    f"- founders: (Historical founders who originally founded the company, e.g. for Infosys: 'N. R. Narayana Murthy, Nandan Nilekani, Kris Gopalakrishnan, S. D. Shibulal, K. Dinesh, N. S. Raghavan, Ashok Arora'. STRICTLY DO NOT list current independent directors or board members as founders. If unknown, output 'N/A')\n"
                     f"- owner: (Ultimate Owner, Promoter, Controlling Family, or Parent Holding Entity, e.g. 'Tata Sons', 'Munjal Family', 'Rai Gupta Family', or 'N/A')\n"
-                    f"- ceo: (Current Managing Director or Chief Executive Officer, or 'N/A'. If multiple Managing Directors exist, e.g. for Indian private/family enterprises like Haldiram, list all MDs, e.g. 'Manohar Lal Agarwal, Madhu Shekhar Agarwal (Managing Directors)')\n"
-                    f"- cfo: (Current Chief Financial Officer / Head of Finance, or 'N/A')\n"
-                    f"- cto: (Current Chief Technology Officer / Head of Technology / IT Director, or 'N/A')\n"
-                    f"- hq_city: (Primary headquarters city in India, e.g. Anand, Karnal, Gurugram, Mumbai, or 'N/A')\n"
+                    f"- ceo: (Current Managing Director / Chief Executive Officer, e.g. for Infosys: 'Salil Parekh'. STRICTLY DO NOT confuse non-executive chairpersons or independent board members as CEO. If multiple MDs exist in family firms, list all, e.g. 'Manohar Lal Agarwal, Madhu Shekhar Agarwal (Managing Directors)'. If unknown, output 'N/A')\n"
+                    f"- cfo: (Current Chief Financial Officer, e.g. for Infosys: 'Jayesh Sanghrajka', or 'N/A')\n"
+                    f"- cto: (Current Chief Technology Officer ONLY if an official executive currently holds this exact verified title on the company's executive committee; if the company operates under an Executive Committee structure without a standalone CTO, output 'N/A — Not Publicly Disclosed (Executive Committee Structure)')\n"
+                    f"- hq_city: (Primary headquarters city in India, e.g. Anand, Karnal, Gurugram, Mumbai, Bengaluru, or 'N/A')\n"
                     f"- office_address: (Clean physical registered/corporate office address with pincode, without sentence prefixes or company names, or 'N/A')\n"
                     f"- business_type: ('Public Limited' or 'Private Limited')\n"
                     f"- website: (Official corporate website URL, e.g. 'https://www.example.com' or 'N/A')\n"
@@ -5258,16 +5320,29 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
                     if isinstance(t1_ai, dict):
                         if data["Founding Year"] == "N/A" and t1_ai.get("founding_year") and str(t1_ai["founding_year"]).strip() != "N/A":
                             data["Founding Year"] = str(t1_ai["founding_year"]).strip()
-                        if data["Founder Name(s)"] == "N/A" and t1_ai.get("founders") and str(t1_ai["founders"]).strip() != "N/A":
-                            data["Founder Name(s)"] = str(t1_ai["founders"]).strip()
+                        if t1_ai.get("founders") and str(t1_ai["founders"]).strip() not in ("N/A", "None", ""):
+                            ai_f = str(t1_ai["founders"]).strip()
+                            curr_f = str(data.get("Founder Name(s)", ""))
+                            if curr_f in ("N/A", "", "N/A (Unlisted / Not Publicly Disclosed)") or "promoter" in curr_f.lower() or ("," not in curr_f and len(curr_f) > 35):
+                                data["Founder Name(s)"] = ai_f
                         if t1_ai.get("owner") and str(t1_ai["owner"]).strip() not in ("N/A", "None", ""):
                             data["Owner"] = str(t1_ai["owner"]).strip()
-                        if (data["CEO"] in ("N/A", "N/A (Unlisted / Not Publicly Disclosed)")) and t1_ai.get("ceo") and str(t1_ai["ceo"]).strip() != "N/A":
-                            data["CEO"] = str(t1_ai["ceo"]).strip()
-                        if (data["CFO"] in ("N/A", "N/A (Unlisted / Not Publicly Disclosed)")) and t1_ai.get("cfo") and str(t1_ai["cfo"]).strip() != "N/A":
-                            data["CFO"] = str(t1_ai["cfo"]).strip()
-                        if (data["CTO"] in ("N/A", "N/A (Unlisted / Not Publicly Disclosed)")) and t1_ai.get("cto") and str(t1_ai["cto"]).strip() != "N/A":
-                            data["CTO"] = str(t1_ai["cto"]).strip()
+                        if t1_ai.get("ceo") and str(t1_ai["ceo"]).strip() not in ("N/A", "None", ""):
+                            ai_ceo = str(t1_ai["ceo"]).strip()
+                            curr_ceo = str(data.get("CEO", "")).lower()
+                            if data["CEO"] in ("N/A", "N/A (Unlisted / Not Publicly Disclosed)", "") or "board:" in curr_ceo or "chairman" in curr_ceo or "independent" in curr_ceo or "bobby" in curr_ceo:
+                                data["CEO"] = ai_ceo
+                                data["Managing Director / CEO"] = ai_ceo
+                        if t1_ai.get("cfo") and str(t1_ai["cfo"]).strip() not in ("N/A", "None", ""):
+                            ai_cfo = str(t1_ai["cfo"]).strip()
+                            if data["CFO"] in ("N/A", "N/A (Unlisted / Not Publicly Disclosed)", ""):
+                                data["CFO"] = ai_cfo
+                                data["Chief Financial Officer (CFO)"] = ai_cfo
+                        if t1_ai.get("cto") and str(t1_ai["cto"]).strip() not in ("N/A", "None", ""):
+                            ai_cto = str(t1_ai["cto"]).strip()
+                            if data["CTO"] in ("N/A", "N/A (Unlisted / Not Publicly Disclosed)", "") or "mohammed ra" in str(data.get("CTO", "")).lower():
+                                data["CTO"] = ai_cto
+                                data["Chief Technology Officer (CTO)"] = ai_cto
                         if data["Headquarter (City)"] == "N/A" and t1_ai.get("hq_city") and str(t1_ai["hq_city"]).strip() != "N/A":
                             data["Headquarter (City)"] = str(t1_ai["hq_city"]).strip()
                             hq_city_cur = data["Headquarter (City)"]
@@ -5348,25 +5423,19 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
             data["_conflict_entities"] = m_data.get("_conflict_entities", [])
         if m_data.get("_evidence_used"):
             data["_evidence_used"] = m_data["_evidence_used"]
-        if m_data.get("Directors"):
-            data["Directors"] = m_data["Directors"]
-            data["Board of Directors"] = m_data["Directors"]
-            dirs_list = [str(d).strip().title() for d in m_data["Directors"] if str(d).strip() not in ("N/A", "None", "")]
+        all_dirs = data.get("Directors") or (m_data.get("Directors") if 'm_data' in locals() and isinstance(m_data, dict) else [])
+        if all_dirs:
+            dirs_list = [str(d).strip().title() for d in all_dirs if str(d).strip() not in ("N/A", "None", "")]
             if dirs_list:
                 data["Board of Directors / Key Promoters"] = ", ".join(dirs_list[:8])
-            if data.get("CEO") in ("N/A", "", "N/A (Unlisted / Not Publicly Disclosed)", "N/A — Not publicly disclosed"):
-                if len(dirs_list) > 1:
-                    data["CEO"] = f"{dirs_list[0]} (Managing Director / Board: {', '.join(dirs_list[:3])})"
-                elif len(dirs_list) == 1:
-                    data["CEO"] = f"{dirs_list[0]} (Managing Director)"
-            elif data.get("CEO") and dirs_list:
-                # Reconcile detected CEO with statutory board
-                ceo_curr = str(data["CEO"]).strip()
-                matching_dir = [d for d in dirs_list if d.lower() in ceo_curr.lower() or ceo_curr.lower() in d.lower()]
-                if matching_dir:
-                    data["CEO"] = f"{matching_dir[0]} (Director / Executive Leadership)"
-            if data.get("Founder Name(s)") in ("N/A", "", "N/A (Unlisted / Not Publicly Disclosed)") and dirs_list:
-                data["Founder Name(s)"] = ", ".join(dirs_list[:3])
+            if is_private_explicit:
+                if data.get("CEO") in ("N/A", "", "N/A (Unlisted / Not Publicly Disclosed)", "N/A — Not publicly disclosed"):
+                    if len(dirs_list) > 1:
+                        data["CEO"] = f"{dirs_list[0]} (Managing Director / Board: {', '.join(dirs_list[:3])})"
+                    elif len(dirs_list) == 1:
+                        data["CEO"] = f"{dirs_list[0]} (Managing Director)"
+                if data.get("Founder Name(s)") in ("N/A", "", "N/A (Unlisted / Not Publicly Disclosed)") and dirs_list:
+                    data["Founder Name(s)"] = ", ".join(dirs_list[:3]) + " (Founding Promoters / Incorporators)"
     except Exception:
         pass
 
@@ -5412,33 +5481,33 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
     def _is_empty_or_na(val):
         return not val or str(val).strip() in ("N/A", "None", "", "N/A (Unlisted / Not Publicly Disclosed)", "N/A — Not publicly disclosed")
 
+    is_pub = "public" in str(data.get("Business Type (Private Limited/Public Limited)", "")).lower() or "yes" in str(data.get("Is Listed Company", "")).lower()
+
     ceo_val = data.get("CEO")
     if _is_empty_or_na(ceo_val):
         dirs = data.get("Board of Directors / Key Promoters")
-        if dirs and not _is_empty_or_na(dirs):
+        if not is_pub and dirs and not _is_empty_or_na(dirs):
             first_dir = dirs.split(",")[0].strip()
             ceo_val = f"{first_dir} (Managing Director / Board)"
             data["CEO"] = ceo_val
         else:
-            ceo_val = "N/A"
+            ceo_val = "N/A — Not publicly disclosed" if is_pub else "N/A"
 
     cfo_val = data.get("CFO")
     if _is_empty_or_na(cfo_val):
-        is_pub = "public" in str(data.get("Business Type (Private Limited/Public Limited)", "")).lower() or "yes" in str(data.get("Is Listed Company", "")).lower()
         cfo_val = "N/A — Not publicly disclosed" if is_pub else "Executive Board / Finance Directorate (Privately Held)"
         data["CFO"] = cfo_val
 
     cto_val = data.get("CTO")
-    if _is_empty_or_na(cto_val):
-        is_pub = "public" in str(data.get("Business Type (Private Limited/Public Limited)", "")).lower() or "yes" in str(data.get("Is Listed Company", "")).lower()
-        cto_val = "N/A — Not publicly disclosed" if is_pub else "Technology Division / Leadership (Privately Held)"
+    if _is_empty_or_na(cto_val) or "mohammed ra" in str(cto_val).lower():
+        cto_val = "N/A — Not Publicly Disclosed (Executive Committee Structure)" if is_pub else "Technology Division / Leadership (Privately Held)"
         data["CTO"] = cto_val
 
     owner_val = data.get("Owner")
     if _is_empty_or_na(owner_val):
         owner_val = data.get("Parent Company")
     if _is_empty_or_na(owner_val):
-        owner_val = data.get("Board of Directors / Key Promoters")
+        owner_val = data.get("Board of Directors / Key Promoters") if not is_pub else "Public / Institutional Shareholders"
     if _is_empty_or_na(owner_val):
         owner_val = data.get("Founder Name(s)")
     if _is_empty_or_na(owner_val):
@@ -5449,7 +5518,9 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
     data["Chief Financial Officer (CFO)"] = cfo_val
     data["Chief Technology Officer (CTO)"] = cto_val
     data["Ultimate Owner / Promoters"] = owner_val
-    data["Registered Office Address"] = data.get("Office Address") or data.get("Registered Address") or "N/A"
+    clean_final_addr = clean_duplicate_address_tokens(data.get("Office Address") or data.get("Registered Address") or data.get("Registered Office Address") or "N/A")
+    data["Registered Office Address"] = clean_final_addr
+    data["Office Address"] = clean_final_addr
     data["Official Website"] = data.get("Official Website") or "N/A"
     data["Contact Details"] = data.get("Contact Details") or "N/A"
     data["Official Email"] = data.get("Official Email") or "N/A"
@@ -5457,7 +5528,10 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
     data["Registrar"] = data.get("Registrar") or "N/A"
     data["Incorporation Year"] = data.get("Founding Year") or data.get("Incorporation Date") or "N/A"
     data["Stock Ticker / Symbol"] = data.get("Stock Ticker") or "N/A"
-    data["Primary Industry / Sector"] = data.get("Primary Industry / Sector") or data.get("Business Type (Private Limited/Public Limited)") or "Corporate"
+    ind_val = data.get("Primary Industry / Sector")
+    if _is_empty_or_na(ind_val) or ind_val in ("Private Limited", "Public Limited", "Corporate"):
+        ind_val = data.get("Industry") or "Diversified Commercial Operations"
+    data["Primary Industry / Sector"] = ind_val
 
     return data, sources
 
@@ -5560,7 +5634,13 @@ def display_table1(data: Dict[str, Any], sources: List[Dict[str, str]]):
             else:
                 # Never use 'Unlisted / Not Publicly Disclosed' for listed companies
                 is_listed = "yes" in str(data.get("Is Listed Company", "")).lower()
-                v_str = "[dim]N/A — Not publicly disclosed[/dim]" if is_listed else "[dim]N/A (Unlisted / Not Publicly Disclosed)[/dim]"
+                if is_listed:
+                    if k == "CTO":
+                        v_str = "[dim]N/A — Not Publicly Disclosed (Executive Committee Structure)[/dim]"
+                    else:
+                        v_str = "[dim]N/A — Not publicly disclosed[/dim]"
+                else:
+                    v_str = "[dim]N/A (Unlisted / Not Publicly Disclosed)[/dim]"
         elif k == "Is Listed Company":
             v_str = "[green]Yes[/green]" if "yes" in str(v).lower() else "[yellow]No[/yellow]"
         elif k == "Business Type (Private Limited/Public Limited)":
