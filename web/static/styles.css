@@ -1194,3 +1194,17 @@ body {
     width: 100%;
   }
 }
+
+/* Pre-incorporation & Table 2 styling */
+.pre-incorp-row {
+  opacity: 0.88;
+}
+.dim-yellow {
+  color: #F59E0B !important;
+  font-weight: 500;
+}
+.dim-cyan {
+  color: #38BDF8 !important;
+  font-weight: 500;
+}
+

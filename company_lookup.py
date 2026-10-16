@@ -5863,6 +5863,7 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
         return p_list, r_dict, e_dict, pt_dict, p_mcap
 
     # 2. Extract audited P&L from Screener if listed ticker is available and not an unlisted entity
+    reporting_scope = "Audited"
     if ticker and not is_unlisted_entity:
         for suffix in ["/consolidated/", "/"]:
             s_url = f"https://www.screener.in/company/{ticker}{suffix}"
@@ -5872,7 +5873,8 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                     soup = BeautifulSoup(res.text, 'html.parser')
                     p_res, r_res, e_res, pt_res, m_res = extract_valid_screener_pl(soup, s_url)
                     if p_res:
-                        add_source("Screener.in (Audited Multi-Year P&L Financials)", s_url)
+                        reporting_scope = "Consolidated" if suffix == "/consolidated/" else "Standalone"
+                        add_source(f"Screener.in (Audited Multi-Year P&L - {reporting_scope})", s_url)
                         periods = p_res
                         rev_by_period = r_res
                         ebitda_by_period = e_res
@@ -5934,7 +5936,8 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                                             soup = BeautifulSoup(res.text, 'html.parser')
                                             p_res, r_res, e_res, pt_res, m_res = extract_valid_screener_pl(soup, s_url)
                                             if p_res:
-                                                add_source("Screener.in (Audited Multi-Year P&L Financials)", s_url)
+                                                reporting_scope = "Consolidated" if suffix == "/consolidated/" else "Standalone"
+                                                add_source(f"Screener.in (Audited Multi-Year P&L - {reporting_scope})", s_url)
                                                 periods = p_res
                                                 rev_by_period = r_res
                                                 ebitda_by_period = e_res
@@ -5962,13 +5965,65 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
     if not periods:
         periods = ["FY21 (2020-21)", "FY22 (2021-22)", "FY23 (2022-23)", "FY24 (2023-24)", "FY25 (2024-25)", "FY26 / Present"]
 
+    def _get_incorp_year() -> Optional[int]:
+        c_cin = ""
+        if isinstance(company_name_or_entity, dict):
+            c_cin = str(company_name_or_entity.get("cin") or company_name_or_entity.get("CIN") or "").strip()
+        if c_cin:
+            m = re.match(r'^[LU]\d{5}[A-Z]{2}(\d{4})[A-Z]{3}\d{6}$', c_cin)
+            if m:
+                try:
+                    return int(m.group(1))
+                except ValueError:
+                    pass
+        if isinstance(company_name_or_entity, dict):
+            for k in ["incorporation_date", "inc_date", "founding_year", "Founding Year", "Incorporation Date"]:
+                v = str(company_name_or_entity.get(k, "")).strip()
+                if v and v != "N/A":
+                    m_y = re.search(r'\b(19\d\d|20\d\d)\b', v)
+                    if m_y:
+                        try:
+                            return int(m_y.group(1))
+                        except ValueError:
+                            pass
+        return None
+
+    incorp_year = _get_incorp_year()
+
+    def _get_period_year(p_str: str) -> Optional[int]:
+        p_up = p_str.upper().strip()
+        if "TTM" in p_up or "PRESENT" in p_up:
+            return datetime.now().year
+        m_fy = re.search(r'FY\s*(\d{2,4})', p_up)
+        if m_fy:
+            val = int(m_fy.group(1))
+            return (2000 + val) if val < 100 else val
+        m_yr = re.search(r'\b(20\d\d|19\d\d)\b', p_up)
+        if m_yr:
+            return int(m_yr.group(1))
+        return None
+
     # 3b. Market Cap History
     mcap_by_period = {}
     is_private = is_unlisted_entity or ((stock_ticker == "N/A" or "unlisted" in str(stock_ticker).lower()) and present_mcap == "N/A")
 
+    paid_up_cap = None
+    if is_private and isinstance(company_name_or_entity, dict):
+        for k in ["paid_up_capital", "Paid-up Capital", "authorized_capital", "Authorized Capital"]:
+            v = str(company_name_or_entity.get(k, "")).strip()
+            if v and v != "N/A":
+                paid_up_cap = v
+                break
+
     if is_private:
         for p in periods:
-            mcap_by_period[p] = "N/A (Privately Held)"
+            p_yr = _get_period_year(p)
+            if incorp_year and p_yr and p_yr < incorp_year:
+                mcap_by_period[p] = "N/A — Pre-Incorporation"
+            elif paid_up_cap:
+                mcap_by_period[p] = f"N/A (Privately Held) [Paid-up: {paid_up_cap}]"
+            else:
+                mcap_by_period[p] = "N/A (Privately Held)"
     else:
         cmc_slugs = []
         if ticker:
@@ -5995,11 +6050,37 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                 pass
 
         for p in periods:
+            p_yr = _get_period_year(p)
+            if incorp_year and p_yr and p_yr < incorp_year:
+                mcap_by_period[p] = "N/A — Pre-Incorporation"
+                continue
+
             yr_match = re.search(r'\d{4}', p)
+            raw_mcap_str = "N/A"
             if yr_match and yr_match.group(0) in cmc_history:
-                mcap_by_period[p] = cmc_history[yr_match.group(0)]
+                raw_mcap_str = cmc_history[yr_match.group(0)]
             elif "ttm" in p.lower() or "present" in p.lower() or "2026" in p:
-                mcap_by_period[p] = present_mcap if present_mcap != "N/A" else cmc_history.get("2026", "N/A")
+                raw_mcap_str = present_mcap if present_mcap != "N/A" else cmc_history.get("2026", "N/A")
+            else:
+                raw_mcap_str = "N/A"
+
+            # Currency normalization for Indian companies so Market Cap matches Revenue/Profit in ₹ Cr.
+            if raw_mcap_str != "N/A":
+                if ("$" in raw_mcap_str or "usd" in raw_mcap_str.lower()):
+                    m_b = re.search(r'\$\s*([0-9]+(?:\.[0-9]+)?)\s*B', raw_mcap_str, re.I)
+                    m_m = re.search(r'\$\s*([0-9]+(?:\.[0-9]+)?)\s*M', raw_mcap_str, re.I)
+                    if m_b:
+                        usd_b = float(m_b.group(1))
+                        inr_cr = round(usd_b * 8300)
+                        mcap_by_period[p] = f"₹ {inr_cr:,} Cr. ({raw_mcap_str})"
+                    elif m_m:
+                        usd_m = float(m_m.group(1))
+                        inr_cr = round(usd_m * 8.3)
+                        mcap_by_period[p] = f"₹ {inr_cr:,} Cr. ({raw_mcap_str})"
+                    else:
+                        mcap_by_period[p] = raw_mcap_str
+                else:
+                    mcap_by_period[p] = raw_mcap_str
             else:
                 mcap_by_period[p] = "N/A"
 
@@ -6034,25 +6115,21 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                 cin_val = str(company_name_or_entity.get("cin", "")).strip()
 
             overview_queries = [
-                f'site:tofler.in "{clean_name}"',
-                f'site:zaubacorp.com "{clean_name}"',
-                f'site:thecompanycheck.com "{clean_name}"',
-                f'"{clean_name}" "operating revenue" OR "turnover" OR "financials" (tofler OR zaubacorp OR mca OR "annual report")',
-                f'"{clean_name}" (revenue OR turnover OR "operating revenue" OR "net profit") (tofler OR zaubacorp OR "economic times" OR "annual report" OR entrackr)',
-                f'"{clean_name}" revenue turnover crore (FY24 OR FY23 OR FY22 OR FY25)',
-                f'"{clean_name}" (employees OR headcount OR workforce) (tofler OR zaubacorp OR "annual report" OR "press release")',
-                f'"{company_name}" (revenue OR turnover OR "operating revenue" OR "financials")',
+                f'"{clean_name}" "operating revenue" OR "turnover" OR "financials"',
+                f'"{clean_name}" "revenue" OR "net profit" OR "profit after tax"',
+                f'"{clean_name}" (employees OR headcount OR workforce)',
+                f'"{clean_name}" "paid up capital" OR "authorized capital"',
+                f'"{clean_name}" (tofler OR zaubacorp OR "thecompanycheck" OR "instafinancials" OR "rocketreach" OR tracxn OR "economic times")',
+                f'"{company_name}" turnover OR revenue OR "profit after tax" OR "EBITDA"',
             ]
             if cin_val and cin_val != "N/A":
-                overview_queries.insert(0, f'site:tofler.in "{cin_val}"')
-                overview_queries.insert(1, f'site:zaubacorp.com "{cin_val}"')
-                overview_queries.insert(2, f'"{clean_name}" "{cin_val}" (revenue OR turnover OR "operating revenue" OR "financials")')
-                overview_queries.append(f'"{cin_val}" (tofler OR zaubacorp OR "annual report" OR financials)')
+                overview_queries.append(f'"{cin_val}" (revenue OR turnover OR capital OR financials)')
+                overview_queries.append(f'"{clean_name}" "{cin_val}"')
             if isinstance(company_name_or_entity, dict):
                 for alias in (company_name_or_entity.get("aliases") or []):
                     a_str = str(alias).strip()
                     if a_str and len(a_str) >= 3 and a_str.lower() != clean_name.lower():
-                        overview_queries.append(f'"{a_str}" turnover revenue crore (FY24 OR FY23 OR FY22 OR FY25)')
+                        overview_queries.append(f'"{a_str}" turnover revenue (FY24 OR FY23 OR FY22 OR FY25)')
 
             raw_fin_items = []
             if os.environ.get("TAVILY_API_KEY"):
@@ -6066,17 +6143,18 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                         })
 
             if len(raw_fin_items) < 3:
-                with DDGS(timeout=7) as ddgs:
-                    for oq in overview_queries[:3]:
-                        try:
+                for oq in overview_queries[:6]:
+                    try:
+                        with DDGS(timeout=10) as ddgs:
                             for r in ddgs.text(oq, max_results=3):
-                                raw_fin_items.append({
-                                    "href": r.get("href", ""),
-                                    "title": r.get("title", ""),
-                                    "body": r.get("body", "")
-                                })
-                        except Exception:
-                            pass
+                                if r.get("href") and r.get("body"):
+                                    raw_fin_items.append({
+                                        "href": r.get("href", ""),
+                                        "title": r.get("title", ""),
+                                        "body": r.get("body", "")
+                                    })
+                    except Exception:
+                        pass
 
             for r in raw_fin_items:
                 href = r.get("href", "")
@@ -6215,16 +6293,59 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
             # Strict data fidelity: do not extrapolate single mentions or employee counts into fake multi-year financials
             pass
 
+    if is_private and not paid_up_cap and unlisted_fin_snippets:
+        for snippet in unlisted_fin_snippets:
+            m_cap = re.search(r'paid[\s-]up\s+(?:share\s+)?capital\s*(?:is|of|stood at|:|-)?\s*(?:inr|rs\.?|₹)?\s*([0-9]+(?:,[0-9]+)*(?:\.[0-9]+)?\s*(?:crore|crores|cr|lakh|lakhs|lac|lacs|thousand|k)?)\b', snippet, re.I)
+            if not m_cap:
+                m_cap = re.search(r'(?:inr|rs\.?|₹)\s*([0-9]+(?:,[0-9]+)*(?:\.[0-9]+)?\s*(?:crore|crores|cr|lakh|lakhs|lac|lacs))\s*paid[\s-]up', snippet, re.I)
+            if m_cap:
+                c_val = m_cap.group(1).strip()
+                if any(w in c_val.lower() for w in ['lakh', 'lac', 'cr', 'crore']):
+                    paid_up_cap = f"₹ {c_val.title()}"
+                else:
+                    try:
+                        n = float(c_val.replace(',', ''))
+                        if n >= 10000000:
+                            paid_up_cap = f"₹ {n/10000000:.2g} Cr."
+                        elif n >= 100000:
+                            paid_up_cap = f"₹ {n/100000:.2g} Lakhs"
+                        else:
+                            paid_up_cap = f"₹ {n:,.0f}"
+                    except ValueError:
+                        paid_up_cap = f"₹ {c_val}"
+                break
+        if paid_up_cap:
+            for p in periods:
+                p_yr = _get_period_year(p)
+                if not (incorp_year and p_yr and p_yr < incorp_year):
+                    mcap_by_period[p] = f"N/A (Privately Held) [Paid-up: {paid_up_cap}]"
+
     table2_rows = []
     for p in periods:
-        table2_rows.append({
-            "Fiscal Period / Year": p,
-            "Market Cap": mcap_by_period.get(p, "N/A"),
-            "Net Revenue/Net Sales": rev_by_period.get(p, "N/A"),
-            "Net Profit": pat_by_period.get(p, "N/A"),
-            "EBITDA": ebitda_by_period.get(p, "N/A"),
-            "Employee Headcount": emp_by_period.get(p, "N/A")
-        })
+        p_yr = _get_period_year(p)
+        if incorp_year and p_yr and p_yr < incorp_year:
+            table2_rows.append({
+                "Fiscal Period / Year": p,
+                "Market Cap": "N/A — Pre-Incorporation",
+                "Net Revenue/Net Sales": f"N/A — Pre-Incorporation (Incorporated {incorp_year})",
+                "Net Profit": "N/A — Pre-Incorporation",
+                "EBITDA": "N/A — Pre-Incorporation",
+                "Employee Headcount": "N/A — Pre-Incorporation"
+            })
+            data_source_labels[(p, "Net Revenue/Net Sales")] = "VERIFIED (Statutory Pre-Incorporation)"
+            data_source_labels[(p, "Net Profit")] = "VERIFIED (Statutory Pre-Incorporation)"
+            data_source_labels[(p, "EBITDA")] = "VERIFIED (Statutory Pre-Incorporation)"
+            data_source_labels[(p, "Market Cap")] = "VERIFIED (Statutory Pre-Incorporation)"
+            data_source_labels[(p, "Employee Headcount")] = "VERIFIED (Statutory Pre-Incorporation)"
+        else:
+            table2_rows.append({
+                "Fiscal Period / Year": p,
+                "Market Cap": mcap_by_period.get(p, "N/A"),
+                "Net Revenue/Net Sales": rev_by_period.get(p, "N/A"),
+                "Net Profit": pat_by_period.get(p, "N/A"),
+                "EBITDA": ebitda_by_period.get(p, "N/A"),
+                "Employee Headcount": emp_by_period.get(p, "N/A")
+            })
 
     # Detect if company is Indian (for currency normalization)
     _indian_suffixes = ['private limited', 'pvt ltd', 'pvt. ltd', 'india', 'limited', 'nse', 'bse',
@@ -6247,6 +6368,7 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
             row["Net Profit"] == "N/A" or 
             row["Employee Headcount"] == "N/A"
             for row in table2_rows
+            if not ("pre-incorporation" in str(row.get("Net Revenue/Net Sales", "")).lower())
         )
         # ZERO-FABRICATION RULE: For private/unlisted entities, ONLY call Gemini if verified research snippets were found!
         # If no verified disclosures exist, strictly preserve N/A (never guess or hallucinate).
@@ -6261,37 +6383,52 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                     if ind:
                         target_desc += f" [Industry: {ind}]"
 
-                web_research_block = ""
-                if unlisted_fin_snippets:
-                    web_research_block = (
-                        f"\nVERIFIED STATUTORY & WEB RESEARCH DISCLOSURES (Tofler, ZaubaCorp, MCA, Press):\n"
-                        + "\n".join(unlisted_fin_snippets[:12]) + "\n"
-                    )
-
-                # Currency instruction: enforce INR for Indian companies without hallucinated multipliers
-                if is_indian_company:
-                    currency_instruction = (
-                        "CURRENCY REPORTING: This is an Indian company. If figures are in INR, report them in Crores (e.g. '₹ 5,420 Cr.', '₹ 360 Cr.'). "
-                        "If figures are disclosed in USD (e.g. '$981M', '$1.5B'), report the exact USD figure directly from the disclosures. Do NOT make up estimated conversion rates.\n"
+                if not is_private:
+                    # Public listed enterprise: target official annual report / BRSR workforce and any missing audited metrics
+                    t2_prompt = (
+                        f"You are an expert corporate financial auditor verifying statutory disclosures for publicly traded companies.\n"
+                        f"Target Company: '{target_desc}' (Stock Ticker: {stock_ticker}).\n"
+                        f"Periods to report: {', '.join(periods)}.\n"
+                        f"Task: Extract the verified annual employee headcount (total workforce) reported in official statutory annual reports / BRSR / SEBI filings as of each fiscal year-end.\n\n"
+                        f"STRICT GROUNDING & ZERO-FABRICATION MANDATE:\n"
+                        f"- employees: Verified total employee headcount for that period (digits only, e.g. '259619', '314015', '343234', '317240', '323500'). If a specific period is not disclosed, output 'N/A'.\n"
+                        f"- revenue: Only provide if missing from disclosures, otherwise 'N/A'.\n"
+                        f"- net_profit: Only provide if missing from disclosures, otherwise 'N/A'.\n"
+                        f"- ebitda: Only provide if missing from disclosures, otherwise 'N/A'.\n\n"
+                        f"Output strictly a JSON array of objects with keys: 'period', 'revenue', 'net_profit', 'ebitda', 'employees'."
                     )
                 else:
-                    currency_instruction = ""
+                    web_research_block = ""
+                    if unlisted_fin_snippets:
+                        web_research_block = (
+                            f"\nVERIFIED STATUTORY & WEB RESEARCH DISCLOSURES (Tofler, ZaubaCorp, MCA, Press):\n"
+                            + "\n".join(unlisted_fin_snippets[:12]) + "\n"
+                        )
 
-                t2_prompt = (
-                    f"You are an expert corporate financial auditor extracting figures strictly from verified disclosures.\n"
-                    f"Target Company: '{target_desc}' (Ticker: {stock_ticker}).\n"
-                    f"Periods to report: {', '.join(periods)}.\n"
-                    f"{web_research_block}\n"
-                    f"{currency_instruction}"
-                    f"Task: Extract corporate financial numbers for each period ONLY from the VERIFIED STATUTORY & WEB RESEARCH DISCLOSURES above.\n\n"
-                    f"STRICT GROUNDING & ZERO-FABRICATION MANDATE:\n"
-                    f"- revenue: Verified annual turnover / net revenue explicitly stated in the research disclosures above (e.g. '₹ 6,169 Cr.', '₹ 5,420 Cr.', or '$981M'). If a period reports a statutory bracket/range (e.g. 'Over INR 500 cr' or '100 cr - 500 cr'), output the exact range formatted as '> ₹ 500 Cr. (Disclosed Range)' or '₹ 100 - 500 Cr. (Disclosed Range)'. If a period is not mentioned in the research disclosures, output 'N/A'. Strictly DO NOT guess, interpolate, or fabricate numbers.\n"
-                    f"- net_profit: Audited net profit / profit after tax (PAT) explicitly stated in the disclosures (e.g. '₹ 588 Cr.'), or 'N/A'.\n"
-                    f"- ebitda: Operating profit / EBITDA explicitly stated in the disclosures (e.g. '₹ 943 Cr.'), or 'N/A'.\n"
-                    f"- employees: Verified corporate headcount for that period (digits only, e.g. '693', '750', '811', '1000') explicitly stated in the disclosures, or 'N/A'.\n\n"
-                    f"CRITICAL RULE: If a metric or period is not disclosed in the provided disclosures, return 'N/A'. Never invent numbers or guess progressions.\n"
-                    f"Output strictly a JSON array of objects with keys: 'period', 'revenue', 'net_profit', 'ebitda', 'employees'."
-                )
+                    # Currency instruction: enforce INR for Indian companies without hallucinated multipliers
+                    if is_indian_company:
+                        currency_instruction = (
+                            "CURRENCY REPORTING: This is an Indian company. If figures are in INR, report them in Crores (e.g. '₹ 5,420 Cr.', '₹ 360 Cr.'). "
+                            "If figures are disclosed in USD (e.g. '$981M', '$1.5B'), report the exact USD figure directly from the disclosures. Do NOT make up estimated conversion rates.\n"
+                        )
+                    else:
+                        currency_instruction = ""
+
+                    t2_prompt = (
+                        f"You are an expert corporate financial auditor extracting figures strictly from verified disclosures.\n"
+                        f"Target Company: '{target_desc}' (Ticker: {stock_ticker}).\n"
+                        f"Periods to report: {', '.join(periods)}.\n"
+                        f"{web_research_block}\n"
+                        f"{currency_instruction}"
+                        f"Task: Extract corporate financial numbers for each period ONLY from the VERIFIED STATUTORY & WEB RESEARCH DISCLOSURES above.\n\n"
+                        f"STRICT GROUNDING & ZERO-FABRICATION MANDATE:\n"
+                        f"- revenue: Verified annual turnover / net revenue explicitly stated in the research disclosures above (e.g. '₹ 6,169 Cr.', '₹ 5,420 Cr.', or '$981M'). If a period reports a statutory bracket/range (e.g. 'Over INR 500 cr' or '100 cr - 500 cr'), output the exact range formatted as '> ₹ 500 Cr. (Disclosed Range)' or '₹ 100 - 500 Cr. (Disclosed Range)'. If a period is not mentioned in the research disclosures, output 'N/A'. Strictly DO NOT guess, interpolate, or fabricate numbers.\n"
+                        f"- net_profit: Audited net profit / profit after tax (PAT) explicitly stated in the disclosures (e.g. '₹ 588 Cr.'), or 'N/A'.\n"
+                        f"- ebitda: Operating profit / EBITDA explicitly stated in the disclosures (e.g. '₹ 943 Cr.'), or 'N/A'.\n"
+                        f"- employees: Verified corporate headcount for that period (digits only, e.g. '693', '750', '811', '1000') explicitly stated in the disclosures, or 'N/A'.\n\n"
+                        f"CRITICAL RULE: If a metric or period is not disclosed in the provided disclosures, return 'N/A'. Never invent numbers or guess progressions.\n"
+                        f"Output strictly a JSON array of objects with keys: 'period', 'revenue', 'net_profit', 'ebitda', 'employees'."
+                    )
                 t2_raw = call_gemini(t2_prompt, system_instruction="Output strictly valid JSON with no markdown formatting.", temperature=0.0)
                 if t2_raw:
                     t2_ai = None
@@ -6438,11 +6575,15 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
                                     if is_valid_verified_employee_count(ai_val):
                                         if verify_number_in_ground_truth(ai_val):
                                             row["Employee Headcount"] = f"{int(ai_val.replace(',', '')):,}"
-                                            data_source_labels[(curr_p, "Employee Headcount")] = "VERIFIED (Audited ROC / Disclosures)"
+                                            emp_lbl = "VERIFIED (BRSR / Statutory Annual Report)" if not is_private else "VERIFIED (Audited ROC / Disclosures)"
+                                            data_source_labels[(curr_p, "Employee Headcount")] = emp_lbl
                                             filled_any = True
                                             ai_filled_cells.add((curr_p, "Employee Headcount"))
                         if filled_any:
-                            add_source("Audited ROC Filings & Financial Disclosures (Grounded Intelligence)", "https://www.mca.gov.in")
+                            if not is_private:
+                                add_source("Statutory Annual Report & BRSR Disclosures (Corporate Workforce)", "https://www.bseindia.com")
+                            else:
+                                add_source("Audited ROC Filings & Financial Disclosures (Grounded Intelligence)", "https://www.mca.gov.in")
             except Exception:
                 pass
 
@@ -6473,12 +6614,14 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
     # Sanity check: Employee Headcount
     # If the exact same employee count is repeated across multiple periods, it is a single point-in-time snapshot,
     # NOT a historical time-series. Keep it only for the latest period and set previous periods to "N/A".
-    emp_vals = [r.get("Employee Headcount", "N/A") for r in table2_rows if r.get("Employee Headcount", "N/A") not in ("N/A", "", None)]
+    emp_vals = [r.get("Employee Headcount", "N/A") for r in table2_rows if r.get("Employee Headcount", "N/A") not in ("N/A", "", None) and not ("pre-incorporation" in str(r.get("Employee Headcount", "")).lower())]
     if len(emp_vals) >= 2 and len(set(emp_vals)) == 1:
         last_val = emp_vals[0]
         for r in table2_rows[:-1]:
-            r["Employee Headcount"] = "N/A"
-        table2_rows[-1]["Employee Headcount"] = last_val
+            if not ("pre-incorporation" in str(r.get("Employee Headcount", "")).lower()):
+                r["Employee Headcount"] = "N/A"
+        if not ("pre-incorporation" in str(table2_rows[-1].get("Employee Headcount", "")).lower()):
+            table2_rows[-1]["Employee Headcount"] = last_val
 
     # Apply financial sanity checks
     table2_rows = financial_sanity_check(table2_rows, "Net Revenue/Net Sales")
@@ -6598,11 +6741,27 @@ def fetch_table2_data(company_name_or_entity: Any, stock_ticker: str = "N/A", ev
             if data_source_labels.get((p, "EBITDA")) not in ("VERIFIED",):
                 data_source_labels[(p, "EBITDA")] = "ESTIMATED"
 
+    # ── Final Temporal Audit Guarantee: Enforce Pre-Incorporation Boundary ──
+    if incorp_year:
+        for row in table2_rows:
+            p = row.get("Fiscal Period / Year", "")
+            p_yr = _get_period_year(p)
+            if p_yr and p_yr < incorp_year:
+                pre_msg = f"N/A — Pre-Incorporation (Incorporated {incorp_year})"
+                row["Net Revenue/Net Sales"] = pre_msg
+                row["Net Profit"] = "N/A — Pre-Incorporation"
+                row["EBITDA"] = "N/A — Pre-Incorporation"
+                row["Market Cap"] = "N/A — Pre-Incorporation"
+                row["Employee Headcount"] = "N/A — Pre-Incorporation"
+                for m in ["Net Revenue/Net Sales", "Net Profit", "EBITDA", "Market Cap", "Employee Headcount"]:
+                    data_source_labels[(p, m)] = "VERIFIED (Statutory Pre-Incorporation)"
+
     return {
         "Company Name": company_name,
         "periods": periods,
         "rows": table2_rows,
         "data_sources": data_source_labels,
+        "reporting_scope": reporting_scope,
         "is_synthetic": {
             "revenue": is_synthetic_revenue,
             "profit": is_synthetic_profit,
@@ -6615,6 +6774,7 @@ def display_table2(data: Dict[str, Any], sources: List[Dict[str, str]]):
     """Render Table #2 with Rich formatting, data source quality labels, and external source URLs."""
     data_sources = data.get("data_sources", {})
     is_synthetic = data.get("is_synthetic", {})
+    scope_str = data.get("reporting_scope", "Audited")
 
     # Source label rendering helper
     def _source_tag(period: str, metric: str) -> str:
@@ -6630,7 +6790,7 @@ def display_table2(data: Dict[str, Any], sources: List[Dict[str, str]]):
         return ""
 
     table = Table(
-        title="[bold cyan]Table #2: 5-Year Historical & Present Financial Metrics [Audited Annual & Interim Disclosures][/bold cyan]",
+        title=f"[bold cyan]Table #2: 5-Year Historical & Present Financial Metrics [{scope_str} Disclosures][/bold cyan]",
         show_header=True,
         header_style="bold magenta",
         show_lines=True
@@ -6644,40 +6804,53 @@ def display_table2(data: Dict[str, Any], sources: List[Dict[str, str]]):
 
     for row in data.get("rows", []):
         p_raw = row.get("Fiscal Period / Year", "N/A")
+        is_pre = "pre-incorporation" in str(row.get("Net Revenue/Net Sales", "")).lower() or "pre-incorporation" in str(row.get("Market Cap", "")).lower()
 
         mcap_val = strip_ai_markers(row.get("Market Cap", "N/A"))
-        if "privately held" in str(mcap_val).lower():
-            mcap_str = "[dim]N/A (Privately Held)[/dim]"
+        if "pre-incorporation" in str(mcap_val).lower():
+            mcap_str = "[dim yellow]N/A — Pre-Incorp[/dim yellow]"
+        elif "privately held" in str(mcap_val).lower():
+            mcap_str = f"[dim cyan]{mcap_val}[/dim cyan]"
         elif mcap_val == "N/A":
             mcap_str = "[dim]N/A[/dim]"
         else:
             mcap_str = f"[bold cyan]{mcap_val}[/bold cyan]"
 
         rev_val = strip_ai_markers(row.get("Net Revenue/Net Sales", "N/A"))
-        if rev_val != "N/A":
+        if "pre-incorporation" in str(rev_val).lower():
+            rev_str = f"[dim yellow]{rev_val}[/dim yellow]"
+        elif rev_val != "N/A":
             rev_str = f"[bold green]{rev_val}[/bold green]{_source_tag(p_raw, 'Net Revenue/Net Sales')}"
         else:
             rev_str = "[dim]N/A[/dim]"
 
         pat_val = strip_ai_markers(row.get("Net Profit", "N/A"))
-        if pat_val != "N/A":
+        if "pre-incorporation" in str(pat_val).lower():
+            pat_str = "[dim yellow]N/A — Pre-Incorp[/dim yellow]"
+        elif pat_val != "N/A":
             pat_str = f"[bold white]{pat_val}[/bold white]{_source_tag(p_raw, 'Net Profit')}"
         else:
             pat_str = "[dim]N/A[/dim]"
 
         eb_val = strip_ai_markers(row.get("EBITDA", "N/A"))
-        if eb_val != "N/A":
+        if "pre-incorporation" in str(eb_val).lower():
+            eb_str = "[dim yellow]N/A — Pre-Incorp[/dim yellow]"
+        elif eb_val != "N/A":
             eb_str = f"[bold magenta]{eb_val}[/bold magenta]{_source_tag(p_raw, 'EBITDA')}"
         else:
             eb_str = "[dim]N/A[/dim]"
 
         emp_val = strip_ai_markers(row.get("Employee Headcount", "N/A"))
-        if emp_val != "N/A":
+        if "pre-incorporation" in str(emp_val).lower():
+            emp_str = "[dim yellow]N/A — Pre-Incorp[/dim yellow]"
+        elif emp_val != "N/A":
             emp_str = f"[white]{emp_val}[/white]{_source_tag(p_raw, 'Employee Headcount')}"
         else:
             emp_str = "[dim]N/A[/dim]"
 
-        if "TTM" in p_raw.upper():
+        if is_pre:
+            p_display = f"{p_raw} [dim yellow][Pre-Incorp][/dim yellow]"
+        elif "TTM" in p_raw.upper():
             p_display = f"{p_raw} [dim cyan][TTM][/dim cyan]"
         elif re.search(r"\b(?:Jun|June|Sep|Sept|September|Dec|December)\b|Q[1-4]|quarter", p_raw, flags=re.I):
             p_display = f"{p_raw} [dim yellow][Unaudited Interim][/dim yellow]"

@@ -185,6 +185,7 @@ async def execute_lookup(payload: Dict[str, Any]):
                 "rows": t2_rows,
                 "data_sources": serializable_sources,
                 "is_synthetic": data2.get("is_synthetic", {}),
+                "reporting_scope": data2.get("reporting_scope", "Audited"),
                 "sources": sources2
             },
             "table3": {"news": data3, "sources": sources3},

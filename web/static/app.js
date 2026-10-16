@@ -545,19 +545,44 @@ document.addEventListener("DOMContentLoaded", () => {
     const chartContainer = document.getElementById("financialChartWrapper");
     const sourcesRow = document.getElementById("tab2SourcesRow");
 
+    // Dynamic Header Scope Badge
+    const scopeBadge = document.getElementById("tab2ScopeBadge");
+    if (scopeBadge && t2.reporting_scope) {
+      if (t2.reporting_scope === "Consolidated") {
+        scopeBadge.textContent = "AUDITED CONSOLIDATED FINANCIALS";
+        scopeBadge.className = "tag-provenance verified";
+      } else if (t2.reporting_scope === "Standalone") {
+        scopeBadge.textContent = "AUDITED STANDALONE FINANCIALS";
+        scopeBadge.className = "tag-provenance verified";
+      } else {
+        scopeBadge.textContent = "AUDITED STATUTORY REGISTRY / DISCLOSURES";
+        scopeBadge.className = "tag-provenance verified";
+      }
+    }
+
     tableBody.innerHTML = rows.map(r => {
       const p = r["Fiscal Period / Year"];
+      const isPre = (r["Net Revenue/Net Sales"] || "").includes("Pre-Incorporation") || (r["Market Cap"] || "").includes("Pre-Incorporation");
       const revTag = getTagBadge(srcMap[`${p}|Net Revenue/Net Sales`]);
       const patTag = getTagBadge(srcMap[`${p}|Net Profit`]);
       const ebitdaTag = getTagBadge(srcMap[`${p}|EBITDA`]);
+      const empTag = getTagBadge(srcMap[`${p}|Employee Headcount`]);
+
+      const pDisplay = isPre 
+        ? `${escapeHtml(p)} <span style="font-size: 0.72rem; color: #F59E0B; margin-left: 6px; padding: 1px 5px; border-radius: 4px; background: rgba(245,158,11,0.12);">[Pre-Incorp]</span>`
+        : escapeHtml(p);
+
+      const mcapClass = isPre ? "dim-yellow" : (r["Market Cap"] && r["Market Cap"].includes("Privately Held") ? "dim-cyan" : "");
+      const revClass = isPre ? "dim-yellow" : "highlight";
+
       return `
-        <tr>
-          <td class="highlight">${escapeHtml(p)}</td>
-          <td class="text-right">${escapeHtml(r["Market Cap"] || "N/A")}</td>
-          <td class="text-right highlight">${escapeHtml(r["Net Revenue/Net Sales"] || "N/A")} ${revTag}</td>
-          <td class="text-right">${escapeHtml(r["Net Profit"] || "N/A")} ${patTag}</td>
-          <td class="text-right">${escapeHtml(r["EBITDA"] || "N/A")} ${ebitdaTag}</td>
-          <td class="text-right">${escapeHtml(r["Employee Headcount"] || "N/A")}</td>
+        <tr class="${isPre ? 'pre-incorp-row' : ''}">
+          <td class="highlight">${pDisplay}</td>
+          <td class="text-right ${mcapClass}">${escapeHtml(r["Market Cap"] || "N/A")}</td>
+          <td class="text-right ${revClass}">${escapeHtml(r["Net Revenue/Net Sales"] || "N/A")} ${revTag}</td>
+          <td class="text-right ${isPre ? 'dim-yellow' : ''}">${escapeHtml(r["Net Profit"] || "N/A")} ${patTag}</td>
+          <td class="text-right ${isPre ? 'dim-yellow' : ''}">${escapeHtml(r["EBITDA"] || "N/A")} ${ebitdaTag}</td>
+          <td class="text-right ${isPre ? 'dim-yellow' : ''}">${escapeHtml(r["Employee Headcount"] || "N/A")} ${empTag}</td>
         </tr>
       `;
     }).join("");
@@ -657,10 +682,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function parseNumericCrore(str) {
-    if (!str || str === "N/A") return 0;
-    const clean = str.replace(/[,₹$]/g, "").replace(/\(.*\)/g, "");
+    if (!str || typeof str !== "string" || str.includes("N/A") || str.toLowerCase().includes("pre-incorporation")) return 0;
+    const clean = str.replace(/\([^)]*\)/g, "").replace(/[,₹$]/g, "").trim();
+    const isLakh = /lakh|lac/i.test(clean);
     const match = clean.match(/([0-9]+(?:\.[0-9]+)?)/);
-    return match ? parseFloat(match[1]) : 0;
+    if (!match) return 0;
+    let val = parseFloat(match[1]);
+    if (isLakh) val = val / 100.0;
+    return val;
   }
 
   // Tab 3: News Signals
