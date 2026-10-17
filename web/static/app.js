@@ -370,8 +370,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const roc = t1["RoC"] || canon.roc || "ROC / Ministry of Corporate Affairs";
     const incorpDate = t1["Incorporation Date"] || t1["Incorporation Year"] || t1["Founding Year"] || t1["Founded"] || canon.founding_year || "N/A";
     const legalStructure = t1["Business Type (Private Limited/Public Limited)"] || canon.legal_structure || (isPrivate ? "Private Limited" : "Public Limited");
-    const address = t1["Registered Office Address"] || t1["Office Address"] || canon.headquarters || "N/A";
-    const hqCity = t1["Headquarter (City)"] || canon.hq_city || "India";
+    const rawHq = t1["Headquarter (City)"] || canon.hq_city || canon.city || "";
+    const cleanHq = String(rawHq).replace(/^[,\s\-]+/, '').replace(/[,\s\-]+$/, '').trim();
+    const hqCity = (!cleanHq || cleanHq === "N/A" || cleanHq.toLowerCase() === "india") ? "India" : cleanHq;
     const industry = t1["Primary Industry / Sector"] || t1["Industry"] || canon.industry || "Diversified Commercial Operations";
     const ticker = t1["Stock Ticker / Symbol"] || t1["Stock Ticker"] || canon.ticker || (isPrivate ? "Unlisted / Privately Held" : "NSE/BSE Listed");
     const website = t1["Official Website"] || t1["Website"] || canon.website || "#";
@@ -465,7 +466,7 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
       <div class="meta-field">
         <div class="meta-label">Primary Operating Jurisdiction</div>
-        <div class="meta-val">${escapeHtml(hqCity)}, India</div>
+        <div class="meta-val">${escapeHtml(hqCity)}${hqCity !== 'India' && !hqCity.toLowerCase().includes('india') ? ', India' : ''}</div>
       </div>
     `;
 

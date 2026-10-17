@@ -1174,53 +1174,90 @@ LOCALITY_TO_CITY = {
     "hinjewadi": "Pune", "magarpatta": "Pune", "hadapsar": "Pune", "shivaji nagar": "Pune",
     "viman nagar": "Pune", "kharadi": "Pune", "kothrud": "Pune", "baner": "Pune",
     "wakad": "Pune", "aundh": "Pune", "pimpri": "Pune", "chinchwad": "Pune",
-    # Chennai
+    # Chennai & Greater Metropolitan / Suburbs / Kanchipuram / Chengalpattu / Thiruvallur
     "guindy": "Chennai", "t nagar": "Chennai", "omr": "Chennai", "taramani": "Chennai",
     "nungambakkam": "Chennai", "alwarpet": "Chennai", "adyar": "Chennai", "anna salai": "Chennai",
+    "chengalpattu": "Chennai", "guduvanchery": "Chennai", "vallancheri": "Chennai",
+    "kanchipuram": "Chennai", "sriperumbudur": "Chennai", "sholinganallur": "Chennai",
+    "siruseri": "Chennai", "velachery": "Chennai", "porur": "Chennai", "ambattur": "Chennai",
+    "tambaram": "Chennai", "chromepet": "Chennai", "pallavaram": "Chennai", "perungudi": "Chennai",
+    "thiruvanmiyur": "Chennai", "kelambakkam": "Chennai", "navalur": "Chennai", "maraimalai nagar": "Chennai",
+    "estancia": "Chennai",
     # Ahmedabad
     "sg highway": "Ahmedabad", "prahlad nagar": "Ahmedabad", "navrangpura": "Ahmedabad",
     "bodakdev": "Ahmedabad", "satellite": "Ahmedabad",
 }
 
+ROC_TO_CITY = {
+    "chennai": "Chennai", "delhi": "New Delhi", "mumbai": "Mumbai", "bangalore": "Bengaluru",
+    "karnataka": "Bengaluru", "hyderabad": "Hyderabad", "pune": "Pune", "ahmedabad": "Ahmedabad",
+    "gujarat": "Ahmedabad", "kolkata": "Kolkata", "kanpur": "Kanpur", "jaipur": "Jaipur",
+    "rajasthan": "Jaipur", "cochin": "Kochi", "ernakulam": "Kochi", "kerala": "Kochi",
+    "chandigarh": "Chandigarh", "punjab": "Chandigarh", "gwalior": "Gwalior", "patna": "Patna",
+    "cuttack": "Cuttack", "goa": "Panaji", "himachal": "Shimla", "jammu": "Jammu",
+    "shillong": "Shillong", "uttarakhand": "Dehradun", "dehradun": "Dehradun", "jharkhand": "Ranchi",
+    "ranchi": "Ranchi", "chhattisgarh": "Raipur", "bilaspur": "Bilaspur",
+    "tn": "Chennai", "dl": "New Delhi", "mh": "Mumbai", "ka": "Bengaluru", "tg": "Hyderabad",
+    "ts": "Hyderabad", "gj": "Ahmedabad", "wb": "Kolkata", "up": "Kanpur", "rj": "Jaipur",
+    "kl": "Kochi", "ch": "Chandigarh", "hr": "Gurugram", "mp": "Gwalior",
+}
 
-def resolve_hq_city(raw_hq: str, addr: str = "") -> str:
+
+def resolve_hq_city(raw_hq: str, addr: str = "", roc: str = "") -> str:
     """Resolve locality, neighborhood, or district into primary canonical metropolitan city."""
-    if not raw_hq or str(raw_hq).strip() in ("N/A", "", "-"):
-        if addr:
-            addr_low = addr.lower()
-            for c in INDIAN_CITIES:
-                if re.search(r'\b' + re.escape(c) + r'\b', addr_low):
-                    return c.title()
-        return "N/A"
+    raw_clean = str(raw_hq or "").strip()
+    raw_clean = re.sub(r'^[,\s\-]+', '', raw_clean).strip()
+    raw_clean = re.sub(r'[,\s\-]+$', '', raw_clean).strip()
 
-    raw_clean = str(raw_hq).strip()
-    raw_lower = raw_clean.lower()
+    # Reject corrupt/generic strings (e.g. ", India - 603202", "India", bare pincode)
+    is_invalid = (
+        not raw_clean or 
+        raw_clean.lower() in ("n/a", "-", "none", "null", "unknown", "india") or
+        bool(re.search(r'^(?:india(?:\s*-\s*\d{6})?|\d{6})$', raw_clean, re.I)) or
+        bool(re.match(r'^[,\s\-]+$', raw_clean))
+    )
 
-    if raw_lower in LOCALITY_TO_CITY:
-        return LOCALITY_TO_CITY[raw_lower]
+    if not is_invalid:
+        raw_lower = raw_clean.lower()
+        if raw_lower in LOCALITY_TO_CITY:
+            return LOCALITY_TO_CITY[raw_lower]
 
-    for loc, p_city in LOCALITY_TO_CITY.items():
-        if re.search(r'\b' + re.escape(loc) + r'\b', raw_lower):
-            return p_city
+        for loc, p_city in LOCALITY_TO_CITY.items():
+            if re.search(r'\b' + re.escape(loc) + r'\b', raw_lower):
+                return p_city
 
-    # If raw_hq is already a recognized Indian city, title case it
-    if raw_lower in INDIAN_CITIES:
-        return raw_clean.title()
+        if raw_lower in INDIAN_CITIES:
+            return raw_clean.title()
 
-    # If raw_hq is not in INDIAN_CITIES, check if addr has a recognized city
+    # Fallback to addr parsing
     if addr:
         addr_low = addr.lower()
         # Check Gurugram / Gurgaon pincodes or landmark roads
         if any(k in addr_low for k in ["122001", "122002", "122003", "122004", "122018", "kherki daula", "basai road", "gurugram", "gurgaon"]):
-            if raw_lower in ("noida", "new delhi", "delhi"):
-                return f"{raw_clean.title()} / Gurugram"
-            if raw_lower not in INDIAN_CITIES:
-                return "Gurugram"
+            return "Gurugram"
+
+        # Check localities first
+        for loc, p_city in LOCALITY_TO_CITY.items():
+            if re.search(r'\b' + re.escape(loc) + r'\b', addr_low):
+                return p_city
+
+        # Check known Indian cities
         for c in INDIAN_CITIES:
             if re.search(r'\b' + re.escape(c) + r'\b', addr_low):
                 return c.title()
 
-    return raw_clean.title()
+    # Fallback to RoC mapping
+    if roc:
+        m_r = re.search(r'RoC-?([A-Za-z]+)', str(roc).strip(), re.I)
+        if m_r:
+            r_k = m_r.group(1).lower()
+            if r_k in ROC_TO_CITY:
+                return ROC_TO_CITY[r_k]
+
+    if not is_invalid and not any(w in raw_clean.lower() for w in ["india", "street", "road", "floor", "plot"]):
+        return raw_clean.title()
+
+    return "N/A"
 
 
 def cross_validate_value(candidates: List[Tuple[str, str, int]]) -> Tuple[str, str, bool]:
@@ -5205,7 +5242,7 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
             add_source("Official Corporate Website", found_web)
 
     # 3. Targeted Web Search for Office Address if needed (AI-filtered extraction)
-    hq_city_cur = resolve_hq_city(data.get("Headquarter (City)", ""), data.get("Office Address", ""))
+    hq_city_cur = resolve_hq_city(data.get("Headquarter (City)", ""), data.get("Office Address", ""), roc=data.get("RoC", ""))
     if hq_city_cur and hq_city_cur != "N/A":
         data["Headquarter (City)"] = hq_city_cur
     has_city_match = True
@@ -5431,15 +5468,13 @@ def fetch_table1_data(query: Union[str, Dict[str, Any]], evidence_store: Optiona
         if m_data.get("Registered Office") and m_data["Registered Office"] != "N/A":
             clean_m_addr = extract_office_address(m_data["Registered Office"], company_name=query, hq_city=hq_city_cur)
             data["Office Address"] = clean_m_addr if clean_m_addr != "N/A" else m_data["Registered Office"]
-            m_city = re.search(r',\s*([A-Za-z\s]+?)\s*-\s*\d{6}', m_data["Registered Office"])
-            if not m_city:
-                m_city = re.search(r'(?:Delhi|New Delhi|Mumbai|Bengaluru|Bangalore|Chennai|Kolkata|Hyderabad|Pune|Ahmedabad|Jaipur|Surat|Lucknow|Kanpur|Nagpur|Indore|Thane|Bhopal|Visakhapatnam|Pimpri-Chinchwad|Patna|Vadodara|Ghaziabad|Ludhiana|Agra|Nashik|Faridabad|Meerut|Rajkot|Kalyan-Dombivli|Vasai-Virar|Varanasi|Srinagar|Aurangabad|Dhanbad|Amritsar|Navi Mumbai|Allahabad|Ranchi|Howrah|Coimbatore|Jabalpur|Gwalior|Vijayawada|Jodhpur|Madurai|Raipur|Kota|Guwahati|Chandigarh|Solapur|Hubli-Dharwad|Bareilly|Moradabad|Mysore|Gurgaon|Gurugram|Aligarh|Jalandhar|Tiruchirappalli|Bhubaneswar|Salem|Mira-Bhayandar|Warangal|Thiruvananthapuram|Bhiwandi|Saharanpur|Guntur|Amravati|Bikaner|Noida|Jamshedpur|Bhilai|Cuttack|Firozabad|Kochi|Nellore|Bhavnagar|Dehradun|Durgapur|Asansol|Rourkela|Nanded|Kolhapur|Ajmer|Akola|Gulbarga|Jamnagar|Ujjain|Loni|Siliguri|Jhansi|Ulhasnagar|Jammu|Sangli-Miraj|Mangalore|Erode|Belgaum|Ambattur|Tirunelveli|Malegaon|Gaya|Jalgaon|Udaipur|Maheshtala)', m_data["Registered Office"], re.I)
-            if m_city:
-                data["Headquarter (City)"] = m_city.group(0).strip()
-            elif m_data.get("RoC") and m_data["RoC"] != "N/A":
-                m_roc = re.search(r'RoC-([A-Za-z]+)', m_data["RoC"])
-                if m_roc:
-                    data["Headquarter (City)"] = m_roc.group(1).strip()
+            resolved_city = resolve_hq_city(data.get("Headquarter (City)", ""), data["Office Address"], roc=m_data.get("RoC") or data.get("RoC", ""))
+            if resolved_city and resolved_city != "N/A":
+                data["Headquarter (City)"] = resolved_city
+        elif (data.get("Headquarter (City)") in ("N/A", "", None) or str(data.get("Headquarter (City)", "")).startswith(",")) and (m_data.get("RoC") or data.get("RoC")):
+            resolved_city = resolve_hq_city(data.get("Headquarter (City)", ""), data.get("Office Address", ""), roc=m_data.get("RoC") or data.get("RoC", ""))
+            if resolved_city and resolved_city != "N/A":
+                data["Headquarter (City)"] = resolved_city
         if m_data.get("Identity Status"):
             data["Identity Status"] = m_data["Identity Status"]
         if m_data.get("Official Website") and (data.get("Official Website") in ("N/A", "", None) or not any(bt in str(data.get("Official Website", "")).lower() for bt in [w.lower() for w in re.findall(r'[a-zA-Z0-9]{3,}', data.get("Company Name", "")) if w.lower() not in GENERIC_CORP_TOKENS])):
@@ -5614,8 +5649,10 @@ def validate_table1_cross_field_consistency(data: Dict[str, Any]) -> Dict[str, A
     # Universal: ensure Headquarter (City) is a canonical metropolitan city (resolve localities like Worli -> Mumbai)
     hq_val = str(data.get("Headquarter (City)", "")).strip()
     addr_val = str(data.get("Office Address", "")).strip()
-    if hq_val and hq_val != "N/A":
-        data["Headquarter (City)"] = resolve_hq_city(hq_val, addr_val)
+    roc_val = str(data.get("RoC", "")).strip()
+    resolved_hq = resolve_hq_city(hq_val, addr_val, roc=roc_val)
+    if resolved_hq and resolved_hq != "N/A":
+        data["Headquarter (City)"] = resolved_hq
 
     # Universal: ensure Office Address has no conversational/preamble junk
     if addr_val and addr_val != "N/A":
@@ -7302,6 +7339,7 @@ def resolve_canonical_entity(
         "company_type": d1.get("Business Type (Private Limited/Public Limited)", "N/A"),
         "listed_status": "Listed" if "yes" in str(d1.get("Is Listed Company", "")).lower() else "Unlisted",
         "city": d1.get("Headquarter (City)", "N/A"),
+        "hq_city": d1.get("Headquarter (City)", "N/A"),
         "ceo": d1.get("CEO", "N/A"),
         "cfo": d1.get("CFO", "N/A"),
         "cto": d1.get("CTO", "N/A"),
