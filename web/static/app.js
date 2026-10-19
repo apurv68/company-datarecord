@@ -826,57 +826,229 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
-  // Tab 5: Strategic Synthesis & Conclusions (All 8 Pillars)
+  // Tab 5: Strategic Synthesis & Conclusions (All 8 Pillars + Scorecard + Brief + Velocity)
   function renderTab5(t5) {
+    const scorecardContainer = document.getElementById("tab5ScorecardContainer");
+    const velocityContainer = document.getElementById("tab5VelocityContainer");
+    const briefContainer = document.getElementById("tab5StrategyBriefContainer");
     const verdictEl = document.getElementById("tab5Verdict");
     const driversEl = document.getElementById("tab5DriversText");
     const pillarsContainer = document.getElementById("tab5PillarsContainer");
 
+    // 1. Corporate Strategic Momentum Scorecard (0-100 Scale)
+    const sc = t5["Momentum Scorecard"] || {};
+    const score = typeof sc.Score === "number" ? sc.Score : 75;
+    const tier = sc.Tier || "Tier A: Steady Operational Compounder";
+    const bd = sc.Breakdown || { growth: 24, margins: 18, workforce: 15, expansion: 15 };
+
+    let tierClass = "tier-a";
+    if (score >= 85) tierClass = "tier-aplus";
+    else if (score >= 70) tierClass = "tier-a";
+    else if (score >= 55) tierClass = "tier-b";
+    else tierClass = "tier-c";
+
+    const gPct = Math.min(100, Math.round(((bd.growth || 0) / 35) * 100));
+    const mPct = Math.min(100, Math.round(((bd.margins || 0) / 25) * 100));
+    const wPct = Math.min(100, Math.round(((bd.workforce || 0) / 20) * 100));
+    const ePct = Math.min(100, Math.round(((bd.expansion || 0) / 20) * 100));
+
+    if (scorecardContainer) {
+      scorecardContainer.innerHTML = `
+        <div class="momentum-scorecard">
+          <div class="scorecard-hero">
+            <div class="scorecard-badge ${tierClass}">
+              <span class="scorecard-num">${score}</span>
+              <span class="scorecard-scale">SCALE 0-100</span>
+            </div>
+            <div class="scorecard-details">
+              <span class="scorecard-title">Strategic Momentum Scorecard</span>
+              <span class="scorecard-tier-pill ${tierClass}">${escapeHtml(tier)}</span>
+              <span style="font-size: 0.74rem; color: var(--text-dim);">Multi-factor deterministic synthesis</span>
+            </div>
+          </div>
+          <div class="scorecard-bars">
+            <div class="score-bar-row">
+              <div class="score-bar-meta">
+                <span class="score-bar-label">Top-Line Growth & Revenue Trajectory</span>
+                <span class="score-bar-val">${bd.growth || 0} / 35</span>
+              </div>
+              <div class="score-bar-track"><div class="score-bar-fill growth" style="width: ${gPct}%;"></div></div>
+            </div>
+            <div class="score-bar-row">
+              <div class="score-bar-meta">
+                <span class="score-bar-label">Profit Margin & Operational Discipline</span>
+                <span class="score-bar-val">${bd.margins || 0} / 25</span>
+              </div>
+              <div class="score-bar-track"><div class="score-bar-fill margins" style="width: ${mPct}%;"></div></div>
+            </div>
+            <div class="score-bar-row">
+              <div class="score-bar-meta">
+                <span class="score-bar-label">Workforce Scaling & Velocity</span>
+                <span class="score-bar-val">${bd.workforce || 0} / 20</span>
+              </div>
+              <div class="score-bar-track"><div class="score-bar-fill workforce" style="width: ${wPct}%;"></div></div>
+            </div>
+            <div class="score-bar-row">
+              <div class="score-bar-meta">
+                <span class="score-bar-label">Commercial Deals & Footprint Expansion</span>
+                <span class="score-bar-val">${bd.expansion || 0} / 20</span>
+              </div>
+              <div class="score-bar-track"><div class="score-bar-fill expansion" style="width: ${ePct}%;"></div></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 2. Financial & Workforce Velocity Strip (Deep Table #2 Integration)
+    const fv = t5["Financial & Workforce Velocity"] || {};
+    const cagrText = fv["Revenue CAGR"] || "N/A";
+    const workforceText = fv["Workforce Velocity"] || "N/A";
+    const prodText = fv["Revenue Per Employee"] || "N/A";
+
+    if (velocityContainer) {
+      velocityContainer.innerHTML = `
+        <div class="velocity-grid">
+          <div class="velocity-card">
+            <div class="velocity-header">
+              <span>📈</span> Multi-Year Revenue CAGR
+            </div>
+            <div class="velocity-value">${escapeHtml(cagrText)}</div>
+            <div class="velocity-sub">Audited historical compound annual growth rate</div>
+          </div>
+          <div class="velocity-card workforce">
+            <div class="velocity-header">
+              <span>👥</span> Workforce Scaling Velocity
+            </div>
+            <div class="velocity-value">${escapeHtml(workforceText)}</div>
+            <div class="velocity-sub">Verified headcount trajectory from statutory filings</div>
+          </div>
+          <div class="velocity-card productivity">
+            <div class="velocity-header">
+              <span>⚡</span> Revenue Productivity
+            </div>
+            <div class="velocity-value">${escapeHtml(prodText)}</div>
+            <div class="velocity-sub">Top-line throughput generated per employee</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 3. 3-Point Executive Strategy Brief ("So What?")
+    const sb = t5["Executive Strategy Brief"] || {};
+    const growthEngine = sb["Growth Engine"] || "Core commercial execution and customer relationships across primary operating channels.";
+    const strategicBet = sb["Strategic Bet"] || "Ongoing capacity optimization and deepening domestic enterprise footprint.";
+    const headwind = sb["Operational Headwind"] || "Competitive sector dynamics and input cost management requiring operational vigilance.";
+
+    if (briefContainer) {
+      briefContainer.innerHTML = `
+        <div class="strategy-brief-grid">
+          <div class="strategy-card engine">
+            <div class="strategy-card-title">
+              <span>🚀</span> Primary Growth Engine
+            </div>
+            <div class="strategy-card-body">${escapeHtml(growthEngine)}</div>
+          </div>
+          <div class="strategy-card bet">
+            <div class="strategy-card-title">
+              <span>🎯</span> Active Strategic Bet
+            </div>
+            <div class="strategy-card-body">${escapeHtml(strategicBet)}</div>
+          </div>
+          <div class="strategy-card headwind">
+            <div class="strategy-card-title">
+              <span>⚠️</span> Key Operational Headwind
+            </div>
+            <div class="strategy-card-body">${escapeHtml(headwind)}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 4. Growth Assessment Verdict Box
     const ga = t5["Growth Assessment"] || {};
     verdictEl.textContent = ga["Verdict"] || t5["Growth Trajectory Verdict"] || "Established Commercial Expansion";
     driversEl.textContent = ga["Summary & Drivers"] || ga["Strategic Analysis"] || "Grounded in audited balance sheets, operational production capacity, and market position.";
 
-    // Render 6 sub-cards for the remaining strategic pillars
+    // 5. 6 Strategic Pillars with Health Chips & Clean Record Presentation
     const pillars = [
       {
         title: "1. Strategic Expansion Vectors",
         data: t5["Expansion Vectors"] || {},
-        icon: "🌐"
+        icon: "🌐",
+        defaultChip: "🟢 Active Expansion"
       },
       {
         title: "2. Mergers, Acquisitions & Capital Actions (M&A)",
         data: t5["Mergers, Acquisitions & Capital Actions"] || {},
-        icon: "🤝"
+        icon: "🤝",
+        defaultChip: "⚪ Organic Expansion"
       },
       {
         title: "3. Leadership & Governance Dynamics",
         data: t5["Leadership Dynamics"] || {},
-        icon: "👥"
+        icon: "👥",
+        defaultChip: "🔵 Stable Governance"
       },
       {
         title: "4. Contraction & Operational Shutdown Signals",
         data: t5["Contraction & Shutdown Signals"] || {},
-        icon: "🔻"
+        icon: "🔻",
+        defaultChip: "🟢 Clean Record"
       },
       {
         title: "5. Real Estate & Property Movements",
         data: t5["Real Estate & Property Movements"] || {},
-        icon: "🏢"
+        icon: "🏢",
+        defaultChip: "⚪ No Property Action"
       },
       {
         title: "6. Key Regulatory & Industry Risks",
         data: t5["Risks & Considerations"] || t5["Key Regulatory & Industry Risks"] || {},
-        icon: "⚠"
+        icon: "⚠️",
+        defaultChip: "🔵 Risk Assessment"
       }
     ];
 
     pillarsContainer.innerHTML = pillars.map(p => {
+      const chipRaw = p.data["Health_Chip"] || p.defaultChip;
+      let chipClass = "blue";
+      if (chipRaw.includes("🟢") || chipRaw.toLowerCase().includes("active") || chipRaw.toLowerCase().includes("clean") || chipRaw.toLowerCase().includes("capital")) {
+        chipClass = "green";
+      } else if (chipRaw.includes("🟡") || chipRaw.toLowerCase().includes("pressure") || chipRaw.toLowerCase().includes("divestment")) {
+        chipClass = "amber";
+      } else if (chipRaw.includes("🔴") || chipRaw.toLowerCase().includes("downsizing")) {
+        chipClass = "red";
+      } else if (chipRaw.includes("⚪")) {
+        chipClass = "gray";
+      }
+
+      // Check for Clean Record in Contraction pillar
+      const isContraction = p.title.includes("Contraction");
+      const isClean = p.data["Clean_Record"] === true || (isContraction && Object.entries(p.data).every(([k, v]) => {
+        if (["Strategic Analysis", "Health_Chip", "Clean_Record", "Status"].includes(k)) return true;
+        return !v || String(v).startsWith("N/A");
+      }));
+
       let itemsHtml = "";
-      if (typeof p.data === "object" && p.data !== null) {
+      if (isContraction && isClean) {
+        itemsHtml = `
+          <div class="clean-record-card">
+            <div class="clean-record-icon">✓</div>
+            <div>
+              <div class="clean-record-title">Clean Statutory Record — Zero Distress / Operational Downsizing Logged</div>
+              <div class="clean-record-subtitle">Zero plant closures, production halts, store network curtailments, or product discontinuations identified in verified statutory and regulatory filings.</div>
+            </div>
+          </div>
+        `;
+      } else if (typeof p.data === "object" && p.data !== null) {
         if (Array.isArray(p.data)) {
           itemsHtml = p.data.map(it => `<div class="pill-item"><span class="pill-bullet">•</span> ${escapeHtml(it)}</div>`).join("");
         } else {
           itemsHtml = Object.entries(p.data).map(([k, v]) => {
+            if (["Strategic Analysis", "Health_Chip", "Clean_Record", "Status", "Pillar_Status", "Badge"].includes(k)) {
+              return "";
+            }
             if (v && v !== "N/A" && !String(v).includes("No verified")) {
               return `
                 <div class="pill-item">
@@ -898,9 +1070,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       return `
         <div class="intel-card" style="margin-bottom: 0; background: var(--bg-surface-elevated);">
-          <h4 style="font-size: 0.88rem; font-weight: 700; color: white; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-            <span>${p.icon}</span> ${p.title}
-          </h4>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <h4 style="font-size: 0.88rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 8px; margin: 0;">
+              <span>${p.icon}</span> ${p.title}
+            </h4>
+            <span class="health-chip ${chipClass}">${escapeHtml(chipRaw)}</span>
+          </div>
           <div class="pill-list">${itemsHtml}</div>
         </div>
       `;

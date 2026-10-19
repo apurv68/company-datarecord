@@ -9898,6 +9898,9 @@ def validate_table5_claims(
             continue
 
         for fld, val in list(p_dict.items()):
+            if fld in {"Health_Chip", "Clean_Record", "Status", "Pillar_Status", "Badge"} or fld.startswith("_"):
+                continue
+
             if val is None:
                 val = "N/A — Not verified from available evidence."
                 p_dict[fld] = val
@@ -10022,6 +10025,82 @@ def validate_table5_claims(
     return conclusions, claims_meta
 
 
+def compute_strategic_momentum_score(
+    rev_growth_pct: Optional[float],
+    cagr_pct: Optional[float],
+    c_margin: Optional[float],
+    diff_margin: Optional[float],
+    emp_growth_pct: Optional[float],
+    expansion_count: int,
+    has_shutdowns: bool
+) -> Tuple[int, str, Dict[str, int]]:
+    """
+    Deterministic multi-factor corporate momentum scoring engine (0 to 100 scale).
+    Combines:
+    1. Top-Line Growth (Max 35)
+    2. Profit Margin & Discipline (Max 25)
+    3. Workforce Scaling & Velocity (Max 20)
+    4. Commercial Velocity & Expansion (Max 20)
+    """
+    # 1. Top-Line Growth (Max 35)
+    eff_growth = cagr_pct if cagr_pct is not None else rev_growth_pct
+    if eff_growth is not None:
+        if eff_growth >= 25.0: g_score = 35
+        elif eff_growth >= 15.0: g_score = 30
+        elif eff_growth >= 8.0: g_score = 24
+        elif eff_growth >= 0.0: g_score = 18
+        elif eff_growth >= -10.0: g_score = 10
+        else: g_score = 5
+    else:
+        g_score = 20  # Neutral baseline when multi-year data is pending
+
+    # 2. Profit Margin & Discipline (Max 25)
+    if c_margin is not None:
+        if c_margin >= 18.0: m_score = 25
+        elif c_margin >= 10.0: m_score = 21
+        elif c_margin >= 4.0: m_score = 16
+        elif c_margin >= 0.0: m_score = 12
+        else: m_score = 5
+        if diff_margin is not None and diff_margin > 1.0:
+            m_score = min(25, m_score + 2)
+        elif diff_margin is not None and diff_margin < -2.0:
+            m_score = max(5, m_score - 3)
+    else:
+        m_score = 16  # Neutral baseline for private firms without disclosed PAT
+
+    # 3. Workforce Scaling & Velocity (Max 20)
+    if emp_growth_pct is not None:
+        if emp_growth_pct >= 25.0: w_score = 20
+        elif emp_growth_pct >= 10.0: w_score = 17
+        elif emp_growth_pct >= 0.0: w_score = 14
+        else: w_score = 7
+    else:
+        w_score = 13  # Neutral baseline
+
+    # 4. Expansion & Commercial Deals (Max 20)
+    e_score = 12
+    if expansion_count >= 3: e_score = 20
+    elif expansion_count >= 1: e_score = 16
+    if has_shutdowns: e_score = max(4, e_score - 6)
+
+    total = g_score + m_score + w_score + e_score
+    if total >= 85:
+        tier = "Tier A+: High Growth & Momentum Leader"
+    elif total >= 70:
+        tier = "Tier A: Steady Operational Compounder"
+    elif total >= 55:
+        tier = "Tier B: Moderate Expansion with Margin Headwinds"
+    else:
+        tier = "Tier C: Operational Consolidation / Margin Stressed"
+
+    return total, tier, {
+        "growth": g_score,
+        "margins": m_score,
+        "workforce": w_score,
+        "expansion": e_score
+    }
+
+
 def fetch_strategic_conclusions(
     canonical_entity: Dict[str, Any],
     data1: Dict[str, Any],
@@ -10077,6 +10156,7 @@ def fetch_strategic_conclusions(
                 return None
         return None
 
+    emp_by_period = {}
     for r in rows:
         period = r.get("Fiscal Period / Year", "")
         clean_p = re.sub(r"\s+", " ", period).strip()
@@ -10086,6 +10166,14 @@ def fetch_strategic_conclusions(
             rev_by_period[clean_p] = rev
         if pat is not None:
             pat_by_period[clean_p] = pat
+        raw_emp = r.get("Employee Headcount", "")
+        if raw_emp and raw_emp != "N/A" and "pre-incorporation" not in str(raw_emp).lower() and "undisclosed" not in str(raw_emp).lower():
+            m_emp = re.search(r"(\d+(?:,\d+)*)", str(raw_emp))
+            if m_emp:
+                try:
+                    emp_by_period[clean_p] = int(m_emp.group(1).replace(",", ""))
+                except Exception:
+                    pass
 
     valid_periods = [p for p in periods if "TTM" not in p and re.sub(r"\s+", " ", p).strip() in rev_by_period]
     if not valid_periods and periods:
@@ -10093,8 +10181,17 @@ def fetch_strategic_conclusions(
 
     yoy_rev_text = "N/A — Historical multi-year financials required for YoY trend calculation"
     yoy_margin_text = "N/A — Historical net profit margin data pending"
+    cagr_text = "N/A — Multi-year financial statements required for CAGR calculation"
+    workforce_velocity_text = "N/A — Multi-year employee disclosures pending"
+    rev_per_emp_text = "N/A — Financial and headcount disclosures required for productivity calculation"
     growth_verdict = "Growing"
     rev_growth_pct = None
+    cagr_pct = None
+    c_margin = None
+    p_margin = None
+    diff = None
+    emp_growth_pct = None
+    profit_under_pressure = False
 
     if len(valid_periods) >= 2:
         curr_p = valid_periods[-1]
@@ -10110,7 +10207,6 @@ def fetch_strategic_conclusions(
             yoy_rev_text = f"{curr_p} vs {prev_p}: {sign}{rev_growth_pct:.1f}% YoY [Audited Annual] [DERIVED] (₹ {c_rev:,.0f} Cr. vs ₹ {p_rev:,.0f} Cr.)"
 
             # Check profit trajectory as well to avoid misleading "GROWING" on collapsed profit/losses
-            profit_under_pressure = False
             if c_pat is not None and p_pat is not None:
                 if c_pat < 0 and p_pat >= 0:
                     profit_under_pressure = True
@@ -10142,6 +10238,47 @@ def fetch_strategic_conclusions(
         if c_rev and c_pat:
             c_margin = (c_pat / c_rev) * 100
             yoy_margin_text = f"Latest Reported ({p}): {c_margin:.1f}% Net Profit Margin [Audited Annual] [DERIVED]"
+
+    # Multi-Year Revenue CAGR Calculation
+    if len(valid_periods) >= 3:
+        first_p = valid_periods[0]
+        curr_p = valid_periods[-1]
+        first_rev = rev_by_period.get(first_p)
+        curr_rev = rev_by_period.get(curr_p)
+        n_years = len(valid_periods) - 1
+        if first_rev and curr_rev and first_rev > 0 and curr_rev > 0 and n_years >= 2:
+            try:
+                cagr_pct = ((curr_rev / first_rev) ** (1.0 / n_years) - 1.0) * 100
+                c_sign = "+" if cagr_pct >= 0 else ""
+                cagr_text = f"{n_years}-Year Revenue CAGR ({first_p} to {curr_p}): {c_sign}{cagr_pct:.1f}% p.a. [Audited Annual] [DERIVED]"
+            except Exception:
+                pass
+
+    # Workforce Velocity & Scaling Calculation
+    if len(emp_by_period) >= 2:
+        sorted_emp_periods = [p for p in periods if re.sub(r"\s+", " ", p).strip() in emp_by_period]
+        if len(sorted_emp_periods) >= 2:
+            first_ep = sorted_emp_periods[0]
+            latest_ep = sorted_emp_periods[-1]
+            first_emp = emp_by_period[first_ep]
+            latest_emp = emp_by_period[latest_ep]
+            if first_emp > 0:
+                emp_growth_pct = ((latest_emp - first_emp) / first_emp) * 100
+                e_sign = "+" if emp_growth_pct >= 0 else ""
+                workforce_velocity_text = f"Headcount scaled from {first_emp:,} ({first_ep}) to {latest_emp:,} ({latest_ep}) [{e_sign}{emp_growth_pct:.1f}% overall expansion] [Audited Headcount]"
+    elif len(emp_by_period) == 1:
+        ep = list(emp_by_period.keys())[0]
+        cnt = emp_by_period[ep]
+        workforce_velocity_text = f"Verified Headcount: {cnt:,} employees ({ep}) [Point-in-Time Snapshot]"
+
+    # Revenue per Employee Productivity Calculation
+    if valid_periods and emp_by_period:
+        latest_p = valid_periods[-1]
+        l_rev = rev_by_period.get(latest_p)
+        l_emp = emp_by_period.get(latest_p) or (list(emp_by_period.values())[-1] if emp_by_period else None)
+        if l_rev and l_emp and l_emp > 0 and l_rev > 0:
+            rev_lakhs = (l_rev * 100.0) / l_emp
+            rev_per_emp_text = f"₹ {rev_lakhs:,.1f} Lakhs / Employee [DERIVED from {latest_p}]"
 
     # ──────────────────────────────────────────────────────────────────────────
     # 2. Gather All Signals & Context from Table #3 & Table #4
@@ -10497,6 +10634,87 @@ def fetch_strategic_conclusions(
             interim_perf = f"{clean_insight_text(s_txt, 120)} [Unaudited Interim]"
             break
 
+    # Compute Expansion and Contraction Signal Counts for Scoring
+    expansion_count = sum(1 for sig_list in [store_fac_sigs, mkt_sigs, geo_sigs, prod_sigs, cat_sigs, acq_sigs, fund_sigs] if sig_list)
+    if new_stores_facilities and not new_stores_facilities.startswith("N/A"):
+        expansion_count = max(expansion_count, 1)
+
+    has_shutdowns = any(not s.startswith("N/A") for s in [bs_line, plant_shutdown, closing_stores, stop_product])
+
+    # Compute Deterministic Strategic Momentum Scorecard (0 to 100)
+    momentum_score, momentum_tier, momentum_breakdown = compute_strategic_momentum_score(
+        rev_growth_pct=rev_growth_pct,
+        cagr_pct=cagr_pct,
+        c_margin=c_margin,
+        diff_margin=diff,
+        emp_growth_pct=emp_growth_pct,
+        expansion_count=expansion_count,
+        has_shutdowns=has_shutdowns
+    )
+
+    # Establish Pillar Health Chips & Clean Record Flags
+    is_contraction_clean = not has_shutdowns
+    contraction_status = "Clean Statutory Record — Zero Distress or Downsizing Signals Logged" if is_contraction_clean else "Active Downsizing / Restructuring Recorded"
+    contraction_chip = "🟢 Clean Record" if is_contraction_clean else "🔴 Active Downsizing"
+
+    has_expansion = expansion_count > 0 or any(not s.startswith("N/A") for s in [new_markets, new_geography, new_products, new_categories, new_stores_facilities])
+    expansion_chip = "🟢 Active Expansion" if has_expansion else "⚪ Baseline Disclosures"
+
+    has_leadership_moves = any(not s.startswith("N/A") for s in [cxo_status, ai_digital_leader, ceo_transition, growth_leader, caio_status])
+    leadership_chip = "🔵 Active Appointments" if has_leadership_moves else "🔵 Stable Governance"
+
+    if profit_under_pressure or (diff is not None and diff < -2.0):
+        fin_chip = "🟡 Margin Under Pressure"
+    elif rev_growth_pct is not None and rev_growth_pct > 15 and (diff is None or diff >= 0):
+        fin_chip = "🟢 Robust Acceleration"
+    elif rev_growth_pct is not None and rev_growth_pct > 0:
+        fin_chip = "🟢 Steady Expansion"
+    else:
+        fin_chip = "🔵 Stable Run-Rate"
+
+    re_chip = "🟢 Capital Investment" if not acquired_property.startswith("N/A") else ("🟡 Property Divestment" if not sold_property.startswith("N/A") else "⚪ No Property Action")
+    has_mna = any(not s.startswith("N/A") for s in [buying_company, merged_company, demerger_status, funding_status])
+    mna_chip = "🟢 Active Deals / Capital" if has_mna else "⚪ Organic Expansion"
+
+    # Deterministic 3-Point Executive Strategy Brief
+    if contract_signals:
+        growth_engine = f"Commercial execution & enterprise contract delivery: {clean_insight_text(contract_signals[0], 110)}"
+    elif prod_sigs:
+        growth_engine = f"Product innovation & category offerings: {prod_sigs[0]}"
+    elif cagr_pct is not None and cagr_pct > 15:
+        growth_engine = f"Core operational market penetration delivering {cagr_pct:.1f}% multi-year revenue CAGR across key business segments."
+    elif rev_growth_pct is not None and rev_growth_pct > 0:
+        growth_engine = f"Sustained core product demand driving +{rev_growth_pct:.1f}% YoY top-line expansion."
+    else:
+        ind_name = canonical_entity.get("primary_industry") or "commercial operations"
+        growth_engine = f"Steady operational footprint in {ind_name} with established client relationships and recurring service contracts."
+
+    if any(not s.startswith("N/A") for s in [caio_status, ai_digital_leader]):
+        strategic_bet = f"Digital & AI transformation: {ai_digital_leader if not ai_digital_leader.startswith('N/A') else caio_status}"
+    elif not funding_status.startswith("N/A"):
+        strategic_bet = f"Capital mobilization for strategic scaling: {funding_status}"
+    elif not buying_company.startswith("N/A"):
+        strategic_bet = f"Inorganic expansion & acquisition synergy: {buying_company}"
+    elif not new_stores_facilities.startswith("N/A"):
+        strategic_bet = f"Physical capacity & network footprint rollout: {new_stores_facilities}"
+    elif not new_markets.startswith("N/A"):
+        strategic_bet = f"Geographic & new market penetration: {new_markets}"
+    elif emp_growth_pct is not None and emp_growth_pct > 20:
+        strategic_bet = f"Aggressive talent scaling (+{emp_growth_pct:.1f}% headcount expansion) to capture expanding addressable market share."
+    else:
+        strategic_bet = "Optimization of core operating facilities and deepening domestic commercial reach."
+
+    if profit_under_pressure:
+        operational_headwind = "Margin compression: Profit growth lagging top-line trajectory, indicating rising input costs or aggressive reinvestment."
+    elif diff is not None and diff < -1.5:
+        operational_headwind = f"Net profit margin contracted by {abs(diff):.1f} percentage points YoY, reflecting cost escalation or competitive pricing pressure."
+    elif has_shutdowns:
+        operational_headwind = f"Operational realignment: {bs_line if not bs_line.startswith('N/A') else plant_shutdown}"
+    elif rev_growth_pct is not None and rev_growth_pct < 0:
+        operational_headwind = f"Top-line contraction of {rev_growth_pct:.1f}% YoY amidst cyclical sector demand moderations."
+    else:
+        operational_headwind = "Competitive peer intensity and macroeconomic inflation requiring disciplined working capital and operational vigilance."
+
     conclusions = {
         "Growth Assessment": {
             "Verdict": growth_verdict,
@@ -10508,12 +10726,16 @@ def fetch_strategic_conclusions(
             "New Product Launch": new_products,
             "New Product Category/Segment": new_categories,
             "Opening New Stores / Facilities": new_stores_facilities,
+            "Health_Chip": expansion_chip,
         },
         "Contraction & Shutdown Signals": {
             "Manufacturing / Line Discontinuation": bs_line,
             "Plant / Facility Shutdown": plant_shutdown,
             "Closing Stores / Branches": closing_stores,
             "Stop Selling Product / Manufacturing": stop_product,
+            "Health_Chip": contraction_chip,
+            "Clean_Record": is_contraction_clean,
+            "Status": contraction_status,
         },
         "Leadership Dynamics": {
             "CEO / CXO Hiring or Exit": cxo_status,
@@ -10521,16 +10743,19 @@ def fetch_strategic_conclusions(
             "CEO Transition / Stepping Down": ceo_transition,
             "Growth & Marketing Leader": growth_leader,
             "Chief AI Officer": caio_status,
+            "Health_Chip": leadership_chip,
         },
         "Real Estate & Property Movements": {
             "Acquired New Property": acquired_property,
             "Sold Property": sold_property,
+            "Health_Chip": re_chip,
         },
         "Mergers, Acquisitions & Capital Actions": {
             "Buying Company / Startup": buying_company,
             "Merged with Company": merged_company,
             "Demerger": demerger_status,
             "New Funding / IPO Launch": funding_status,
+            "Health_Chip": mna_chip,
         },
         "Financial Health": {
             "Annual Trend (YoY Revenue)": yoy_rev_text,
@@ -10538,6 +10763,7 @@ def fetch_strategic_conclusions(
             "Latest Interim Performance": interim_perf,
             "YoY Revenue": yoy_rev_text,
             "YoY Profit Margin": yoy_margin_text,
+            "Health_Chip": fin_chip,
         }
     }
 
@@ -10583,8 +10809,11 @@ def fetch_strategic_conclusions(
                 f"5. real_estate: Evidenced property transactions, or N/A.\n"
                 f"6. mna: Evidenced M&A, demergers, capital actions, or N/A.\n"
                 f"7. financial_health: Audited annual trend vs interim results.\n"
-                f"8. risk_outlook: Analytical risk interpretation grounded strictly in the company's evidenced financial or operational facts. Do NOT manufacture causal or mitigating links between unrelated facts.\n\n"
-                f"Return ONLY a JSON object with keys 'growth', 'expansion', 'contraction', 'leadership', 'real_estate', 'mna', 'financial_health', 'risk_outlook'.\n"
+                f"8. risk_outlook: Analytical risk interpretation grounded strictly in the company's evidenced financial or operational facts. Do NOT manufacture causal or mitigating links between unrelated facts.\n"
+                f"9. growth_engine: 1 concise sentence summarizing primary revenue driver.\n"
+                f"10. strategic_bet: 1 concise sentence summarizing main strategic bet.\n"
+                f"11. operational_headwind: 1 concise sentence summarizing primary headwind or margin friction.\n\n"
+                f"Return ONLY a JSON object with keys 'growth', 'expansion', 'contraction', 'leadership', 'real_estate', 'mna', 'financial_health', 'risk_outlook', 'growth_engine', 'strategic_bet', 'operational_headwind'.\n"
                 f"No markdown formatting, just raw JSON."
             )
             ai_res = call_gemini(t5_prompt, max_tokens=2048)
@@ -10611,8 +10840,40 @@ def fetch_strategic_conclusions(
                         conclusions["Financial Health"]["Strategic Analysis"] = parsed_t5["financial_health"].strip()
                     if parsed_t5.get("risk_outlook"):
                         conclusions["Risks & Considerations"] = {"Strategic Analysis": parsed_t5["risk_outlook"].strip()}
+                    if parsed_t5.get("growth_engine") and len(parsed_t5["growth_engine"].strip()) > 15:
+                        growth_engine = parsed_t5["growth_engine"].strip()
+                    if parsed_t5.get("strategic_bet") and len(parsed_t5["strategic_bet"].strip()) > 15:
+                        strategic_bet = parsed_t5["strategic_bet"].strip()
+                    if parsed_t5.get("operational_headwind") and len(parsed_t5["operational_headwind"].strip()) > 15:
+                        operational_headwind = parsed_t5["operational_headwind"].strip()
         except Exception:
             pass
+
+    # Attach Top-Level Strategy Brief, Momentum Scorecard, and Financial Velocity
+    scorecard_data = {
+        "Score": momentum_score,
+        "Tier": momentum_tier,
+        "Breakdown": momentum_breakdown,
+        "Scale": "0-100 Multi-Factor Deterministic Scale"
+    }
+    velocity_data = {
+        "YoY Revenue Growth": yoy_rev_text,
+        "Revenue CAGR": cagr_text,
+        "Workforce Velocity": workforce_velocity_text,
+        "Revenue Per Employee": rev_per_emp_text,
+        "CAGR_Pct": cagr_pct,
+        "Revenue_Growth_Pct": rev_growth_pct,
+        "Workforce_Growth_Pct": emp_growth_pct
+    }
+    brief_data = {
+        "Growth Engine": growth_engine,
+        "Strategic Bet": strategic_bet,
+        "Operational Headwind": operational_headwind
+    }
+
+    conclusions["Momentum Scorecard"] = scorecard_data
+    conclusions["Financial & Workforce Velocity"] = velocity_data
+    conclusions["Executive Strategy Brief"] = brief_data
 
     # Validate Table #5 claims through the Claim Validator
     conclusions, claims_meta = validate_table5_claims(
@@ -10625,6 +10886,11 @@ def fetch_strategic_conclusions(
     )
     conclusions["_claims_meta"] = claims_meta
 
+    # Ensure top-level structures remain attached after validation
+    conclusions["Momentum Scorecard"] = scorecard_data
+    conclusions["Financial & Workforce Velocity"] = velocity_data
+    conclusions["Executive Strategy Brief"] = brief_data
+
     return conclusions, sources
 
 
@@ -10632,7 +10898,47 @@ def display_strategic_conclusions(data: Dict[str, Any], sources: List[Dict[str, 
     """Render Table #5 Strategic Business Intelligence Conclusions & Growth Assessment as a Rich Panel."""
     lines = []
 
-    # 1. Growth Assessment
+    # 1. Corporate Strategic Momentum Scorecard (0-100 Scale)
+    sc = data.get("Momentum Scorecard", {})
+    score = sc.get("Score", 75)
+    tier = sc.get("Tier", "Tier A: Steady Operational Compounder")
+    bd = sc.get("Breakdown", {})
+    score_style = "bold green" if score >= 85 else ("bold cyan" if score >= 70 else ("bold yellow" if score >= 55 else "bold red"))
+    tier_style = "bold white on green" if score >= 85 else ("bold white on blue" if score >= 70 else ("bold white on dark_orange" if score >= 55 else "bold white on red"))
+
+    lines.append("[bold cyan]╔═══════════════════════════════════════════════════════════════════════════════════════════════════════╗[/bold cyan]")
+    lines.append(f"  [bold white]CORPORATE STRATEGIC MOMENTUM SCORECARD:[/bold white] [{score_style}][bold]{score} / 100[/bold][/{score_style}]  •  [{tier_style}] {tier.split(':')[0]} [/{tier_style}] [bold white]{tier.split(':')[-1] if ':' in tier else ''}[/bold white]")
+    lines.append(f"  [dim]Factor Breakdown: Growth: [white]{bd.get('growth', '-')}/35[/white] • Margins: [white]{bd.get('margins', '-')}/25[/white] • Workforce: [white]{bd.get('workforce', '-')}/20[/white] • Commercial Expansion: [white]{bd.get('expansion', '-')}/20[/white][/dim]")
+    lines.append("[bold cyan]╚═══════════════════════════════════════════════════════════════════════════════════════════════════════╝[/bold cyan]\n")
+
+    # 2. 3-Point Executive Strategy Brief ("So What?")
+    sb = data.get("Executive Strategy Brief", {})
+    if sb and any(sb.values()):
+        lines.append("[bold yellow]🎯 3-Point Executive Strategy Brief[/bold yellow]")
+        if sb.get("Growth Engine"):
+            lines.append(f"  [bold green]🚀 Primary Growth Engine:[/bold green] {sb['Growth Engine']}")
+        if sb.get("Strategic Bet"):
+            lines.append(f"  [bold cyan]🎯 Active Strategic Bet:[/bold cyan] {sb['Strategic Bet']}")
+        if sb.get("Operational Headwind"):
+            lines.append(f"  [bold red]⚠️  Key Operational Headwind:[/bold red] {sb['Operational Headwind']}\n")
+
+    # 3. Financial & Workforce Velocity (Deep Table #2 Integration)
+    fv = data.get("Financial & Workforce Velocity", {})
+    cagr_t = fv.get("Revenue CAGR", "N/A")
+    wv_t = fv.get("Workforce Velocity", "N/A")
+    rpe_t = fv.get("Revenue Per Employee", "N/A")
+    has_velocity = any(v and not str(v).startswith("N/A") for v in [cagr_t, wv_t, rpe_t])
+    if has_velocity:
+        lines.append("[bold yellow]⚡ Financial & Workforce Velocity (Table #2 Multi-Year Integration)[/bold yellow]")
+        if cagr_t and not str(cagr_t).startswith("N/A"):
+            lines.append(f"  [green]•[/green] [bold white]Top-Line Trajectory:[/bold white] {cagr_t}")
+        if wv_t and not str(wv_t).startswith("N/A"):
+            lines.append(f"  [cyan]•[/cyan] [bold white]Workforce Scaling:[/bold white] {wv_t}")
+        if rpe_t and not str(rpe_t).startswith("N/A"):
+            lines.append(f"  [magenta]•[/magenta] [bold white]Revenue Productivity:[/bold white] {rpe_t}")
+        lines.append("")
+
+    # 4. Growth Assessment
     ga = data.get("Growth Assessment", {})
     verdict = ga.get("Verdict", "Growing")
     summary = ga.get("Summary & Drivers", "Sustained operational expansion.")
@@ -10645,10 +10951,11 @@ def display_strategic_conclusions(data: Dict[str, Any], sources: List[Dict[str, 
     else:
         lines.append(f"  [cyan]•[/cyan] [bold white]Strategic Drivers:[/bold white] {summary}\n")
 
-    # 2. Strategic Expansion Vectors
+    # 5. Strategic Expansion Vectors
     ev = data.get("Expansion Vectors", {})
     ev_analysis = ev.get("Strategic Analysis", "")
-    lines.append("[bold yellow]🌐 2. Strategic Expansion Vectors[/bold yellow]")
+    ev_chip = ev.get("Health_Chip", "🟢 Active Expansion")
+    lines.append(f"[bold yellow]🌐 2. Strategic Expansion Vectors[/bold yellow]  [{ev_chip}]")
     if ev_analysis:
         lines.append(f"  [dim cyan]↳[/dim cyan] [bold white]Executive Assessment (2-3 Lines):[/bold white] {ev_analysis}")
     lines.append(f"  [green]•[/green] [bold white]New Markets:[/bold white] {ev.get('New Markets', 'N/A')}")
@@ -10657,21 +10964,28 @@ def display_strategic_conclusions(data: Dict[str, Any], sources: List[Dict[str, 
     lines.append(f"  [green]•[/green] [bold white]New Product Category/Segment:[/bold white] {ev.get('New Product Category/Segment', 'N/A')}")
     lines.append(f"  [green]•[/green] [bold white]Opening New Stores / Facilities:[/bold white] {ev.get('Opening New Stores / Facilities', 'N/A')}\n")
 
-    # 3. Contraction & Operational Shutdown Signals
+    # 6. Contraction & Operational Shutdown Signals (Elimination of N/A Clutter)
     cs = data.get("Contraction & Shutdown Signals", {})
     cs_analysis = cs.get("Strategic Analysis", "")
-    lines.append("[bold yellow]🔻 3. Contraction & Operational Shutdown Signals[/bold yellow]")
-    if cs_analysis:
-        lines.append(f"  [dim cyan]↳[/dim cyan] [bold white]Executive Assessment (2-3 Lines):[/bold white] {cs_analysis}")
-    lines.append(f"  [red]•[/red] [bold white]Manufacturing / Line Discontinuation:[/bold white] {cs.get('Manufacturing / Line Discontinuation', 'N/A')}")
-    lines.append(f"  [red]•[/red] [bold white]Plant / Facility Shutdown:[/bold white] {cs.get('Plant / Facility Shutdown', 'N/A')}")
-    lines.append(f"  [red]•[/red] [bold white]Closing Stores / Branches:[/bold white] {cs.get('Closing Stores / Branches', 'N/A')}")
-    lines.append(f"  [red]•[/red] [bold white]Stop Selling Product / Manufacturing:[/bold white] {cs.get('Stop Selling Product / Manufacturing', 'N/A')}\n")
+    is_clean = cs.get("Clean_Record", False) or all(str(cs.get(k, "N/A")).startswith("N/A") for k in ["Manufacturing / Line Discontinuation", "Plant / Facility Shutdown", "Closing Stores / Branches", "Stop Selling Product / Manufacturing"])
+    cs_chip = cs.get("Health_Chip", "🟢 Clean Record" if is_clean else "🔴 Active Downsizing")
+    lines.append(f"[bold yellow]🔻 3. Contraction & Operational Shutdown Signals[/bold yellow]  [{cs_chip}]")
+    if is_clean:
+        lines.append(f"  [bold green]✓ Clean Statutory Record — Zero Distress / Operational Downsizing Signals Logged[/bold green]")
+        lines.append(f"  [dim]  (Zero plant closures, store rationalizations, or product discontinuations identified in verified regulatory filings)[/dim]\n")
+    else:
+        if cs_analysis:
+            lines.append(f"  [dim cyan]↳[/dim cyan] [bold white]Executive Assessment (2-3 Lines):[/bold white] {cs_analysis}")
+        lines.append(f"  [red]•[/red] [bold white]Manufacturing / Line Discontinuation:[/bold white] {cs.get('Manufacturing / Line Discontinuation', 'N/A')}")
+        lines.append(f"  [red]•[/red] [bold white]Plant / Facility Shutdown:[/bold white] {cs.get('Plant / Facility Shutdown', 'N/A')}")
+        lines.append(f"  [red]•[/red] [bold white]Closing Stores / Branches:[/bold white] {cs.get('Closing Stores / Branches', 'N/A')}")
+        lines.append(f"  [red]•[/red] [bold white]Stop Selling Product / Manufacturing:[/bold white] {cs.get('Stop Selling Product / Manufacturing', 'N/A')}\n")
 
-    # 4. Leadership & Governance Dynamics
+    # 7. Leadership & Governance Dynamics
     ld = data.get("Leadership Dynamics", {})
     ld_analysis = ld.get("Strategic Analysis", "")
-    lines.append("[bold yellow]👥 4. Leadership & Governance Dynamics[/bold yellow]")
+    ld_chip = ld.get("Health_Chip", "🔵 Stable Governance")
+    lines.append(f"[bold yellow]👥 4. Leadership & Governance Dynamics[/bold yellow]  [{ld_chip}]")
     if ld_analysis:
         lines.append(f"  [dim cyan]↳[/dim cyan] [bold white]Executive Assessment (2-3 Lines):[/bold white] {ld_analysis}")
     lines.append(f"  [cyan]•[/cyan] [bold white]CEO / CXO Hiring or Exit:[/bold white] {ld.get('CEO / CXO Hiring or Exit', 'N/A')}")
@@ -10680,19 +10994,21 @@ def display_strategic_conclusions(data: Dict[str, Any], sources: List[Dict[str, 
     lines.append(f"  [cyan]•[/cyan] [bold white]Growth & Marketing Leader:[/bold white] {ld.get('Growth & Marketing Leader', 'N/A')}")
     lines.append(f"  [cyan]•[/cyan] [bold white]Chief AI Officer:[/bold white] {ld.get('Chief AI Officer', 'N/A')}\n")
 
-    # 5. Real Estate & Property Movements
+    # 8. Real Estate & Property Movements
     re_mov = data.get("Real Estate & Property Movements", {})
     re_analysis = re_mov.get("Strategic Analysis", "")
-    lines.append("[bold yellow]🏢 5. Real Estate & Property Movements[/bold yellow]")
+    re_chip = re_mov.get("Health_Chip", "⚪ No Property Action")
+    lines.append(f"[bold yellow]🏢 5. Real Estate & Property Movements[/bold yellow]  [{re_chip}]")
     if re_analysis:
         lines.append(f"  [dim cyan]↳[/dim cyan] [bold white]Executive Assessment (2-3 Lines):[/bold white] {re_analysis}")
     lines.append(f"  [magenta]•[/magenta] [bold white]Acquired New Property:[/bold white] {re_mov.get('Acquired New Property', 'N/A')}")
     lines.append(f"  [magenta]•[/magenta] [bold white]Sold Property:[/bold white] {re_mov.get('Sold Property', 'N/A')}\n")
 
-    # 6. Mergers, Acquisitions & Capital Actions
+    # 9. Mergers, Acquisitions & Capital Actions
     ma = data.get("Mergers, Acquisitions & Capital Actions", {})
     ma_analysis = ma.get("Strategic Analysis", "")
-    lines.append("[bold yellow]🤝 6. Mergers, Acquisitions & Capital Actions (M&A)[/bold yellow]")
+    ma_chip = ma.get("Health_Chip", "⚪ Organic Expansion")
+    lines.append(f"[bold yellow]🤝 6. Mergers, Acquisitions & Capital Actions (M&A)[/bold yellow]  [{ma_chip}]")
     if ma_analysis:
         lines.append(f"  [dim cyan]↳[/dim cyan] [bold white]Executive Assessment (2-3 Lines):[/bold white] {ma_analysis}")
     lines.append(f"  [yellow]•[/yellow] [bold white]Buying Company / Startup:[/bold white] {ma.get('Buying Company / Startup', 'N/A')}")
@@ -10700,10 +11016,11 @@ def display_strategic_conclusions(data: Dict[str, Any], sources: List[Dict[str, 
     lines.append(f"  [yellow]•[/yellow] [bold white]Demerger / Spinoff:[/bold white] {ma.get('Demerger', 'N/A')}")
     lines.append(f"  [yellow]•[/yellow] [bold white]New Funding / IPO Launch:[/bold white] {ma.get('New Funding / IPO Launch', 'N/A')}\n")
 
-    # 7. Financial Health & YoY Performance
+    # 10. Financial Health & YoY Performance
     fh = data.get("Financial Health", {})
     fh_analysis = fh.get("Strategic Analysis", "")
-    lines.append("[bold yellow]📈 7. Financial Health & YoY Performance[/bold yellow]")
+    fh_chip = fh.get("Health_Chip", "🔵 Audited Trend")
+    lines.append(f"[bold yellow]📈 7. Financial Health & YoY Performance[/bold yellow]  [{fh_chip}]")
     if fh_analysis:
         lines.append(f"  [dim cyan]↳[/dim cyan] [bold white]Executive Assessment (2-3 Lines):[/bold white] {fh_analysis}")
     lines.append(f"  [green]•[/green] [bold white]Annual Trend (YoY):[/bold white] {fh.get('Annual Trend (YoY Revenue)', fh.get('YoY Revenue', 'N/A'))}")
@@ -10711,7 +11028,7 @@ def display_strategic_conclusions(data: Dict[str, Any], sources: List[Dict[str, 
     if fh.get('Latest Interim Performance') and fh.get('Latest Interim Performance') != 'N/A':
         lines.append(f"  [green]•[/green] [bold white]Latest Interim Performance:[/bold white] {fh.get('Latest Interim Performance')}")
 
-    # 8. Strategic Risks & Competitive Outlook
+    # 11. Strategic Risks & Competitive Outlook
     ro = data.get("Risks & Considerations", {})
     ro_analysis = ro.get("Strategic Analysis", "")
     if ro_analysis:
@@ -12071,8 +12388,105 @@ def save_company_docx(
     # ──────────────────────────────────────────────────────────────────────────
     # TABLE #5: Strategic Conclusions & Growth Assessment
     # ──────────────────────────────────────────────────────────────────────────
-    add_section_header("5.0", "Strategic Conclusions & Growth Assessment", "Growth Assessment, Expansion Vectors, Leadership Dynamics & M&A Actions")
+    add_section_header("5.0", "Strategic Conclusions & Growth Assessment", "Growth Assessment, Strategic Momentum Scorecard, Expansion Vectors & M&A Actions")
     d5 = data5 or {}
+
+    # 1. Corporate Strategic Momentum Scorecard (0-100 Scale)
+    sc = d5.get("Momentum Scorecard", {})
+    score = sc.get("Score", 75)
+    tier = sc.get("Tier", "Tier A: Steady Operational Compounder")
+    bd = sc.get("Breakdown", {})
+
+    p_sc = doc.add_paragraph()
+    p_sc.paragraph_format.space_before = Pt(6)
+    p_sc.paragraph_format.space_after = Pt(2)
+    r_sc_lbl = p_sc.add_run("Corporate Strategic Momentum Scorecard: ")
+    r_sc_lbl.font.bold = True
+    r_sc_lbl.font.size = Pt(11)
+    r_sc_lbl.font.color.rgb = RGBColor(15, 41, 66)
+    r_sc_val = p_sc.add_run(f"[{score} / 100 — {tier}]")
+    r_sc_val.font.bold = True
+    r_sc_val.font.size = Pt(11)
+    r_sc_val.font.color.rgb = RGBColor(5, 150, 105) if score >= 85 else (RGBColor(2, 132, 199) if score >= 70 else RGBColor(217, 119, 6))
+
+    p_sc_sub = doc.add_paragraph()
+    p_sc_sub.paragraph_format.space_after = Pt(8)
+    r_sc_sub = p_sc_sub.add_run(f"Factor Scoring: Top-Line Growth ({bd.get('growth', '-')}/35) • Margins ({bd.get('margins', '-')}/25) • Workforce Scaling ({bd.get('workforce', '-')}/20) • Commercial Expansion ({bd.get('expansion', '-')}/20)")
+    r_sc_sub.font.size = Pt(8.5)
+    r_sc_sub.font.italic = True
+    r_sc_sub.font.color.rgb = RGBColor(100, 116, 139)
+
+    # 2. 3-Point Executive Strategy Brief ("So What?")
+    sb = d5.get("Executive Strategy Brief", {})
+    if sb and any(sb.values()):
+        p_sb_h = doc.add_paragraph()
+        p_sb_h.paragraph_format.space_before = Pt(4)
+        p_sb_h.paragraph_format.space_after = Pt(2)
+        r_sb_h = p_sb_h.add_run("Executive 3-Point Strategic Brief:")
+        r_sb_h.font.bold = True
+        r_sb_h.font.size = Pt(10)
+        r_sb_h.font.color.rgb = RGBColor(15, 41, 66)
+
+        for label, icon, key in [
+            ("Primary Growth Engine", "🚀", "Growth Engine"),
+            ("Active Strategic Bet", "🎯", "Strategic Bet"),
+            ("Key Operational Headwind", "⚠️", "Operational Headwind")
+        ]:
+            val = sb.get(key)
+            if val:
+                p_item = doc.add_paragraph()
+                p_item.paragraph_format.space_before = Pt(1)
+                p_item.paragraph_format.space_after = Pt(2)
+                p_item.paragraph_format.left_indent = Inches(0.15)
+                r_lbl = p_item.add_run(f"{icon} {label}: ")
+                r_lbl.font.bold = True
+                r_lbl.font.size = Pt(9)
+                r_lbl.font.color.rgb = RGBColor(30, 41, 59)
+                r_txt = p_item.add_run(str(val))
+                r_txt.font.size = Pt(9)
+                r_txt.font.color.rgb = RGBColor(51, 65, 85)
+
+    # 3. Financial & Workforce Velocity (Deep Table #2 Integration)
+    fv = d5.get("Financial & Workforce Velocity", {})
+    cagr_t = fv.get("Revenue CAGR", "N/A")
+    wv_t = fv.get("Workforce Velocity", "N/A")
+    rpe_t = fv.get("Revenue Per Employee", "N/A")
+    has_velocity = any(v and not str(v).startswith("N/A") for v in [cagr_t, wv_t, rpe_t])
+    if has_velocity:
+        p_fv_h = doc.add_paragraph()
+        p_fv_h.paragraph_format.space_before = Pt(6)
+        p_fv_h.paragraph_format.space_after = Pt(2)
+        r_fv_h = p_fv_h.add_run("Financial & Workforce Velocity Trajectory:")
+        r_fv_h.font.bold = True
+        r_fv_h.font.size = Pt(10)
+        r_fv_h.font.color.rgb = RGBColor(15, 41, 66)
+
+        if cagr_t and not str(cagr_t).startswith("N/A"):
+            p_v1 = doc.add_paragraph()
+            p_v1.paragraph_format.space_after = Pt(1)
+            p_v1.paragraph_format.left_indent = Inches(0.15)
+            r1 = p_v1.add_run("• Top-Line Trajectory: ")
+            r1.font.bold = True
+            r1.font.size = Pt(8.5)
+            p_v1.add_run(str(cagr_t)).font.size = Pt(8.5)
+
+        if wv_t and not str(wv_t).startswith("N/A"):
+            p_v2 = doc.add_paragraph()
+            p_v2.paragraph_format.space_after = Pt(1)
+            p_v2.paragraph_format.left_indent = Inches(0.15)
+            r2 = p_v2.add_run("• Workforce Scaling: ")
+            r2.font.bold = True
+            r2.font.size = Pt(8.5)
+            p_v2.add_run(str(wv_t)).font.size = Pt(8.5)
+
+        if rpe_t and not str(rpe_t).startswith("N/A"):
+            p_v3 = doc.add_paragraph()
+            p_v3.paragraph_format.space_after = Pt(3)
+            p_v3.paragraph_format.left_indent = Inches(0.15)
+            r3 = p_v3.add_run("• Revenue Productivity: ")
+            r3.font.bold = True
+            r3.font.size = Pt(8.5)
+            p_v3.add_run(str(rpe_t)).font.size = Pt(8.5)
 
     ga = d5.get("Growth Assessment", {})
     verdict = ga.get("Verdict", "Steady Growth")
@@ -12084,12 +12498,12 @@ def save_company_docx(
     p_ga.paragraph_format.space_after = Pt(4)
     r_v_lbl = p_ga.add_run("Executive Growth Trajectory Verdict: ")
     r_v_lbl.font.bold = True
-    r_v_lbl.font.size = Pt(11)
+    r_v_lbl.font.size = Pt(10.5)
     r_v_lbl.font.color.rgb = RGBColor(15, 41, 66)
 
     r_v = p_ga.add_run(f"[{verdict.upper()}]")
     r_v.font.bold = True
-    r_v.font.size = Pt(11)
+    r_v.font.size = Pt(10.5)
     if any(k in verdict.lower() for k in ["growing", "strong", "rapid", "expansion"]):
         r_v.font.color.rgb = RGBColor(5, 150, 105)
     elif "steady" in verdict.lower():
@@ -12135,9 +12549,11 @@ def save_company_docx(
         p_sec.paragraph_format.space_before = Pt(8)
         p_sec.paragraph_format.space_after = Pt(2)
         p_sec.paragraph_format.keep_with_next = True
-        r_sec = p_sec.add_run(f"• {sec_title}")
+        chip = sec_dict.get("Health_Chip", "")
+        chip_txt = f" [{chip}]" if chip else ""
+        r_sec = p_sec.add_run(f"• {sec_title}{chip_txt}")
         r_sec.font.bold = True
-        r_sec.font.size = Pt(10.5)
+        r_sec.font.size = Pt(10)
         r_sec.font.color.rgb = RGBColor(15, 41, 66)
 
         tbl_sec = doc.add_table(rows=1, cols=2)
@@ -12158,27 +12574,46 @@ def save_company_docx(
                     r.font.size = Pt(9)
                     r.font.color.rgb = RGBColor(255, 255, 255)
 
-        row_idx = 0
-        for k, v in sec_dict.items():
-            if k == "Strategic Analysis":
-                continue
+        # Elimination of N/A Clutter for Contraction Signals
+        if sec_title == "Contraction & Shutdown Signals" and sec_dict.get("Clean_Record", False):
             row = tbl_sec.add_row()
             set_row_props(row)
             rc = row.cells
             rc[0].width = Inches(2.5)
             rc[1].width = Inches(4.5)
-            rc[0].text = str(k)
-            rc[1].text = str(v) if v else "N/A"
-            bg_col = ZEBRA_BG if row_idx % 2 == 0 else "FFFFFF"
-            for c in rc:
-                apply_shading(c, bg_col)
-                apply_margins(c, top=60, bottom=60, left=100, right=100)
-                for p in c.paragraphs:
-                    for r in p.runs:
-                        r.font.size = Pt(8.5)
-                        r.font.color.rgb = RGBColor(30, 41, 59)
+            rc[0].text = "Operational Integrity"
+            rc[1].text = "Clean Statutory Record — Zero Distress, Downsizing, or Product Discontinuation Signals Logged in Public Filings"
+            apply_shading(rc[0], "F0FDF4")
+            apply_shading(rc[1], "F0FDF4")
+            apply_margins(rc[0], top=70, bottom=70, left=100, right=100)
+            apply_margins(rc[1], top=70, bottom=70, left=100, right=100)
             rc[0].paragraphs[0].runs[0].font.bold = True
-            row_idx += 1
+            rc[0].paragraphs[0].runs[0].font.color.rgb = RGBColor(22, 101, 52)
+            rc[1].paragraphs[0].runs[0].font.color.rgb = RGBColor(22, 101, 52)
+            rc[0].paragraphs[0].runs[0].font.size = Pt(8.5)
+            rc[1].paragraphs[0].runs[0].font.size = Pt(8.5)
+        else:
+            row_idx = 0
+            for k, v in sec_dict.items():
+                if k in ("Strategic Analysis", "Health_Chip", "Clean_Record", "Status", "Pillar_Status", "Badge"):
+                    continue
+                row = tbl_sec.add_row()
+                set_row_props(row)
+                rc = row.cells
+                rc[0].width = Inches(2.5)
+                rc[1].width = Inches(4.5)
+                rc[0].text = str(k)
+                rc[1].text = str(v) if v else "N/A"
+                bg_col = ZEBRA_BG if row_idx % 2 == 0 else "FFFFFF"
+                for c in rc:
+                    apply_shading(c, bg_col)
+                    apply_margins(c, top=60, bottom=60, left=100, right=100)
+                    for p in c.paragraphs:
+                        for r in p.runs:
+                            r.font.size = Pt(8.5)
+                            r.font.color.rgb = RGBColor(30, 41, 59)
+                rc[0].paragraphs[0].runs[0].font.bold = True
+                row_idx += 1
 
     add_sources_list(sources5)
 

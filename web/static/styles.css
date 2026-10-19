@@ -1208,3 +1208,360 @@ body {
   font-weight: 500;
 }
 
+/* ==========================================================================
+   TABLE #5: CORPORATE STRATEGIC MOMENTUM & BUSINESS INTELLIGENCE
+   ========================================================================== */
+
+/* 1. Momentum Scorecard Widget */
+.momentum-scorecard {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(8, 12, 20, 0.98));
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: center;
+}
+
+.scorecard-hero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 280px;
+}
+
+.scorecard-badge {
+  width: 90px;
+  height: 90px;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  border: 2px solid;
+  flex-shrink: 0;
+}
+
+.scorecard-badge.tier-aplus {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 78, 59, 0.4));
+  border-color: #10B981;
+  color: #34D399;
+}
+
+.scorecard-badge.tier-a {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(14, 116, 144, 0.4));
+  border-color: #38BDF8;
+  color: #38BDF8;
+}
+
+.scorecard-badge.tier-b {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(180, 83, 9, 0.4));
+  border-color: #F59E0B;
+  color: #FBBF24;
+}
+
+.scorecard-badge.tier-c {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(153, 27, 27, 0.4));
+  border-color: #EF4444;
+  color: #F87171;
+}
+
+.scorecard-num {
+  font-size: 2.1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.scorecard-scale {
+  font-size: 0.68rem;
+  opacity: 0.8;
+  margin-top: 2px;
+  letter-spacing: 0.05em;
+}
+
+.scorecard-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.scorecard-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.scorecard-tier-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  width: fit-content;
+}
+
+.scorecard-tier-pill.tier-aplus {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.scorecard-tier-pill.tier-a {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38BDF8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.scorecard-tier-pill.tier-b {
+  background: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.scorecard-tier-pill.tier-c {
+  background: rgba(239, 68, 68, 0.15);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.scorecard-bars {
+  flex: 1;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-left: 20px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.score-bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.score-bar-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.76rem;
+}
+
+.score-bar-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.score-bar-val {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.score-bar-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.score-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.6s ease;
+}
+
+.score-bar-fill.growth { background: linear-gradient(90deg, #0284C7, #38BDF8); }
+.score-bar-fill.margins { background: linear-gradient(90deg, #059669, #10B981); }
+.score-bar-fill.workforce { background: linear-gradient(90deg, #7C3AED, #A855F7); }
+.score-bar-fill.expansion { background: linear-gradient(90deg, #D97706, #FBBF24); }
+
+/* 2. Financial & Workforce Velocity Strip */
+.velocity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.velocity-card {
+  background: #0A0F1A;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 2px solid #38BDF8;
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.velocity-card.workforce {
+  border-top-color: #A855F7;
+}
+
+.velocity-card.productivity {
+  border-top-color: #10B981;
+}
+
+.velocity-header {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.velocity-value {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-top: 2px;
+}
+
+.velocity-sub {
+  font-size: 0.74rem;
+  color: var(--text-dim);
+}
+
+/* 3. 3-Point Executive Strategy Brief */
+.strategy-brief-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.strategy-card {
+  background: #0B1120;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.strategy-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+}
+
+.strategy-card.engine::before { background: #10B981; }
+.strategy-card.bet::before { background: #38BDF8; }
+.strategy-card.headwind::before { background: #F59E0B; }
+
+.strategy-card-title {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.strategy-card.engine .strategy-card-title { color: #34D399; }
+.strategy-card.bet .strategy-card-title { color: #38BDF8; }
+.strategy-card.headwind .strategy-card-title { color: #FBBF24; }
+
+.strategy-card-body {
+  font-size: 0.86rem;
+  color: #E2E8F0;
+  line-height: 1.5;
+}
+
+/* 4. Health Chips */
+.health-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.health-chip.green {
+  background: rgba(16, 185, 129, 0.14);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.32);
+}
+
+.health-chip.blue {
+  background: rgba(56, 189, 248, 0.14);
+  color: #38BDF8;
+  border: 1px solid rgba(56, 189, 248, 0.32);
+}
+
+.health-chip.amber {
+  background: rgba(245, 158, 11, 0.14);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.32);
+}
+
+.health-chip.red {
+  background: rgba(239, 68, 68, 0.14);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.32);
+}
+
+.health-chip.gray {
+  background: rgba(148, 163, 184, 0.12);
+  color: #94A3B8;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+}
+
+/* 5. Clean Statutory Record Banner */
+.clean-record-card {
+  background: linear-gradient(135deg, rgba(6, 78, 59, 0.18), rgba(15, 23, 42, 0.6));
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.clean-record-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.2);
+  border: 2px solid #10B981;
+  color: #10B981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.clean-record-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #34D399;
+}
+
+.clean-record-subtitle {
+  font-size: 0.78rem;
+  color: #94A3B8;
+  margin-top: 2px;
+}
+
